@@ -33,6 +33,18 @@ map("n", "<leader>lC", function() lazy.check() end, { desc = "Lazy Check" })
 map("n", "<leader>ls", function() lazy.sync() end, { desc = "Lazy Sync" })
 -- stylua: ignore end
 
+-- Open current file's PWD in VSCode
+vim.keymap.set("n", "<leader>fV", function()
+    local dir_path = vim.fn.getcwd()
+    if dir_path ~= "" then
+        local command = "code " .. vim.fn.shellescape(dir_path)
+        vim.fn.system(command)
+        print("Opened PWD in VSCode: " .. dir_path)
+    else
+        print("No file is currently open")
+    end
+end, { desc = "[C]Open current file's PWD in VSCode" })
+
 -- Disable LazyVim bindings
 map("n", "<leader>L", "<Nop>")
 map("n", "<leader>fT", "<Nop>")

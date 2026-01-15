@@ -41,9 +41,9 @@ go.editorconfig = true
 
 -- Root dir detection
 go.root_spec = {
-  "lsp",
-  { ".git", "lua", ".obsidian", "package.json", "Makefile", "go.mod", "cargo.toml", "pyproject.toml", "src" },
-  "cwd",
+    "lsp",
+    { ".git", "lua", ".obsidian", "package.json", "Makefile", "go.mod", "cargo.toml", "pyproject.toml", "src" },
+    "cwd",
 }
 
 -- Disable annoying cmd line stuff
@@ -73,5 +73,5 @@ o.conceallevel = 2
 
 -- Fix the clipboard when using WSL. Install https://github.com/equalsraf/win32yank (https://github.com/microsoft/WSL/issues/4440#issuecomment-1212350183)
 if os.getenv("WSL_DISTRO_NAME") ~= nil then
-  o.clipboard = "unnamedplus"
+    o.clipboard = "unnamedplus"
 end

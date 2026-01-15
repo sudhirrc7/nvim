@@ -8,43 +8,43 @@ end
 vim.opt.rtp:prepend(vim.env.LAZY or lazypath)
 
 require("lazy").setup({
-  spec = {
-    {
-      "LazyVim/LazyVim",
-      import = "lazyvim.plugins",
-      opts = {
-        colorscheme = "rose-pine-moon",
-      },
+    spec = {
+        {
+            "LazyVim/LazyVim",
+            import = "lazyvim.plugins",
+            opts = {
+                colorscheme = "rose-pine-moon",
+            },
+        },
+        {
+            import = "plugins",
+        },
     },
-    {
-      import = "plugins",
+    ui = {
+        backdrop = 100,
     },
-  },
-  ui = {
-    backdrop = 100,
-  },
-  defaults = {
-    lazy = true,
-    version = false, -- always use the latest git commit
-    -- version = "*", -- try installing the latest stable version for plugins that support semver
-  },
-  local_spec = true,
-  checker = { enabled = true }, -- automatically check for plugin updates
-  performance = {
-    cache = {
-      enabled = true,
-      -- disable_events = {},
+    defaults = {
+        lazy = true,
+        version = false, -- always use the latest git commit
+        -- version = "*", -- try installing the latest stable version for plugins that support semver
     },
-    rtp = {
-      -- disable some rtp plugins
-      disabled_plugins = {
-        "gzip",
-        "tarPlugin",
-        "tohtml",
-        "tutor",
-        "netrwPlugin",
-        "zipPlugin",
-      },
+    local_spec = true,
+    checker = { enabled = true }, -- automatically check for plugin updates
+    performance = {
+        cache = {
+            enabled = true,
+            -- disable_events = {},
+        },
+        rtp = {
+            -- disable some rtp plugins
+            disabled_plugins = {
+                "gzip",
+                "tarPlugin",
+                "tohtml",
+                "tutor",
+                "netrwPlugin",
+                "zipPlugin",
+            },
+        },
     },
-  },
 })

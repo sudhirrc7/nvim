@@ -11,14 +11,14 @@ table.insert(keys, { prefix .. ">", "<cmd>BufferLineMoveNext<cr>", desc = "Move 
 -- stylua: ignore end
 
 return {
-  "akinsho/bufferline.nvim",
-  enabled = false,
-  keys = keys,
-  opts = {
-    options = {
-      modified_icon = "",
-      color_icons = true,
-      separator_style = "slope",
+    "akinsho/bufferline.nvim",
+    enabled = false,
+    keys = keys,
+    opts = {
+        options = {
+            modified_icon = "",
+            color_icons = true,
+            separator_style = "slope",
+        },
     },
-  },
 }

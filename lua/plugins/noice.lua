@@ -1,17 +1,17 @@
 return {
-  "folke/noice.nvim",
-  enabled = true,
-  opts = {
-    cmdline = {
-      view = "cmdline",
+    "folke/noice.nvim",
+    enabled = true,
+    opts = {
+        cmdline = {
+            view = "cmdline",
+        },
+        lsp = {
+            progress = {
+                enabled = false,
+            },
+        },
+        presets = {
+            lsp_doc_border = true,
+        },
     },
-    lsp = {
-      progress = {
-        enabled = false,
-      },
-    },
-    presets = {
-      lsp_doc_border = true,
-    },
-  },
 }

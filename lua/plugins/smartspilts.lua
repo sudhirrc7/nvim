@@ -1,6 +1,6 @@
 return {
-  "mrjones2014/smart-splits.nvim",
-  event = "VeryLazy",
+    "mrjones2014/smart-splits.nvim",
+    event = "VeryLazy",
   -- stylua: ignore
   keys = {
     { "<C-Left>",  function() require("smart-splits").resize_left() end,       desc = "Resize Left" },

@@ -11,7 +11,7 @@ local lazy = require("lazy")
 vim.keymap.set("n", "<leader>ij", require("treesj").toggle)
 -- Search current word
 local searching_brave = function()
-  vim.fn.system({ "xdg-open", "https://search.brave.com/search?q=" .. vim.fn.expand("<cword>") })
+    vim.fn.system({ "xdg-open", "https://search.brave.com/search?q=" .. vim.fn.expand("<cword>") })
 end
 map("n", "<leader>?", searching_brave, { noremap = true, silent = true, desc = "Search Current Word on Brave Search" })
 
@@ -57,33 +57,33 @@ map("n", "<M-CR>", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
 
 -- Toggle statusline
 map("n", "<leader>uS", function()
-  if o.laststatus:get() == 0 then
-    o.laststatus = 3
-  else
-    o.laststatus = 0
-  end
+    if o.laststatus:get() == 0 then
+        o.laststatus = 3
+    else
+        o.laststatus = 0
+    end
 end, { desc = "Toggle Statusline" })
 
 -- Plugin Info
 map("n", "<leader>cif", "<cmd>LazyFormatInfo<cr>", { desc = "Formatting" })
 map("n", "<leader>cic", "<cmd>ConformInfo<cr>", { desc = "Conform" })
 local linters = function()
-  local linters_attached = require("lint").linters_by_ft[vim.bo.filetype]
-  local buf_linters = {}
+    local linters_attached = require("lint").linters_by_ft[vim.bo.filetype]
+    local buf_linters = {}
 
-  if not linters_attached then
-    LazyVim.warn("No linters attached", { title = "Linter" })
-    return
-  end
+    if not linters_attached then
+        LazyVim.warn("No linters attached", { title = "Linter" })
+        return
+    end
 
-  for _, linter in pairs(linters_attached) do
-    table.insert(buf_linters, linter)
-  end
+    for _, linter in pairs(linters_attached) do
+        table.insert(buf_linters, linter)
+    end
 
-  local unique_client_names = table.concat(buf_linters, ", ")
-  local linters = string.format("%s", unique_client_names)
+    local unique_client_names = table.concat(buf_linters, ", ")
+    local linters = string.format("%s", unique_client_names)
 
-  LazyVim.notify(linters, { title = "Linter" })
+    LazyVim.notify(linters, { title = "Linter" })
 end
 map("n", "<leader>ciL", linters, { desc = "Lint" })
 map("n", "<leader>cir", "<cmd>LazyRoot<cr>", { desc = "Root" })
@@ -100,13 +100,13 @@ map({ "n", "x" }, "<A-c>", '"_c', { desc = "Change Without Yanking" })
 
 -- Dashboard
 map("n", "<leader>fd", function()
-  if LazyVim.has("snacks.nvim") then
-    Snacks.dashboard()
-  elseif LazyVim.has("alpha-nvim") then
-    require("alpha").start(true)
-  elseif LazyVim.has("dashboard-nvim") then
-    vim.cmd("Dashboard")
-  end
+    if LazyVim.has("snacks.nvim") then
+        Snacks.dashboard()
+    elseif LazyVim.has("alpha-nvim") then
+        require("alpha").start(true)
+    elseif LazyVim.has("dashboard-nvim") then
+        vim.cmd("Dashboard")
+    end
 end, { desc = "Dashboard" })
 
 -- Spelling
@@ -115,15 +115,15 @@ map("n", "<leader>@", "zug", { desc = "Remove Word from Dictionary" })
 
 -- Terminal Stuff
 if not LazyVim.has("floaterm.nvim") or not LazyVim.has("toggleterm.nvim") then
-  local lazyterm = function()
-    Snacks.terminal(nil, { size = { width = 0.8, height = 0.8 }, cwd = LazyVim.root() })
-  end
-  map("n", "<leader>ft", lazyterm, { desc = "Terminal (Root Dir)" })
-  map("n", "<leader>fT", function()
-    Snacks.terminal(nil, { size = { width = 0.8, height = 0.8 }, cwd = vim.fn.getcwd() })
-  end, { desc = "Terminal (cwd)" })
-  map("n", [[<c-\>]], lazyterm, { desc = "Terminal (Root Dir)" })
-  map("t", [[<c-\>]], "<cmd>close<cr>", { desc = "Hide Terminal" })
+    local lazyterm = function()
+        Snacks.terminal(nil, { size = { width = 0.8, height = 0.8 }, cwd = LazyVim.root() })
+    end
+    map("n", "<leader>ft", lazyterm, { desc = "Terminal (Root Dir)" })
+    map("n", "<leader>fT", function()
+        Snacks.terminal(nil, { size = { width = 0.8, height = 0.8 }, cwd = vim.fn.getcwd() })
+    end, { desc = "Terminal (cwd)" })
+    map("n", [[<c-\>]], lazyterm, { desc = "Terminal (Root Dir)" })
+    map("t", [[<c-\>]], "<cmd>close<cr>", { desc = "Hide Terminal" })
 end
 
 -- Windows Split
@@ -132,21 +132,21 @@ map("n", "<leader>\\", "<C-W>v", { desc = "Split Window Right", remap = true })
 
 -- Center when scrolling
 if Snacks.scroll.enabled then
-  map("n", "<C-d>", function()
-    vim.wo.scrolloff = 999
-    vim.defer_fn(function()
-      vim.wo.scrolloff = 8
-    end, 500)
-    return "<c-d>"
-  end, { expr = true })
+    map("n", "<C-d>", function()
+        vim.wo.scrolloff = 999
+        vim.defer_fn(function()
+            vim.wo.scrolloff = 8
+        end, 500)
+        return "<c-d>"
+    end, { expr = true })
 
-  map("n", "<C-u>", function()
-    vim.wo.scrolloff = 999
-    vim.defer_fn(function()
-      vim.wo.scrolloff = 8
-    end, 500)
-    return "<c-u>"
-  end, { expr = true })
+    map("n", "<C-u>", function()
+        vim.wo.scrolloff = 999
+        vim.defer_fn(function()
+            vim.wo.scrolloff = 8
+        end, 500)
+        return "<c-u>"
+    end, { expr = true })
 end
 
 -- Select first option for spelling

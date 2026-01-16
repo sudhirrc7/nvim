@@ -71,6 +71,8 @@ o.smoothscroll = true
 
 o.conceallevel = 2
 
+vim.opt.list = false
+
 -- Fix the clipboard when using WSL. Install https://github.com/equalsraf/win32yank (https://github.com/microsoft/WSL/issues/4440#issuecomment-1212350183)
 if os.getenv("WSL_DISTRO_NAME") ~= nil then
     o.clipboard = "unnamedplus"

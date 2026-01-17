@@ -138,16 +138,15 @@ if not LazyVim.has("floaterm.nvim") or not LazyVim.has("toggleterm.nvim") then
     map("t", [[<c-\>]], "<cmd>close<cr>", { desc = "Hide Terminal" })
 end
 
-    -- Tmux sessionizer
-    map("n", "<leader>tt", function()
-        if vim.fn.executable("fish") == 0 then
-            vim.notify("fish not found in PATH", vim.log.levels.ERROR)
-            return
-        end
-
-        vim.cmd("silent !fish -lc tmux_sessionizer")
-        vim.cmd("redraw!")
-    end, { desc = "Tmux Sessionizer" })
+-- Tmux sessionizer
+map("n", "<leader>tt", function()
+    if vim.fn.executable("fish") == 0 then
+        vim.notify("fish not found in PATH", vim.log.levels.ERROR)
+        return
+    end
+    vim.cmd("silent !fish -lc tmux_sessionizer")
+    vim.cmd("redraw!")
+end, { desc = "Tmux Sessionizer" })
 
 -- Windows Split
 map("n", "<leader>_", "<C-W>s", { desc = "Split Window Below", remap = true })
@@ -174,5 +173,3 @@ end
 
 -- Select first option for spelling
 map("n", "<leader>S", "1z=", { desc = "Spelling (First Option)" })
-
-

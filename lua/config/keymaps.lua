@@ -68,7 +68,7 @@ map("n", "<leader>ba", "<cmd>blast<cr>", { desc = "Last Buffer" })
 map("n", "<M-CR>", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
 
 -- Toggle statusline
-map("n", "<leader>uS", function()
+map("n", "<leader>uX", function()
     if o.laststatus:get() == 0 then
         o.laststatus = 3
     else

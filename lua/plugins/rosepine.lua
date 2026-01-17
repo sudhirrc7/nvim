@@ -17,7 +17,7 @@ return {
             moon = {
                 -- base = "#1c1f20",
                 base = "#000000",
-                overlay = "#363738",
+                -- overlay = "#363738",
             },
         },
     },

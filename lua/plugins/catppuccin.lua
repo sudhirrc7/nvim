@@ -3,7 +3,7 @@ return {
     name = "catppuccin",
     priority = 1000,
     opts = {
-        no_italic = true,
+        no_italic = false,
         term_colors = true,
         transparent_background = false,
         styles = {

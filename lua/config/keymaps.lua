@@ -77,7 +77,7 @@ map("n", "<leader>uX", function()
 end, { desc = "Toggle Statusline" })
 
 -- Toggle colorcolumn: off -> 80 -> 100 -> off
-map("n", "<leader>uC", function()
+map("n", "<leader>uu", function()
     local current = vim.wo.colorcolumn
     if current == "" or current == nil then
         vim.wo.colorcolumn = "80"

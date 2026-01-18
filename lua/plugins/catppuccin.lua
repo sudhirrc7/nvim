@@ -26,10 +26,13 @@ return {
                 crust = "#000000",
             },
         },
+        float = {
+            transparent = false, -- enables transparency on floating windows
+            solid = true, -- use nvchad styling for floating windows
+        },
         integrations = {
             telescope = {
                 enabled = true,
-                style = "nvchad",
             },
             dropbar = {
                 enabled = true,

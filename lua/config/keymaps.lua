@@ -76,6 +76,18 @@ map("n", "<leader>uX", function()
     end
 end, { desc = "Toggle Statusline" })
 
+-- Toggle colorcolumn: off -> 80 -> 100 -> off
+map("n", "<leader>uC", function()
+    local current = vim.wo.colorcolumn
+    if current == "" or current == nil then
+        vim.wo.colorcolumn = "80"
+    elseif current == "80" then
+        vim.wo.colorcolumn = "100"
+    else
+        vim.wo.colorcolumn = ""
+    end
+end, { desc = "Toggle Color Column (80/100/off)" })
+
 -- Plugin Info
 map("n", "<leader>cif", "<cmd>LazyFormatInfo<cr>", { desc = "Formatting" })
 map("n", "<leader>cic", "<cmd>ConformInfo<cr>", { desc = "Conform" })

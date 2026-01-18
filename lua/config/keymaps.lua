@@ -150,7 +150,7 @@ if not LazyVim.has("floaterm.nvim") or not LazyVim.has("toggleterm.nvim") then
     map("t", [[<c-\>]], "<cmd>close<cr>", { desc = "Hide Terminal" })
 end
 
--- Tmux sessionizer
+-- Tmux sessionizer doesnt work if tmux is not active
 map("n", "<leader>tt", function()
     if vim.fn.executable("fish") == 0 then
         vim.notify("fish not found in PATH", vim.log.levels.ERROR)

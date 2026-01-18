@@ -5,7 +5,7 @@ return {
     opts = {
         highlight_groups = {
             EndOfBuffer = { fg = "base" },
-            Visual = { fg = "base", bg = "rose", inherit = true },
+            Visual = { fg = "base", bg = "rose", inherit = false },
             -- VisualNOS = { fg = "base", bg = "rose", inherit = false },
         },
 

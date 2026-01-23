@@ -80,6 +80,9 @@ return {
         },
         indent = {
             enabled = false, -- enable indent guides
+            scope = {
+                enabled = false,
+            },
         },
         scroll = {
             animate = {

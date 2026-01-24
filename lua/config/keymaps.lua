@@ -185,3 +185,6 @@ end
 
 -- Select first option for spelling
 map("n", "<leader>S", "1z=", { desc = "Spelling (First Option)" })
+
+-- exit insert mode using jk
+map("i", "jj", "<Esc>", { noremap = true, silent = true })

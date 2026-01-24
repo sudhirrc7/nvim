@@ -14,6 +14,9 @@ return {
         keymaps = {
             ["q"] = "actions.close",
         },
+        view_options = {
+            show_hidden = true,
+        },
     },
   -- stylua: ignore
   keys = {

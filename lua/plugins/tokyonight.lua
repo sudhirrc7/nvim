@@ -3,11 +3,14 @@ return {
     lazy = false,
     priority = 1000,
     opts = {
+        transparent = true,
         styles = {
-            comments = { italic = true },
-            keywords = { italic = true },
-            functions = {},
-            variables = {},
+            sidebars = "transparent",
+            floats = "transparent",
+            comments = { italic = false },
+            keywords = { italic = false },
+            functions = { italic = false },
+            variables = { italic = false },
         },
     },
 }

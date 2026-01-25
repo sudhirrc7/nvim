@@ -70,7 +70,7 @@ return {
             -- },
         },
         image = {
-            enabled = true,
+            enabled = false,
             doc = {
                 inline = false,
             },

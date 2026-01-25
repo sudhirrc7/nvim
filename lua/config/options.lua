@@ -7,6 +7,7 @@ local o = vim.opt
 -- Optimizations on startup
 vim.loader.enable()
 
+vim.g.omni_sql_no_default_maps = 1
 -- Personal Config and LazyVim global options
 go.lualine_info_extras = false
 go.snacks_animate = true

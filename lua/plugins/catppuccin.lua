@@ -5,7 +5,7 @@ return {
     opts = {
         no_italic = false,
         term_colors = true,
-        transparent_background = false,
+        transparent_background = true,
         styles = {
             comments = { "italic" },
             conditionals = {},
@@ -21,7 +21,7 @@ return {
         },
         color_overrides = {
             mocha = {
-                base = "#000000",
+                -- base = "#000000",
                 -- mantle = "#000000",
                 -- crust = "#000000",
             },

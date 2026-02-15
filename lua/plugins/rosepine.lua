@@ -5,13 +5,13 @@ return {
     opts = {
         highlight_groups = {
             EndOfBuffer = { fg = "base" },
-            -- Visual = { fg = "base", bg = "#c4a7e7", inherit = false },
+            Visual = { fg = "base", bg = "#c4a7e7", inherit = false },
             -- VisualNOS = { fg = "base", bg = "rose", inherit = false },
         },
 
         styles = {
             bold = true,
-            italic = false,
+            italic = true,
             transparency = true,
         },
         palette = {

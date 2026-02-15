@@ -41,6 +41,15 @@ return {
             matcher = {
                 frecency = true,
             },
+            sources = {
+                explorer = {
+                    layout = {
+                        layout = {
+                            position = "right",
+                        },
+                    },
+                },
+            },
             -- layouts = {
             --   default = {
             --     layout = {

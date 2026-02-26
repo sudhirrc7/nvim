@@ -1,1 +1,1 @@
-return { "EdenEast/nightfox.nvim" } -- lazy
+return { "EdenEast/nightfox.nvim", enabled = false } -- lazy

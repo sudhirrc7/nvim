@@ -12,7 +12,7 @@ return {
         styles = {
             bold = true,
             italic = false,
-            transparency = false,
+            transparency = true,
         },
         palette = {
             -- Override the builtin palette per variant

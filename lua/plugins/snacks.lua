@@ -32,7 +32,7 @@ return {
             },
         },
         picker = {
-            layout = "telescope",
+            -- layout = "telescope",
             previewers = {
                 git = {
                     builtin = false,

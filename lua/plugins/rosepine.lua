@@ -1,6 +1,8 @@
 return {
     "rose-pine/neovim",
     lazy = false,
+    priority = 10000,
+    enabled = false,
     name = "rose-pine",
     opts = {
         highlight_groups = {
@@ -11,7 +13,7 @@ return {
 
         styles = {
             bold = true,
-            italic = false,
+            italic = true,
             transparency = true,
         },
         palette = {

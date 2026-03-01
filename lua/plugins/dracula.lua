@@ -1,1 +1,1 @@
-return { "Mofiqul/dracula.nvim" }
+return { "Mofiqul/dracula.nvim", enabled = false }

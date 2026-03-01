@@ -7,10 +7,10 @@ return {
         styles = {
             sidebars = "transparent",
             floats = "transparent",
-            comments = { italic = false },
-            keywords = { italic = false },
-            functions = { italic = false },
-            variables = { italic = false },
+            comments = { italic = true },
+            keywords = { italic = true },
+            functions = { italic = true },
+            variables = { italic = true },
         },
     },
 }

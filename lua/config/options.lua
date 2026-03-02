@@ -19,11 +19,11 @@ go.trouble_lualine = false
 
 --vim settings for me
 -- Disable cursorline in all modes
-vim.opt.cursorline = false
+-- vim.opt.cursorline = false
 
 -- Set cursor to a block in all modes (normal, visual, insert, command)
 -- The 'a' value applies the setting to all modes
-vim.opt.guicursor = ""
+-- vim.opt.guicursor = ""
 
 -- Define leader key
 go.mapleader = " "

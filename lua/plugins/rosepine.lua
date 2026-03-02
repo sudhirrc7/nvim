@@ -2,7 +2,7 @@ return {
     "rose-pine/neovim",
     lazy = false,
     priority = 10000,
-    enabled = false,
+    enabled = true,
     name = "rose-pine",
     opts = {
         highlight_groups = {
@@ -14,12 +14,12 @@ return {
         styles = {
             bold = true,
             italic = true,
-            transparency = true,
+            transparency = false,
         },
         palette = {
             -- Override the builtin palette per variant
             moon = {
-                base = "#1c1f20",
+                -- base = "#000000",
                 -- base = "#030A15",
                 -- overlay = "#363738",
             },

@@ -14,14 +14,14 @@ return {
         styles = {
             bold = true,
             italic = true,
-            transparency = false,
+            transparency = true,
         },
         palette = {
             -- Override the builtin palette per variant
             moon = {
-                -- base = "#000000",
+                base = "#000000",
                 -- base = "#030A15",
-                -- overlay = "#363738",
+                -- overlay = "#000000",
             },
         },
     },

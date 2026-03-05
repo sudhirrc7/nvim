@@ -5,7 +5,7 @@ return {
     opts = {
         no_italic = false,
         term_colors = true,
-        transparent_background = false,
+        transparent_background = true,
         styles = {
             comments = { "italic" },
             conditionals = {},
@@ -28,7 +28,7 @@ return {
         },
         float = {
             transparent = true, -- enables transparency on floating windows
-            solid = false, -- use nvchad styling for floating windows
+            solid = true, -- use nvchad styling for floating windows
         },
         integrations = {
             telescope = {

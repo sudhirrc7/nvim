@@ -38,6 +38,10 @@ return {
                 enabled = true,
                 color_mode = true,
             },
+            snacks = {
+                enabled = true,
+                indent_scope_color = "mauve",
+            },
         },
     },
 }

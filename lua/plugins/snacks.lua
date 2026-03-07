@@ -88,9 +88,9 @@ return {
             replace_netrw = true, -- Replace netrw with the snacks explorer
         },
         indent = {
-            enabled = false, -- enable indent guides
+            enabled = true, -- enable indent guides
             scope = {
-                enabled = false,
+                enabled = true,
             },
         },
         scroll = {

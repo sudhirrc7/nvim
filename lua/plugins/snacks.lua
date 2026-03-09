@@ -32,7 +32,7 @@ return {
             },
         },
         picker = {
-            -- layout = "telescope",
+            layout = "telescope",
             previewers = {
                 git = {
                     builtin = false,
@@ -87,12 +87,12 @@ return {
         explorer = {
             replace_netrw = true, -- Replace netrw with the snacks explorer
         },
-        indent = {
-            enabled = true, -- enable indent guides
-            scope = {
-                enabled = true,
-            },
-        },
+        -- indent = {
+        --     enabled = true, -- enable indent guides
+        --     scope = {
+        --         enabled = true,
+        --     },
+        -- },
         scroll = {
             animate = {
                 duration = { step = 10, total = 100 },

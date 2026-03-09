@@ -16,7 +16,7 @@ go.lazygit_config = false
 go.lazyvim_cmp = "blink"
 go.lazyvim_picker = "snacks"
 go.trouble_lualine = false
-
+o.scrolloff = 8
 --vim settings for me
 -- Disable cursorline in all modes
 -- vim.opt.cursorline = false

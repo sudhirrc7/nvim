@@ -32,6 +32,10 @@ map("n", "<leader>lC", function() lazy.check() end, { desc = "Lazy Check" })
 map("n", "<leader>ls", function() lazy.sync() end, { desc = "Lazy Sync" })
 -- stylua: ignore end
 
+-- Neovim (init.lua)
+vim.keymap.set("i", "<C-e>", "<C-x><C-e>")
+vim.keymap.set("i", "<C-y>", "<C-x><C-y>")
+
 -- Open current file's PWD in VSCode
 vim.keymap.set("n", "<leader>fV", function()
     local dir_path = vim.fn.getcwd()

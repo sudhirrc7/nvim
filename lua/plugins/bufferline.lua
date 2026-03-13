@@ -18,7 +18,7 @@ return {
         options = {
             modified_icon = "",
             color_icons = true,
-            separator_style = "slope",
+            -- separator_style = "slope",
         },
     },
 }

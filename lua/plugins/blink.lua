@@ -58,6 +58,7 @@ return {
             documentation = {
                 window = {
                     border = "rounded",
+                    scrollbar = false,
                     winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:BlinkCmpDocCursorLine,Search:None",
                 },
             },

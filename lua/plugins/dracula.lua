@@ -1,1 +1,5 @@
-return { "Mofiqul/dracula.nvim", enabled = false }
+return {
+    "Mofiqul/dracula.nvim",
+    lazy = false,
+    enabled = false,
+}

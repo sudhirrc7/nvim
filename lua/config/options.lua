@@ -17,6 +17,8 @@ go.lazyvim_cmp = "blink"
 go.lazyvim_picker = "snacks"
 go.trouble_lualine = false
 o.scrolloff = 8
+vim.g.moonflyNormalFloat = true
+
 --vim settings for me
 -- Disable cursorline in all modes
 -- vim.opt.cursorline = false
@@ -54,7 +56,10 @@ o.cmdheight = 0
 -- o.cmdheight = 1
 
 -- Disable mouse
-o.mouse = ""
+-- o.mouse = ""
+
+vim.opt.list = false
+-- vim.opt.listchars:append("eol:↴")
 
 -- Disable native bufferline
 o.showtabline = 0
@@ -71,8 +76,6 @@ o.breakindent = true
 o.smoothscroll = true
 
 o.conceallevel = 2
-
-vim.opt.list = false
 
 -- Fix the clipboard when using WSL. Install https://github.com/equalsraf/win32yank (https://github.com/microsoft/WSL/issues/4440#issuecomment-1212350183)
 if os.getenv("WSL_DISTRO_NAME") ~= nil then

@@ -44,8 +44,24 @@ return {
             sources = {
                 explorer = {
                     layout = {
+                        preview = false,
                         layout = {
-                            position = "right",
+                            width = 30,
+                            min_width = 30,
+                            height = 0,
+                            position = "left",
+                            border = "rounded",
+                            backdrop = false,
+                            box = "vertical",
+                            {
+                                win = "input",
+                                height = 1,
+                                border = "bottom",
+                                title = "{title} {live} {flags}",
+                                title_pos = "center",
+                            },
+                            { win = "list", border = "none" },
+                            { win = "preview", title = "{preview}", height = 0.4, border = "top" },
                         },
                     },
                 },

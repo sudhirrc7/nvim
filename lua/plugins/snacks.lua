@@ -46,6 +46,8 @@ return {
                     layout = {
                         preview = false,
                         layout = {
+                            -- title = "explorer",
+                            -- title_pos = "center",
                             width = 30,
                             min_width = 30,
                             height = 0,
@@ -103,12 +105,16 @@ return {
         explorer = {
             replace_netrw = true, -- Replace netrw with the snacks explorer
         },
-        -- indent = {
-        --     enabled = true, -- enable indent guides
-        --     scope = {
-        --         enabled = true,
-        --     },
-        -- },
+        indent = {
+            enabled = true,
+            indent = {
+                char = "┊",
+            },
+            scope = {
+                enabled = true,
+                char = "┊",
+            },
+        },
         scroll = {
             animate = {
                 duration = { step = 10, total = 100 },

@@ -17,7 +17,7 @@ go.lazyvim_picker = "snacks"
 go.trouble_lualine = false
 o.scrolloff = 8
 vim.g.moonflyNormalFloat = true
-
+vim.opt.cursorlineopt = "number"
 --vim settings for me
 -- Disable cursorline in all modes
 -- vim.opt.cursorline = false
@@ -59,6 +59,8 @@ o.cmdheight = 0
 
 vim.opt.list = false
 -- vim.opt.listchars:append("eol:↴")
+
+vim.opt.relativenumber = true
 
 -- Disable native bufferline
 o.showtabline = 0

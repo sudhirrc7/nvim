@@ -1,45 +1,27 @@
 return {
-    "NickvanDyke/opencode.nvim",
+    "sudo-tee/opencode.nvim",
     lazy = false,
-    enabled = false,
-    dependencies = {
-        -- Recommended for `ask()` and `select()`.
-        -- Required for `snacks` provider.
-        ---@module 'snacks' <- Loads `snacks.nvim` types for configuration intellisense.
-        { "folke/snacks.nvim", opts = { input = {}, picker = {}, terminal = {} } },
-    },
     config = function()
-        ---@type opencode.Opts
-        vim.g.opencode_opts = {
-            -- Your configuration, if any — see `lua/opencode/config.lua`, or "goto definition".
-        }
-
-        -- Required for `opts.events.reload`.
-        vim.o.autoread = true
-
-        -- Recommended/example keymaps.
-        vim.keymap.set({ "n", "x" }, "<leader>aa", function()
-            require("opencode").ask("@this: ", { submit = true })
-        end, { desc = "Ask opencode" })
-        vim.keymap.set({ "n", "x" }, "<leader>ax", function()
-            require("opencode").select()
-        end, { desc = "Execute opencode action…" })
-        vim.keymap.set({ "n", "t" }, "<leader>a.", function()
-            require("opencode").toggle()
-        end, { desc = "Toggle opencode" })
-
-        vim.keymap.set({ "n", "x" }, "<leader>ao", function()
-            return require("opencode").operator("@this ")
-        end, { expr = true, desc = "Add range to opencode" })
-        vim.keymap.set("n", "<leader>aO", function()
-            return require("opencode").operator("@this ") .. "_"
-        end, { expr = true, desc = "Add line to opencode" })
-
-        vim.keymap.set("n", "<S-C-u>", function()
-            require("opencode").command("session.half.page.up")
-        end, { desc = "opencode half page up" })
-        vim.keymap.set("n", "<S-C-d>", function()
-            require("opencode").command("session.half.page.down")
-        end, { desc = "opencode half page down" })
+        require("opencode").setup({})
     end,
+    dependencies = {
+        "nvim-lua/plenary.nvim",
+        {
+            "MeanderingProgrammer/render-markdown.nvim",
+            opts = {
+                anti_conceal = { enabled = false },
+                file_types = { "markdown", "opencode_output" },
+            },
+            ft = { "markdown", "Avante", "copilot-chat", "opencode_output" },
+        },
+        -- Optional, for file mentions and commands completion, pick only one
+        "saghen/blink.cmp",
+        -- 'hrsh7th/nvim-cmp',
+
+        -- Optional, for file mentions picker, pick only one
+        "folke/snacks.nvim",
+        -- 'nvim-telescope/telescope.nvim',
+        -- 'ibhagwan/fzf-lua',
+        -- 'nvim_mini/mini.nvim',
+    },
 }

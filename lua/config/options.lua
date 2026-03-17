@@ -16,8 +16,8 @@ go.lazyvim_cmp = "blink"
 go.lazyvim_picker = "snacks"
 go.trouble_lualine = false
 o.scrolloff = 8
-vim.g.moonflyNormalFloat = true
 vim.opt.cursorlineopt = "number"
+vim.opt.tabstop = 4
 --vim settings for me
 -- Disable cursorline in all modes
 -- vim.opt.cursorline = false
@@ -25,6 +25,7 @@ vim.opt.cursorlineopt = "number"
 -- Set cursor to a block in all modes (normal, visual, insert, command)
 -- The 'a' value applies the setting to all modes
 -- vim.opt.guicursor = ""
+vim.opt.guicursor = "n-v-c:block,i-ci-ve:hor20,r-cr:hor20,o:hor50"
 
 -- Define leader key
 go.mapleader = " "
@@ -72,7 +73,6 @@ o.spelllang:append("es")
 -- Backspacing and indentation when wrapping
 o.backspace = { "start", "eol", "indent" }
 o.breakindent = true
-
 -- Smoothscroll
 o.smoothscroll = true
 

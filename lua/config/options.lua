@@ -25,7 +25,7 @@ vim.opt.tabstop = 4
 -- Set cursor to a block in all modes (normal, visual, insert, command)
 -- The 'a' value applies the setting to all modes
 -- vim.opt.guicursor = ""
-vim.opt.guicursor = "n-v-c:block,i-ci-ve:hor20,r-cr:hor20,o:hor50"
+-- vim.opt.guicursor = "n-v-c:block,i-ci-ve:hor20,r-cr:hor20,o:hor50"
 
 -- Define leader key
 go.mapleader = " "

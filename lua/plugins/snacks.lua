@@ -32,6 +32,10 @@ return {
             },
         },
         picker = {
+            exclude = { -- add folder names here to exclude
+                ".git",
+                "node_modules",
+            },
             layout = "telescope",
             previewers = {
                 git = {

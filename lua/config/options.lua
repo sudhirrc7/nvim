@@ -27,6 +27,7 @@ vim.opt.tabstop = 4
 -- vim.opt.guicursor = ""
 -- vim.opt.guicursor = "n-v-c:block,i-ci-ve:hor20,r-cr:hor20,o:hor50"
 
+vim.g.moonflyNormalFloat = true
 -- Define leader key
 go.mapleader = " "
 go.maplocalleader = "\\"

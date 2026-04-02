@@ -47,7 +47,9 @@ return {
                                     path = "[Path]",
                                     snippets = "[Snippet]",
                                 }
-                                return (source_names[ctx.source_name] or "[") .. ctx.source_name .. "]"
+                                return (source_names[ctx.source_name] or "[")
+                                    .. ctx.source_name
+                                    .. "]"
                             end,
                             highlight = "CmpItemMenu",
                         },

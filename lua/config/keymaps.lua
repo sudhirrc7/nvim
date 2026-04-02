@@ -10,13 +10,40 @@ local lazy = require("lazy")
 vim.keymap.set("n", "<leader>ij", require("treesj").toggle)
 -- Search current word
 local searching_brave = function()
-    vim.fn.system({ "xdg-open", "https://search.brave.com/search?q=" .. vim.fn.expand("<cword>") })
+    vim.fn.system({
+        "xdg-open",
+        "https://search.brave.com/search?q=" .. vim.fn.expand("<cword>"),
+    })
 end
-map("n", "<leader>?", searching_brave, { noremap = true, silent = true, desc = "Search Current Word on Brave Search" })
+map(
+    "n",
+    "<leader>?",
+    searching_brave,
+    {
+        noremap = true,
+        silent = true,
+        desc = "Search Current Word on Brave Search",
+    }
+)
 
-vim.keymap.set("n", "<leader>s1", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "s&r1" })
-vim.keymap.set("n", "<leader>s2", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gi<Left><Left><Left>]], { desc = "s&r2" })
-vim.keymap.set("n", "<leader>s3", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gIc<Left><Left><Left><Left>]], { desc = "s&r3" })
+vim.keymap.set(
+    "n",
+    "<leader>s1",
+    [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
+    { desc = "s&r1" }
+)
+vim.keymap.set(
+    "n",
+    "<leader>s2",
+    [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gi<Left><Left><Left>]],
+    { desc = "s&r2" }
+)
+vim.keymap.set(
+    "n",
+    "<leader>s3",
+    [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gIc<Left><Left><Left><Left>]],
+    { desc = "s&r3" }
+)
 
 -- Lazy options
 map("n", "<leader>l", "<Nop>")
@@ -57,7 +84,12 @@ map("n", "<", "<<", { desc = "Deindent" })
 map("n", ">", ">>", { desc = "Indent" })
 
 -- Save without formatting
-map({ "n", "i" }, "<A-s>", "<cmd>noautocmd w<CR>", { desc = "Save Without Formatting" })
+map(
+    { "n", "i" },
+    "<A-s>",
+    "<cmd>noautocmd w<CR>",
+    { desc = "Save Without Formatting" }
+)
 
 -- Increment/decrement
 -- map("n", "+", "<C-a>")
@@ -116,10 +148,20 @@ map("n", "<leader>ciL", linters, { desc = "Lint" })
 map("n", "<leader>cir", "<cmd>LazyRoot<cr>", { desc = "Root" })
 
 -- Copy whole text to clipboard
-map("n", "<C-c>", ":%y+<CR>", { desc = "Copy Whole Text to Clipboard", silent = true })
+map(
+    "n",
+    "<C-c>",
+    ":%y+<CR>",
+    { desc = "Copy Whole Text to Clipboard", silent = true }
+)
 
 -- Select all text
-map("n", "<C-e>", "gg<S-V>G", { desc = "Select all Text", silent = true, noremap = true })
+map(
+    "n",
+    "<C-e>",
+    "gg<S-V>G",
+    { desc = "Select all Text", silent = true, noremap = true }
+)
 
 -- Delete and change without yanking
 map({ "n", "x" }, "<A-d>", '"_d', { desc = "Delete Without Yanking" })
@@ -143,11 +185,17 @@ map("n", "<leader>@", "zug", { desc = "Remove Word from Dictionary" })
 -- Terminal Stuff
 if not LazyVim.has("floaterm.nvim") or not LazyVim.has("toggleterm.nvim") then
     local lazyterm = function()
-        Snacks.terminal(nil, { size = { width = 0.8, height = 0.8 }, cwd = LazyVim.root() })
+        Snacks.terminal(
+            nil,
+            { size = { width = 0.8, height = 0.8 }, cwd = LazyVim.root() }
+        )
     end
     map("n", "<leader>ft", lazyterm, { desc = "Terminal (Root Dir)" })
     map("n", "<leader>fT", function()
-        Snacks.terminal(nil, { size = { width = 0.8, height = 0.8 }, cwd = vim.fn.getcwd() })
+        Snacks.terminal(
+            nil,
+            { size = { width = 0.8, height = 0.8 }, cwd = vim.fn.getcwd() }
+        )
     end, { desc = "Terminal (cwd)" })
     map("n", [[<c-\>]], lazyterm, { desc = "Terminal (Root Dir)" })
     map("t", [[<c-\>]], "<cmd>close<cr>", { desc = "Hide Terminal" })
@@ -191,3 +239,27 @@ map("n", "<leader>S", "1z=", { desc = "Spelling (First Option)" })
 
 -- exit insert mode using jk
 map("i", "jj", "<Esc>", { noremap = true, silent = true })
+
+if vim.g.neovide then
+    vim.g.neovide_scale_factor = 1.0
+
+    -- Ctrl + =
+    vim.keymap.set({ "n", "v", "i" }, "<C-=>", function()
+        vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.1
+    end, { desc = "Zoom in" })
+
+    -- Ctrl + Shift + =
+    vim.keymap.set({ "n", "v", "i" }, "<C-S-=>", function()
+        vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.1
+    end, { desc = "Zoom in" })
+
+    -- Ctrl + -
+    vim.keymap.set({ "n", "v", "i" }, "<C-->", function()
+        vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.1
+    end, { desc = "Zoom out" })
+
+    -- reset zoom
+    vim.keymap.set({ "n", "v", "i" }, "<C-0>", function()
+        vim.g.neovide_scale_factor = 1.0
+    end, { desc = "Reset zoom" })
+end

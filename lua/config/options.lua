@@ -18,6 +18,8 @@ go.trouble_lualine = false
 o.scrolloff = 8
 vim.opt.cursorlineopt = "number"
 vim.opt.tabstop = 4
+vim.o.guifont = "TX-02:h15" -- text below applies for VimScript
+go.neovide_input_macos_option_key_is_meta = "only_left"
 --vim settings for me
 -- Disable cursorline in all modes
 -- vim.opt.cursorline = false
@@ -35,18 +37,23 @@ go.maplocalleader = "\\"
 -- Autoformat on save (Global)
 go.autoformat = true
 
--- Font
-go.gui_font_default_size = 10
-go.gui_font_size = go.gui_font_default_size
-go.gui_font_face = "Maple Mono NF"
-
 -- Enable EditorConfig integration
 go.editorconfig = true
 
 -- Root dir detection
 go.root_spec = {
     "lsp",
-    { ".git", "lua", ".obsidian", "package.json", "Makefile", "go.mod", "cargo.toml", "pyproject.toml", "src" },
+    {
+        ".git",
+        "lua",
+        ".obsidian",
+        "package.json",
+        "Makefile",
+        "go.mod",
+        "cargo.toml",
+        "pyproject.toml",
+        "src",
+    },
     "cwd",
 }
 

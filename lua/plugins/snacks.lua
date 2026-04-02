@@ -2,6 +2,7 @@ return {
     "folke/snacks.nvim",
     opts = {
         dashboard = {
+            enabled = true,
             preset = {
                 -- keys = {},
                 header = [[
@@ -67,7 +68,12 @@ return {
                                 title_pos = "center",
                             },
                             { win = "list", border = "none" },
-                            { win = "preview", title = "{preview}", height = 0.4, border = "top" },
+                            {
+                                win = "preview",
+                                title = "{preview}",
+                                height = 0.4,
+                                border = "top",
+                            },
                         },
                     },
                 },
@@ -112,11 +118,11 @@ return {
         indent = {
             enabled = true,
             indent = {
-                -- char = "┊",
+                char = "┊",
             },
             scope = {
                 enabled = true,
-                -- char = "┊",
+                char = "┊",
             },
         },
         scroll = {

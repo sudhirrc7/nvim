@@ -72,15 +72,4 @@ return {
             return opts
         end,
     },
-    {
-        "luckasRanarison/nvim-devdocs",
-        optional = true,
-        opts = {
-            ensure_installed = {
-                "html",
-                "css",
-                "sass",
-            },
-        },
-    },
 }

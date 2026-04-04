@@ -15,16 +15,11 @@ local searching_brave = function()
         "https://search.brave.com/search?q=" .. vim.fn.expand("<cword>"),
     })
 end
-map(
-    "n",
-    "<leader>?",
-    searching_brave,
-    {
-        noremap = true,
-        silent = true,
-        desc = "Search Current Word on Brave Search",
-    }
-)
+map("n", "<leader>?", searching_brave, {
+    noremap = true,
+    silent = true,
+    desc = "Search Current Word on Brave Search",
+})
 
 vim.keymap.set(
     "n",
@@ -91,6 +86,7 @@ map(
     { desc = "Save Without Formatting" }
 )
 
+vim.keymap.set("n", "<leader>iu", require("undotree").open)
 -- Increment/decrement
 -- map("n", "+", "<C-a>")
 

@@ -25,6 +25,7 @@ return {
             },
         },
         notifier = {
+            enabled = false,
             style = "fancy",
         },
         terminal = {

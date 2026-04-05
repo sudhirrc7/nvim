@@ -19,7 +19,7 @@ o.scrolloff = 8
 vim.cmd("packadd nvim.undotree")
 vim.opt.cursorlineopt = "number"
 vim.opt.tabstop = 4
-vim.o.guifont = "TX-02:h15" -- text below applies for VimScript
+-- vim.o.guifont = "TX-02:h15" -- text below applies for VimScript
 go.neovide_input_macos_option_key_is_meta = "only_left"
 --vim settings for me
 -- Disable cursorline in all modes

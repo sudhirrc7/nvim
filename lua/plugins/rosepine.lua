@@ -15,9 +15,9 @@ return {
         },
 
         styles = {
-            bold = false,
-            italic = false,
-            transparency = false,
+            bold = true,
+            italic = true,
+            transparency = true,
         },
         palette = {
             -- Override the builtin palette per variant

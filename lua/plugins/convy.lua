@@ -1,6 +1,7 @@
 return {
     "necrom4/convy.nvim",
     cmd = { "Convy", "ConvySeparator" },
+    enabled = false,
     opts = {
         notifications = true,
         separator = " ",

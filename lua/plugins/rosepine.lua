@@ -2,7 +2,7 @@ return {
     "rose-pine/neovim",
     lazy = false,
     priority = 10000,
-    enabled = false,
+    enabled = true,
     name = "rose-pine",
     opts = {
         extend_background_behind_borders = false,
@@ -16,8 +16,8 @@ return {
 
         styles = {
             bold = true,
-            italic = true,
-            transparency = true,
+            italic = false,
+            transparency = false,
         },
         palette = {
             -- Override the builtin palette per variant

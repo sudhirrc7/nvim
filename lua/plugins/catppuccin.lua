@@ -5,9 +5,9 @@ return {
     opts = {
         no_italic = false,
         term_colors = true,
-        transparent_background = true,
+        transparent_background = false,
         styles = {
-            comments = {},
+            comments = { "italic" },
             conditionals = {},
             loops = {},
             functions = {},

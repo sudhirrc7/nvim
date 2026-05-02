@@ -3,7 +3,7 @@ return {
     lazy = false,
     config = function()
         require("guess-indent").setup({
-            auto_cmd = true,
+            -- auto_cmd = true,
         })
     end,
 }

@@ -57,18 +57,28 @@ ac("FileType", {
         "floaterm",
     },
     callback = function(event)
-        vim.keymap.set("n", "<leader>", "<nop>", { buffer = event.buf, desc = "" })
-        vim.keymap.set("n", "<localleader>", "<nop>", { buffer = event.buf, desc = "" })
+        vim.keymap.set(
+            "n",
+            "<leader>",
+            "<nop>",
+            { buffer = event.buf, desc = "" }
+        )
+        vim.keymap.set(
+            "n",
+            "<localleader>",
+            "<nop>",
+            { buffer = event.buf, desc = "" }
+        )
     end,
 })
 
 -- Delete number column on terminals
-ac("TermOpen", {
-    callback = function()
-        vim.cmd("setlocal listchars= nonumber norelativenumber")
-        vim.cmd("setlocal nospell")
-    end,
-})
+-- ac("TermOpen", {
+--     callback = function()
+--         vim.cmd("setlocal listchars= nonumber norelativenumber")
+--         vim.cmd("setlocal nospell")
+--     end,
+-- })
 
 -- Disable next line comments
 ac("BufEnter", {

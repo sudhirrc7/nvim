@@ -49,6 +49,54 @@ return {
             },
             sources = {
                 explorer = {
+                    actions = {
+                        float_preview = function(picker)
+                            local item = picker:current()
+
+                            if not item or not item.file then
+                                return
+                            end
+
+                            local buf = vim.api.nvim_create_buf(false, true)
+
+                            vim.api.nvim_buf_call(buf, function()
+                                vim.cmd(
+                                    "silent read "
+                                        .. vim.fn.fnameescape(item.file)
+                                )
+                                vim.cmd("0d_")
+                            end)
+
+                            vim.bo[buf].filetype = vim.filetype.match({
+                                filename = item.file,
+                            }) or ""
+                            vim.bo[buf].buftype = "nofile"
+                            vim.bo[buf].bufhidden = "wipe"
+                            vim.bo[buf].swapfile = false
+                            vim.bo[buf].modifiable = false
+
+                            local win = require("snacks.win")({
+                                buf = buf,
+                                style = "float",
+                                border = "rounded",
+                                width = 0.8,
+                                height = 0.8,
+                            })
+
+                            vim.wo[win.win].number = true
+                            vim.wo[win.win].relativenumber = false
+                            vim.wo[win.win].signcolumn = "yes"
+                            vim.wo[win.win].cursorline = true
+                            vim.wo[win.win].wrap = false
+                        end,
+                    },
+                    win = {
+                        list = {
+                            keys = {
+                                ["P"] = "float_preview",
+                            },
+                        },
+                    },
                     layout = {
                         preview = false,
                         layout = {

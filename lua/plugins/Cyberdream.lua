@@ -6,6 +6,7 @@ return {
         transparent = true,
         cache = true,
         borderless_pickers = false,
+        italic_comments = false,
         colors = {
             -- Override colors for both light and dark variants
             bg = "#000000",

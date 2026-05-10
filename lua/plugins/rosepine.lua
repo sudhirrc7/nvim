@@ -2,7 +2,7 @@ return {
     "rose-pine/neovim",
     lazy = false,
     priority = 10000,
-    enabled = false,
+    enabled = true,
     name = "rose-pine",
     opts = {
         extend_background_behind_borders = false,

@@ -1,6 +1,6 @@
 return {
     "ankushbhagats/pastel.nvim",
-    enabled = false,
+    enabled = true,
     lazy = true,
     -- priority = 1000, -- load earlier
     config = function()

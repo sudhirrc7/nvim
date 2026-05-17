@@ -67,7 +67,7 @@ o.cmdheight = 0
 -- Disable mouse
 -- o.mouse = ""
 
-vim.opt.list = true
+vim.opt.list = false
 -- vim.opt.listchars:append("eol:↴")
 
 vim.opt.relativenumber = true

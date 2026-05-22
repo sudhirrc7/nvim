@@ -167,11 +167,11 @@ return {
         indent = {
             enabled = true,
             indent = {
-                char = "┊",
+                -- char = "┊",
             },
             scope = {
                 enabled = true,
-                char = "┊",
+                -- char = "┊",
             },
         },
         scroll = {

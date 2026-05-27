@@ -1,6 +1,5 @@
 return {
     "dmtrKovalenko/fff.nvim",
-    enabled = false,
     build = function()
         -- downloads a prebuilt binary or falls back to cargo build
         require("fff.download").download_or_build_binary()
@@ -8,9 +7,14 @@ return {
     -- for nixos:
     -- build = "nix run .#release",
     opts = {
-        debug = {
-            enabled = true,
-            show_scores = true,
+        -- debug = {
+        --     enabled = true,
+        --     show_scores = true,
+        -- },
+        layout = {
+            prompt_position = "bottom",
+            height = 1,
+            width = 1,
         },
     },
     lazy = false, -- the plugin lazy-initialises itself

@@ -17,7 +17,7 @@ go.lazyvim_picker = "snacks"
 go.trouble_lualine = false
 o.scrolloff = 8
 vim.cmd("packadd nvim.undotree")
-vim.opt.cursorlineopt = "number"
+-- vim.opt.cursorlineopt = "number"
 vim.opt.tabstop = 4
 vim.o.guifont = "Hack Nerd Font:h15" -- text below applies for VimScript
 go.neovide_input_macos_option_key_is_meta = "only_left"

@@ -26,7 +26,7 @@ return {
         },
         notifier = {
             enabled = true,
-            -- style = "fancy",
+            style = "fancy",
         },
         terminal = {
             win = {

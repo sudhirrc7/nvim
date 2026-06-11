@@ -20,6 +20,9 @@ return {
             transparency = false,
         },
         palette = {
+            main = {
+                base = "#000000",
+            },
             -- Override the builtin palette per variant
             moon = {
                 base = "#000000",

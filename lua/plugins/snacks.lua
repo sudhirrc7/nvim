@@ -38,7 +38,7 @@ return {
                 ".git",
                 "node_modules",
             },
-            layout = "telescope",
+            layout = "ivy",
             previewers = {
                 git = {
                     builtin = false,
@@ -165,13 +165,13 @@ return {
             replace_netrw = true, -- Replace netrw with the snacks explorer
         },
         indent = {
-            enabled = true,
+            enabled = false,
             indent = {
-                -- char = "┊",
+                char = "┊",
             },
             scope = {
                 enabled = true,
-                -- char = "┊",
+                char = "┊",
             },
         },
         scroll = {

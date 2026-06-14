@@ -18,7 +18,7 @@ return {
             trim_whitespace = true,
         },
         layout = {
-            prompt_position = "bottom",
+            prompt_position = "top",
             height = 1,
             width = 1,
         },

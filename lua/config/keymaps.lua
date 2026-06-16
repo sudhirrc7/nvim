@@ -7,7 +7,7 @@ local o = vim.opt
 
 local lazy = require("lazy")
 
-vim.keymap.set("n", "<leader>ij", require("treesj").toggle)
+map("n", "<leader>ij", require("treesj").toggle)
 -- Search current word
 local searching_brave = function()
     vim.fn.system({
@@ -21,19 +21,19 @@ map("n", "<leader>?", searching_brave, {
     desc = "Search Current Word on Brave Search",
 })
 
-vim.keymap.set(
+map(
     "n",
     "<leader>s1",
     [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]],
     { desc = "s&r1" }
 )
-vim.keymap.set(
+map(
     "n",
     "<leader>s2",
     [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gi<Left><Left><Left>]],
     { desc = "s&r2" }
 )
-vim.keymap.set(
+map(
     "n",
     "<leader>s3",
     [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gIc<Left><Left><Left><Left>]],
@@ -56,11 +56,11 @@ map("n", "<leader>ls", function() lazy.sync() end, { desc = "Lazy Sync" })
 -- stylua: ignore end
 
 -- Neovim (init.lua)
-vim.keymap.set("i", "<C-e>", "<C-x><C-e>")
-vim.keymap.set("i", "<C-y>", "<C-x><C-y>")
+map("i", "<C-e>", "<C-x><C-e>")
+map("i", "<C-y>", "<C-x><C-y>")
 
 -- Open current file's PWD in VSCode
-vim.keymap.set("n", "<leader>fV", function()
+map("n", "<leader>fV", function()
     local dir_path = vim.fn.getcwd()
     if dir_path ~= "" then
         local command = "code " .. vim.fn.shellescape(dir_path)
@@ -87,12 +87,15 @@ map(
     { desc = "Save Without Formatting" }
 )
 
-vim.keymap.set("n", "<leader>iu", require("undotree").open)
+map("n", "<leader>iu", require("undotree").open)
 -- Increment/decrement
 -- map("n", "+", "<C-a>")
 
 -- toggle oil
 map("n", "-", "<cmd>Oil<cr>", { desc = "toggle oil lua" })
+
+--toggle code diff
+map("n", "<leader>cd", "<cmd>CodeDiff<cr>", { desc = "Toggle codediff" })
 
 -- Buffers
 map("n", "<leader>bf", "<cmd>bfirst<cr>", { desc = "First Buffer" })
@@ -119,6 +122,9 @@ map("n", "<leader>uu", function()
         vim.wo.colorcolumn = ""
     end
 end, { desc = "Toggle Color Column (80/100/off)" })
+
+-- keymap to exit terminal mode using esc
+map("t", "<Esc><Esc>", [[<C-\><C-n>]], { silent = true })
 
 -- Plugin Info
 map("n", "<leader>cif", "<cmd>LazyFormatInfo<cr>", { desc = "Formatting" })
@@ -241,22 +247,22 @@ if vim.g.neovide then
     vim.g.neovide_scale_factor = 1.0
 
     -- Ctrl + =
-    vim.keymap.set({ "n", "v", "i" }, "<C-=>", function()
+    map({ "n", "v", "i" }, "<C-=>", function()
         vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.1
     end, { desc = "Zoom in" })
 
     -- Ctrl + Shift + =
-    vim.keymap.set({ "n", "v", "i" }, "<C-S-=>", function()
+    map({ "n", "v", "i" }, "<C-S-=>", function()
         vim.g.neovide_scale_factor = vim.g.neovide_scale_factor + 0.1
     end, { desc = "Zoom in" })
 
     -- Ctrl + -
-    vim.keymap.set({ "n", "v", "i" }, "<C-->", function()
+    map({ "n", "v", "i" }, "<C-->", function()
         vim.g.neovide_scale_factor = vim.g.neovide_scale_factor - 0.1
     end, { desc = "Zoom out" })
 
     -- reset zoom
-    vim.keymap.set({ "n", "v", "i" }, "<C-0>", function()
+    map({ "n", "v", "i" }, "<C-0>", function()
         vim.g.neovide_scale_factor = 1.0
     end, { desc = "Reset zoom" })
 end

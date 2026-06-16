@@ -30,6 +30,7 @@ go.neovide_input_macos_option_key_is_meta = "only_left"
 -- vim.opt.guicursor = ""
 -- vim.opt.guicursor = "n-v-c:block,i-ci-ve:hor20,r-cr:hor20,o:hor50"
 
+vim.g.moonflyTransparent = true
 vim.g.moonflyNormalFloat = true
 -- Define leader key
 go.mapleader = " "

@@ -25,7 +25,7 @@ return {
         opts.sections.lualine_a = {
             {
                 "mode",
-                icon = "",
+                -- icon = "",
                 fmt = function(text, context)
                     return string.sub(text, 1, 3)
                 end,
@@ -49,9 +49,9 @@ return {
         opts.sections.lualine_z = {
             { "location", separator = "" },
             {
-                function()
-                    return ""
-                end,
+                -- function()
+                --     return ""
+                -- end,
                 padding = { left = 0, right = 1 },
             },
         }

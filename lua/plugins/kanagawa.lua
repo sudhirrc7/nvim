@@ -1,5 +1,6 @@
 return {
     "rebelot/kanagawa.nvim",
+    enabled = false,
     opts = {
         colors = {
             palette = {

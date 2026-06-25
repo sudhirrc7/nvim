@@ -21,6 +21,11 @@ map("n", "<leader>?", searching_brave, {
     desc = "Search Current Word on Brave Search",
 })
 
+local fyler = require("fyler")
+vim.keymap.set("n", "<leader>ie", function()
+    fyler.open({ kind = "split_left_most" })
+end, { desc = "Fyler.nvim - Open" })
+
 map(
     "n",
     "<leader>s1",

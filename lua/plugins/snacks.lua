@@ -49,6 +49,13 @@ return {
             },
             sources = {
                 explorer = {
+                    icons = {
+                        tree = {
+                            vertical = "  ",
+                            middle = "  ",
+                            last = "  ",
+                        },
+                    },
                     actions = {
                         float_preview = function(picker)
                             local item = picker:current()

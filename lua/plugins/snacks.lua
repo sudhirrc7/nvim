@@ -38,7 +38,7 @@ return {
                 ".git",
                 "node_modules",
             },
-            layout = "ivy",
+            layout = "telescope",
             previewers = {
                 git = {
                     builtin = false,

@@ -7,7 +7,7 @@ return {
     opts = {
         extend_background_behind_borders = false,
         highlight_groups = {
-            EndOfBuffer = { fg = "base" },
+            -- EndOfBuffer = { fg = "base" },
             Visual = { fg = "base", bg = "#c4a7e7", inherit = false },
 
             NormalFloat = { bg = "none" },

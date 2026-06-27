@@ -4,7 +4,7 @@ return {
     lazy = false,
     opts = {
         integrations = { icon = "mini_icons" },
-        -- integrations = { icon = "vim_nerdfont" },
+        -- integrations = { icon = "vim_nerdfont`" },
         extensions = { git = { enabled = true, inline = false } },
         ui = {
             hidden_items = {

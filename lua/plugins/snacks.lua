@@ -28,11 +28,11 @@ return {
             enabled = true,
             style = "fancy",
         },
-        terminal = {
-            win = {
-                position = "float",
-            },
-        },
+        -- terminal = {
+        --     win = {
+        --         position = "float",
+        --     },
+        -- },
         picker = {
             exclude = { -- add folder names here to exclude
                 ".git",

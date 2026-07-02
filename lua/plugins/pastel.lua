@@ -12,6 +12,7 @@ return {
                 border = true,
                 bold = true,
                 italic = true,
+                underline = false,
                 invert_title = false,
                 simple_syntax = false,
                 dynamic_statusline = false,

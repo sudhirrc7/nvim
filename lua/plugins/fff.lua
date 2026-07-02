@@ -12,15 +12,88 @@ return {
         --     enabled = true,
         --     show_scores = true,
         -- },
+        -- lazy_sync = true,
+        -- wrap_around = true,
+        -- grep = {
+        --     trim_whitespace = true,
+        -- },
+        -- layout = {
+        --     prompt_position = "top",
+        --     height = 1,
+        --     width = 1,
+        -- },
+        title = "Find Files", -- Window title
+        max_results = 100, -- Maximum search results to display
+        max_threads = 4, -- Maximum threads for fuzzy search
         lazy_sync = true,
-        wrap_around = true,
-        grep = {
-            trim_whitespace = true,
-        },
+
+        prompt = "🛸 ", -- Input prompt symbol
         layout = {
-            prompt_position = "top",
-            height = 1,
-            width = 1,
+            width = 0.75, -- Window width as fraction of screen
+            height = 0.85, -- Window height as fraction of screen
+            prompt_position = "bottom", -- or 'top'
+            preview_position = "right", -- or 'left', 'right', 'top', 'bottom'
+            preview_size = 0.5,
+            flex = false,
+        },
+        preview = {
+            enabled = true,
+            max_lines = 100,
+            max_size = 10 * 1024 * 1024, -- 1MB
+            chunk_size = 8192,
+            binary_file_threshold = 1024,
+            line_numbers = false,
+            wrap_lines = false,
+            show_file_info = true,
+            history = {
+                enabled = true,
+                db_path = vim.fn.stdpath("data") .. "/fff_queries",
+                min_combo_count = 3, -- file will get a boost if it was selected 3 in a row times per specific query
+                combo_boost_score_multiplier = 100, -- Score multiplier for combo matches
+            },
+        },
+        keymaps = {
+            close = { "<C-c>", "<Esc>" },
+            select = "<CR>",
+            select_split = "<C-s>",
+            select_vsplit = "<C-v>",
+            select_tab = "<C-t>",
+            -- Multiple bindings supported
+            move_up = { "<Up>", "<C-p>", "<C-k>" },
+            move_down = { "<Down>", "<C-n>", "<C-j>" },
+            preview_scroll_up = "<C-u>",
+            preview_scroll_down = "<C-d>",
+        },
+        git = {
+            status_text_color = true, -- Enable git status colors on filename text
+        },
+        -- Highlight groups
+        hl = {
+            border = "FloatBorder",
+            normal = "Normal",
+            cursor = "CursorLine",
+            matched = "IncSearch",
+            title = "Title",
+            prompt = "Question",
+            active_file = "Visual",
+            frecency = "Number",
+            debug = "Comment",
+            git_staged = "FFFGitStaged", -- Files staged for commit
+            git_modified = "FFFGitModified", -- Modified unstaged files
+            git_deleted = "FFFGitDeleted", -- Deleted files
+            git_renamed = "FFFGitRenamed", -- Renamed files
+            git_untracked = "FFFGitUntracked", -- New untracked files
+            git_ignored = "FFFGitIgnored", -- Git-ignored files
+        },
+        frecency = {
+            enabled = true,
+            db_path = vim.fn.stdpath("cache") .. "/fff_nvim",
+        },
+        history = {
+            enabled = true,
+            db_path = vim.fn.stdpath("data") .. "/fff_queries",
+            min_combo_count = 3, -- file will get a boost if it was selected 3 in a row times per specific query
+            combo_boost_score_multiplier = 100, -- Score multiplier for combo matches
         },
     },
     lazy = false, -- the plugin lazy-initialises itself

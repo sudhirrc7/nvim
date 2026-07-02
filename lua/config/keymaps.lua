@@ -23,6 +23,10 @@ map("n", "<leader>?", searching_brave, {
 
 local fyler = require("fyler")
 vim.keymap.set("n", "<leader>ie", function()
+    fyler.open({ kind = "split_left_most" })
+end, { desc = "Fyler.nvim - Open" })
+
+vim.keymap.set("n", "<leader>iE", function()
     fyler.open({ kind = "split_right_most" })
 end, { desc = "Fyler.nvim - Open" })
 

@@ -21,11 +21,11 @@ return {
         },
         palette = {
             main = {
-                base = "#000000",
+                base = "#141415",
             },
             -- Override the builtin palette per variant
             moon = {
-                base = "#000000",
+                base = "#141415",
                 -- base = "#030A15",
                 -- overlay = "#000000",
             },

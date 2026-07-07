@@ -38,7 +38,65 @@ return {
                 ".git",
                 "node_modules",
             },
-            layout = "telescope",
+            layout = {
+
+                ---- this one modifies the default telescope setup
+                reverse = false,
+                layout = {
+                    box = "horizontal",
+                    backdrop = true,
+                    width = 0.9,
+                    height = 0.9,
+                    border = "none",
+                    {
+                        box = "vertical",
+                        {
+                            win = "input",
+                            height = 1,
+                            border = false,
+                            title = "{title} {live} {flags}",
+                            title_pos = "center",
+                        },
+                        {
+                            win = "list",
+                            title = " Results ",
+                            title_pos = "center",
+                            border = false,
+                        },
+                    },
+                    {
+                        win = "preview",
+                        title = "{preview:Preview}",
+                        width = 0.5,
+                        border = false,
+                        title_pos = "center",
+                    },
+                },
+
+                --- picker which modifies the ivy setup
+                -- layout = {
+                --     box = "vertical",
+                --     backdrop = false,
+                --     row = -1,
+                --     width = 0,
+                --     height = 0.6,
+                --     border = "top",
+                --     title = " {title} {live} {flags}",
+                --     title_pos = "left",
+                --     { win = "input", height = 1, border = "bottom" },
+                --     {
+                --         box = "horizontal",
+                --         { win = "list", border = "none" },
+                --         {
+                --             win = "preview",
+                --             title = "{preview}",
+                --             width = 0.6,
+                --             border = "left",
+                --         },
+                --     },
+                -- },
+            },
+
             previewers = {
                 git = {
                     builtin = false,

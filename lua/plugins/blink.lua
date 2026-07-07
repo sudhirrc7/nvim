@@ -56,7 +56,6 @@ return {
                     },
                 },
             },
-
             documentation = {
                 window = {
                     border = "rounded",

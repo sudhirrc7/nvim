@@ -19,7 +19,7 @@ o.scrolloff = 8
 vim.cmd("packadd nvim.undotree")
 vim.opt.cursorlineopt = "number"
 -- vim.o.cursorlineopt = "screenline,number"
-vim.opt.tabstop = 4
+vim.opt.tabstop = 8
 vim.o.guifont = "MonaSpace Neon:h15" -- text below applies for VimScript
 go.neovide_input_macos_option_key_is_meta = "only_left"
 --vim settings for me
@@ -28,7 +28,7 @@ go.neovide_input_macos_option_key_is_meta = "only_left"
 
 -- Set cursor to a block in all modes (normal, visual, insert, command)
 -- The 'a' value applies the setting to all modes
--- vim.opt.guicursor = ""
+vim.opt.guicursor = ""
 -- vim.opt.guicursor = "n-v-c:block,i-ci-ve:hor20,r-cr:hor20,o:hor50"
 
 vim.g.moonflyTransparent = true

@@ -75,7 +75,7 @@ ac("FileType", {
 -- Delete number column on terminals
 -- ac("TermOpen", {
 --     callback = function()
---         vim.cmd("setlocal listchars= nonumber norelativenumber")
+--         vim.cmd("setlocal listchars= number relativenumber")
 --         vim.cmd("setlocal nospell")
 --     end,
 -- })

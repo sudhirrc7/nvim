@@ -36,6 +36,7 @@ return {
             preview_size = 0.5,
             flex = false,
         },
+
         preview = {
             enabled = true,
             max_lines = 100,
@@ -124,7 +125,9 @@ return {
         {
             "fc",
             function()
-                require("fff").live_grep({ query = vim.fn.expand("<cword>") })
+                require("fff").live_grep({
+                    query = vim.fn.expand("<cword>"),
+                })
             end,
             desc = "Search current word",
         },

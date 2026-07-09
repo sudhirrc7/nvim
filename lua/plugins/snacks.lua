@@ -38,64 +38,10 @@ return {
                 ".git",
                 "node_modules",
             },
-            layout = {
+            layout = "telescope",
 
-                ---- this one modifies the default telescope setup
-                reverse = false,
-                layout = {
-                    box = "horizontal",
-                    backdrop = true,
-                    width = 0.9,
-                    height = 0.9,
-                    border = "none",
-                    {
-                        box = "vertical",
-                        {
-                            win = "input",
-                            height = 1,
-                            border = false,
-                            title = "{title} {live} {flags}",
-                            title_pos = "center",
-                        },
-                        {
-                            win = "list",
-                            title = " Results ",
-                            title_pos = "center",
-                            border = false,
-                        },
-                    },
-                    {
-                        win = "preview",
-                        title = "{preview:Preview}",
-                        width = 0.5,
-                        border = false,
-                        title_pos = "center",
-                    },
-                },
-
-                --- picker which modifies the ivy setup
-                -- layout = {
-                --     box = "vertical",
-                --     backdrop = false,
-                --     row = -1,
-                --     width = 0,
-                --     height = 0.6,
-                --     border = "top",
-                --     title = " {title} {live} {flags}",
-                --     title_pos = "left",
-                --     { win = "input", height = 1, border = "bottom" },
-                --     {
-                --         box = "horizontal",
-                --         { win = "list", border = "none" },
-                --         {
-                --             win = "preview",
-                --             title = "{preview}",
-                --             width = 0.6,
-                --             border = "left",
-                --         },
-                --     },
-                -- },
-            },
+            ---- this one modifies the default telescope setup
+            -- reverse = false,
 
             previewers = {
                 git = {
@@ -114,54 +60,6 @@ return {
                             last = "  ",
                         },
                     },
-                    actions = {
-                        float_preview = function(picker)
-                            local item = picker:current()
-
-                            if not item or not item.file then
-                                return
-                            end
-
-                            local buf = vim.api.nvim_create_buf(false, true)
-
-                            vim.api.nvim_buf_call(buf, function()
-                                vim.cmd(
-                                    "silent read "
-                                        .. vim.fn.fnameescape(item.file)
-                                )
-                                vim.cmd("0d_")
-                            end)
-
-                            vim.bo[buf].filetype = vim.filetype.match({
-                                filename = item.file,
-                            }) or ""
-                            vim.bo[buf].buftype = "nofile"
-                            vim.bo[buf].bufhidden = "wipe"
-                            vim.bo[buf].swapfile = false
-                            vim.bo[buf].modifiable = false
-
-                            local win = require("snacks.win")({
-                                buf = buf,
-                                style = "float",
-                                border = "rounded",
-                                width = 0.8,
-                                height = 0.8,
-                            })
-
-                            vim.wo[win.win].number = true
-                            vim.wo[win.win].relativenumber = false
-                            vim.wo[win.win].signcolumn = "yes"
-                            vim.wo[win.win].cursorline = true
-                            vim.wo[win.win].wrap = false
-                        end,
-                    },
-                    win = {
-                        list = {
-                            keys = {
-                                ["P"] = "float_preview",
-                            },
-                        },
-                    },
                     layout = {
                         preview = false,
                         layout = {
@@ -171,13 +69,13 @@ return {
                             min_width = 30,
                             height = 0,
                             position = "left",
-                            border = "rounded",
+                            border = "double", -- options are single|double|solid|shadow|rounded|bold
                             backdrop = false,
                             box = "vertical",
                             {
                                 win = "input",
                                 height = 1,
-                                border = "bottom",
+                                border = "none",
                                 title = "{title} {live} {flags}",
                                 title_pos = "center",
                             },

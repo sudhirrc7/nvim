@@ -2,6 +2,12 @@ return {
     "rebelot/kanagawa.nvim",
     enabled = true,
     opts = {
+        commentStyle = { italic = false, bold = false },
+        functionStyle = { italic = false, bold = false },
+        keywordStyle = { italic = false, bold = false },
+        statementStyle = { bold = false, italic = false },
+        typeStyle = { italic = false, bold = false },
+        transparent = true, -- do not set background color
         overrides = function(colors)
             local theme = colors.theme
             return {

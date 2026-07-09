@@ -1,5 +1,6 @@
 return {
     "kopecmaciej/vi-sql.nvim",
+    enabled = false,
     config = function()
         require("vi-sql").setup({
             -- Press this inside vi-sql to hide the window (change to taste)

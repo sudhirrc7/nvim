@@ -49,6 +49,36 @@ map(
     { desc = "s&r3" }
 )
 
+-- Add N blank lines above the current line (e.g. 2]<CR> gone here... wait, use [<CR>)
+vim.keymap.set("n", "[<CR>", function()
+    local count = vim.v.count1
+    local pos = vim.api.nvim_win_get_cursor(0)
+    local lnum, col = pos[1], pos[2]
+
+    local blanks = {}
+    for _ = 1, count do
+        table.insert(blanks, "")
+    end
+
+    vim.api.nvim_buf_set_lines(0, lnum - 1, lnum - 1, false, blanks)
+    vim.api.nvim_win_set_cursor(0, { lnum + count, col })
+end, { desc = "Add N blank lines above" })
+
+-- Add N blank lines below the current line
+vim.keymap.set("n", "]<CR>", function()
+    local count = vim.v.count1
+    local pos = vim.api.nvim_win_get_cursor(0)
+    local lnum, col = pos[1], pos[2]
+
+    local blanks = {}
+    for _ = 1, count do
+        table.insert(blanks, "")
+    end
+
+    vim.api.nvim_buf_set_lines(0, lnum, lnum, false, blanks)
+    vim.api.nvim_win_set_cursor(0, { lnum, col })
+end, { desc = "Add N blank lines below" })
+
 -- Lazy options
 map("n", "<leader>l", "<Nop>")
 map("n", "<leader>ll", "<cmd>Lazy<cr>", { desc = "Lazy" })
@@ -87,6 +117,11 @@ map("n", "<leader>fT", "<Nop>")
 -- Identation
 map("n", "<", "<<", { desc = "Deindent" })
 map("n", ">", ">>", { desc = "Indent" })
+
+-- keymaps
+vim.keymap.set("n", "<leader>sk", function()
+    Snacks.picker.keymaps({ layout = "select" })
+end, { desc = "show keymaps" })
 
 -- Save without formatting
 map(

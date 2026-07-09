@@ -4,6 +4,13 @@
 local go = vim.g
 local o = vim.opt
 
+vim.o.tabstop = 4
+vim.bo.tabstop = 4
+vim.o.softtabstop = 4
+vim.o.shiftround = true
+vim.o.shiftwidth = 4
+vim.bo.shiftwidth = 4
+
 -- Optimizations on startup
 vim.loader.enable()
 vim.g.omni_sql_no_default_maps = 1
@@ -19,7 +26,7 @@ o.scrolloff = 8
 vim.cmd("packadd nvim.undotree")
 vim.opt.cursorlineopt = "number"
 -- vim.o.cursorlineopt = "screenline,number"
-vim.opt.tabstop = 8
+vim.opt.tabstop = 4
 vim.o.guifont = "MonaSpace Neon:h15" -- text below applies for VimScript
 go.neovide_input_macos_option_key_is_meta = "only_left"
 --vim settings for me

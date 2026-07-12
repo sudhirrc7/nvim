@@ -2,6 +2,7 @@ return {
     {
         "rachartier/tiny-inline-diagnostic.nvim",
         event = "VeryLazy",
+        enabled = true,
         priority = 1000,
         config = function()
             require("tiny-inline-diagnostic").setup({
@@ -22,6 +23,14 @@ return {
     },
     {
         "neovim/nvim-lspconfig",
-        opts = { diagnostics = { virtual_text = false } },
+        opts = {
+            inlay_hints = {
+                enabled = false,
+            },
+            diagnostics = {
+                virtual_text = false,
+                signs = false,
+            },
+        },
     },
 }

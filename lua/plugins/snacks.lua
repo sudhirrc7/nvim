@@ -69,7 +69,7 @@ return {
                             min_width = 30,
                             height = 0,
                             position = "left",
-                            border = "double", -- options are single|double|solid|shadow|rounded|bold
+                            border = "single", -- options are single|double|solid|shadow|rounded|bold
                             backdrop = false,
                             box = "vertical",
                             {

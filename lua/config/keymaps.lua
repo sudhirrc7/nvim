@@ -195,12 +195,12 @@ map("n", "<leader>ciL", linters, { desc = "Lint" })
 map("n", "<leader>cir", "<cmd>LazyRoot<cr>", { desc = "Root" })
 
 -- Copy whole text to clipboard
-map(
-    "n",
-    "<C-c>",
-    ":%y+<CR>",
-    { desc = "Copy Whole Text to Clipboard", silent = true }
-)
+-- map(
+--     "n",
+--     "<C-c>",
+--     ":%y+<CR>",
+--     { desc = "Copy Whole Text to Clipboard", silent = true }
+-- )
 
 -- Select all text
 map(

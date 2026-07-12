@@ -1,11 +1,17 @@
 return {
     "stevearc/oil.nvim",
     lazy = false,
-    dependencies = {
-        "nvim-tree/nvim-web-devicons",
-        optional = true,
-    },
+    -- dependencies = {
+    --     "nvim-tree/nvim-web-devicons",
+    --     optional = true,
+    -- },
     opts = {
+        columns = {
+            "icon",
+            -- "permissions",
+            -- "size",
+            -- "mtime",
+        },
         skip_confirm_for_simple_edits = true,
         prompt_save_on_select_new_entry = false,
         delete_to_trash = true,

@@ -27,9 +27,9 @@ return {
             {
                 "mode",
                 -- icon = "",
-                fmt = function(text, context)
-                    return string.sub(text, 1, 3)
-                end,
+                -- fmt = function(text, context)
+                --     return string.sub(text, 1, 3)
+                -- end,
             },
         }
         opts.sections.lualine_c[4] = {

@@ -6,7 +6,7 @@ return {
         priority = 1000,
         config = function()
             require("tiny-inline-diagnostic").setup({
-                preset = "simple",
+                preset = "modern",
                 options = {
                     add_messages = {
                         display_count = true,

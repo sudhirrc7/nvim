@@ -16,7 +16,7 @@ return {
                 show_on_insert_on_trigger_character = false,
             },
             window = {
-                border = "rounded",
+                border = "double",
                 show_documentation = true,
             },
         },
@@ -26,7 +26,7 @@ return {
         },
         completion = {
             menu = {
-                border = "rounded",
+                border = "double",
                 winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:BlinkCmpMenuSelection,Search:None",
                 scrollbar = false,
                 max_height = 10,
@@ -57,7 +57,7 @@ return {
             },
             documentation = {
                 window = {
-                    border = "rounded",
+                    border = "double",
                     scrollbar = false,
                     winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:BlinkCmpDocCursorLine,Search:None",
                 },

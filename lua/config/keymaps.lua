@@ -124,6 +124,16 @@ map("n", "<leader>tb", function()
     vim.cmd.colorscheme("kanagawa-dragon")
 end, { desc = "Toggle transparency" })
 
+-- -- this is used to toggle the transparency of the catppuccin theme on the fly
+-- local config1 = {
+--     transparent_background = true,
+-- }
+-- map("n", "<leader>tc", function()
+--     config1.transparent_background = not config.transparent_background
+--     require("catppuccin").setup(config1)
+--     vim.cmd.colorscheme("catppuccin-mocha")
+-- end, { desc = "Toggle transparency" })
+
 -- Identation
 map("n", "<", "<<", { desc = "Deindent" })
 map("n", ">", ">>", { desc = "Indent" })
@@ -141,7 +151,7 @@ map(
     { desc = "Save Without Formatting" }
 )
 
-map("n", "<leader>iu", require("undotree").open)
+-- map("n", "<leader>iu", require("undotree").open)
 -- Increment/decrement
 -- map("n", "+", "<C-a>")
 

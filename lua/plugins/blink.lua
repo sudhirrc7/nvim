@@ -1,3 +1,4 @@
+vim.g.blink_auto_show = true
 return {
     "saghen/blink.cmp",
     opts = {
@@ -26,6 +27,10 @@ return {
         },
         completion = {
             menu = {
+                auto_show = function()
+                    return vim.g.blink_auto_show
+                end,
+                -- auto_show_delay_ms = 500,
                 border = "double",
                 winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:BlinkCmpMenuSelection,Search:None",
                 scrollbar = false,

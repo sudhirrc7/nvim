@@ -130,3 +130,17 @@ ac("BufWritePre", {
         vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
     end,
 })
+
+-- vim.api.nvim_create_autocmd("CursorMovedI", {
+--     pattern = "*",
+--     callback = function()
+--         -- Check if the completion menu is NOT already visible and if typing
+--         if vim.fn.pumvisible() == 0 and vim.fn.omnifunc ~= "" then
+--             -- Automatically trigger omnicomplete without manually pressing CTRL-X CTRL-O
+--             vim.fn.feedkeys(
+--                 vim.api.nvim_replace_termcodes("<C-x><C-o>", true, true, true),
+--                 "n"
+--             )
+--         end
+--     end,
+-- })

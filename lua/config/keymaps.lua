@@ -282,6 +282,24 @@ end, { desc = "Tmux Sessionizer" })
 map("n", "<leader>_", "<C-W>s", { desc = "Split Window Below", remap = true })
 map("n", "<leader>\\", "<C-W>v", { desc = "Split Window Right", remap = true })
 
+-- this option toggles the blink cmp can be useful when i want to not display any suggestions
+vim.keymap.set("n", "<leader>tc", function()
+    vim.g.blink_auto_show = not vim.g.blink_auto_show
+
+    -- Hide any currently visible completion menu
+    require("blink.cmp").hide()
+
+    vim.notify(
+        "Blink auto completion "
+            .. (vim.g.blink_auto_show and "Enabled" or "Disabled")
+    )
+end, { desc = "Toggle Blink auto completion" })
+
+vim.keymap.set({ "n", "i" }, "<C-q>", function()
+    vim.g.blink_auto_show = not vim.g.blink_auto_show
+    require("blink.cmp").hide()
+end, { desc = "Toggle Blink auto completion" })
+
 -- Center when scrolling
 if Snacks.scroll.enabled then
     map("n", "<C-d>", function()

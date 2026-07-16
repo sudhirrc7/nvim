@@ -114,15 +114,15 @@ end, { desc = "[C]Open current file's PWD in VSCode" })
 map("n", "<leader>L", "<Nop>")
 map("n", "<leader>fT", "<Nop>")
 
--- this is used to toggle the transparency of the kanagawa theme on the fly
-local config = {
-    transparent = true,
-}
-map("n", "<leader>tb", function()
-    config.transparent = not config.transparent
-    require("kanagawa").setup(config)
-    vim.cmd.colorscheme("kanagawa-dragon")
-end, { desc = "Toggle transparency" })
+-- -- this is used to toggle the transparency of the kanagawa theme on the fly
+-- local config = {
+--     transparent = true,
+-- }
+-- map("n", "<leader>tb", function()
+--     config.transparent = not config.transparent
+--     require("kanagawa").setup(config)
+--     vim.cmd.colorscheme("kanagawa-dragon")
+-- end, { desc = "Toggle transparency" })
 
 -- -- this is used to toggle the transparency of the catppuccin theme on the fly
 -- local config1 = {

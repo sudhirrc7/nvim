@@ -1,8 +1,8 @@
 return {
     "rose-pine/neovim",
+    enabled = false,
     lazy = false,
-    priority = 10000,
-    enabled = true,
+    priority = 1000,
     name = "rose-pine",
     opts = {
         extend_background_behind_borders = false,

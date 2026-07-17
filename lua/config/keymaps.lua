@@ -26,6 +26,10 @@ vim.keymap.set("n", "<leader>ie", function()
     fyler.open({ kind = "split_left_most" })
 end, { desc = "Fyler.nvim - Open" })
 
+vim.keymap.set("n", "<leader>if", function()
+    fyler.open()
+end, { desc = "Fyler.nvim - Open" })
+
 vim.keymap.set("n", "<leader>iE", function()
     fyler.open({ kind = "split_right_most" })
 end, { desc = "Fyler.nvim - Open" })

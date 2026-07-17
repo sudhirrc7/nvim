@@ -61,6 +61,8 @@ return {
                         },
                     },
                     layout = {
+                        cycle = false,
+                        auto_hide = { "input" },
                         preview = false,
                         layout = {
                             -- title = "explorer",

@@ -17,30 +17,30 @@ ac("BufRead", {
     end,
 })
 
-local auto_close_filetype = {
-    "lazy",
-    "mason",
-    "lspinfo",
-    "toggleterm",
-    "null-ls-info",
-    "TelescopePrompt",
-    "notify",
-}
+-- local auto_close_filetype = {
+--     "lazy",
+--     "mason",
+--     "lspinfo",
+--     "toggleterm",
+--     "null-ls-info",
+--     "TelescopePrompt",
+--     "notify",
+-- }
 
--- Auto close window when leaving
-ac("BufLeave", {
-    group = ag("lazyvim_auto_close_win", { clear = true }),
-    callback = function(event)
-        local ft = vim.api.nvim_buf_get_option(event.buf, "filetype")
-
-        if vim.fn.index(auto_close_filetype, ft) ~= -1 then
-            local winids = vim.fn.win_findbuf(event.buf)
-            for _, win in pairs(winids) do
-                vim.api.nvim_win_close(win, true)
-            end
-        end
-    end,
-})
+-- -- Auto close window when leaving
+-- ac("BufLeave", {
+--     group = ag("lazyvim_auto_close_win", { clear = true }),
+--     callback = function(event)
+--         local ft = vim.api.nvim_buf_get_option(event.buf, "filetype")
+--
+--         if vim.fn.index(auto_close_filetype, ft) ~= -1 then
+--             local winids = vim.fn.win_findbuf(event.buf)
+--             for _, win in pairs(winids) do
+--                 vim.api.nvim_win_close(win, true)
+--             end
+--         end
+--     end,
+-- })
 
 -- Disable leader and localleader for some filetypes
 ac("FileType", {

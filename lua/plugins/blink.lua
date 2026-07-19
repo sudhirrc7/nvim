@@ -17,7 +17,7 @@ return {
                 show_on_insert_on_trigger_character = false,
             },
             window = {
-                border = "double",
+                border = "rounded",
                 show_documentation = true,
             },
         },
@@ -31,7 +31,7 @@ return {
                     return vim.g.blink_auto_show
                 end,
                 -- auto_show_delay_ms = 500,
-                border = "double",
+                border = "rounded",
                 winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:BlinkCmpMenuSelection,Search:None",
                 scrollbar = false,
                 max_height = 10,
@@ -62,7 +62,7 @@ return {
             },
             documentation = {
                 window = {
-                    border = "double",
+                    border = "rounded",
                     scrollbar = false,
                     winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:BlinkCmpDocCursorLine,Search:None",
                 },

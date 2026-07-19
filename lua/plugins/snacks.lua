@@ -131,13 +131,13 @@ return {
         },
         indent = {
             enabled = false,
-            indent = {
-                char = "┊",
-            },
-            scope = {
-                enabled = true,
-                char = "┊",
-            },
+            -- indent = {
+            --     char = "┊",
+            -- },
+            -- scope = {
+            --     enabled = true,
+            --     char = "┊",
+            -- },
         },
         scroll = {
             animate = {

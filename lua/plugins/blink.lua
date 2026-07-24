@@ -64,7 +64,7 @@ return {
                 window = {
                     border = "rounded",
                     scrollbar = false,
-                    winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:BlinkCmpDocCursorLine,Search:None",
+                    -- winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:BlinkCmpDocCursorLine,Search:None",
                 },
             },
         },

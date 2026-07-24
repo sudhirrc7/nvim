@@ -1,11 +1,15 @@
 return {
     "rose-pine/neovim",
-    enabled = false,
+    enabled = true,
     lazy = false,
     priority = 1000,
     name = "rose-pine",
     opts = {
         extend_background_behind_borders = false,
+        highlight_groups = {
+            StatusLine = { fg = "none", bg = "none" },
+            NormalFloat = { bg = "none" },
+        },
         -- highlight_groups = {
         --     -- EndOfBuffer = { fg = "base" },
         --     Visual = { fg = "base", bg = "#c4a7e7", inherit = false },
@@ -17,7 +21,7 @@ return {
         styles = {
             bold = true,
             italic = false,
-            transparency = true,
+            transparency = false,
         },
         palette = {
             main = {

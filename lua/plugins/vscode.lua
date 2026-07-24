@@ -1,1 +1,4 @@
-return { "Mofiqul/vscode.nvim", enabled = false }
+return {
+    "Mofiqul/vscode.nvim",
+    enabled = false,
+}

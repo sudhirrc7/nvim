@@ -121,8 +121,9 @@ return {
             -- },
         },
         image = {
-            enabled = false,
+            enabled = true,
             doc = {
+                enabled = false,
                 inline = false,
             },
         },

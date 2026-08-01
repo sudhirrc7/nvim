@@ -1,6 +1,7 @@
 return {
     "sainnhe/gruvbox-material",
     lazy = false,
+    enabled = false,
     priority = 1000,
     config = function()
         -- Optionally configure and load the colorscheme
@@ -11,6 +12,7 @@ return {
         vim.g.gruvbox_material_float_style = "blend"
         vim.g.gruvbox_material_ui_contrast = "high"
         vim.g.gruvbox_material_menu_selection_background = "aqua"
+        vim.g.gruvbox_material_background = "hard"
         vim.g.gruvbox_material_visual = "reverse"
         -- vim.g.gruvbox_material_sign_column_background = "grey"
         vim.g.gruvbox_material_spell_foreground = "colored"

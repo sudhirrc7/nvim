@@ -38,7 +38,7 @@ return {
                 ".git",
                 "node_modules",
             },
-            layout = "telescope",
+            layout = "default",
 
             ---- this one modifies the default telescope setup
             -- reverse = false,
@@ -81,7 +81,7 @@ return {
                             min_width = 30,
                             height = 0,
                             position = "left",
-                            border = "single", -- options are single|double|solid|shadow|rounded|bold
+                            border = "rounded", -- options are single|double|solid|shadow|rounded|bold
                             backdrop = true,
                             box = "vertical",
                             {
@@ -196,14 +196,14 @@ return {
             desc = "Lsp",
         },
         {
-            "<leader>sn",
+            "<leader>in",
             function()
                 Snacks.picker.notifications()
             end,
             desc = "Notifications",
         },
         {
-            "<leader>st",
+            "<leader>it",
             function()
                 Snacks.picker.treesitter()
             end,

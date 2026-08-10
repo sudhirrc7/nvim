@@ -65,14 +65,24 @@ return {
                         auto_hide = { "input" },
                         preview = false,
                         layout = {
-                            -- title = "explorer",
-                            -- title_pos = "center",
+                            -- relative = "editor",
+                            -- row = 0,
+                            -- col = 0,
+                            --
+                            -- width = 30,
+                            -- height = 0,
+                            --
+                            -- border = "rounded",
+                            -- backdrop = true,
+                            -- box = "vertical",
+
+                            -- this is another style of the layout here
                             width = 30,
                             min_width = 30,
                             height = 0,
                             position = "left",
                             border = "single", -- options are single|double|solid|shadow|rounded|bold
-                            backdrop = false,
+                            backdrop = true,
                             box = "vertical",
                             {
                                 win = "input",

@@ -26,6 +26,7 @@ return {
             nerd_font_variant = "mono",
         },
         completion = {
+            trigger = { show_in_snippet = false },
             menu = {
                 auto_show = function()
                     return vim.g.blink_auto_show

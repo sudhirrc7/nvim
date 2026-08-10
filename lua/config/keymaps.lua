@@ -86,7 +86,7 @@ end, { desc = "Add N blank lines below" })
 -- Lazy options
 map("n", "<leader>l", "<Nop>")
 map("n", "<leader>ll", "<cmd>Lazy<cr>", { desc = "Lazy" })
-map("n", "<leader>ig", "<cmd>GuessIndent<cr>", { desc = "Lazy" })
+map("n", "<leader>ig", "<cmd>GuessIndent<cr>", { desc = "GuessBufferIndent" })
 -- stylua: ignore start
 map("n", "<leader>ld", function() vim.fn.system({ "xdg-open", "https://lazyvim.org" }) end, { desc = "LazyVim Docs" })
 map("n", "<leader>lr", function() vim.fn.system({ "xdg-open", "https://github.com/LazyVim/LazyVim" }) end, { desc = "LazyVim Repo" })

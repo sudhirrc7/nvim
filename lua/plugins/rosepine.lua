@@ -13,14 +13,14 @@ return {
             NormalFloat = { bg = "none" },
             -- VisualNOS = { fg = "base", bg = "rose", inherit = false },
         },
-        groups = {
-            h1 = "love",
-            h2 = "iris",
-            h4 = "foam",
-            h3 = "pine",
-            h5 = "rose",
-            h6 = "gold",
-        },
+        -- groups = {
+        --     h1 = "love",
+        --     h2 = "iris",
+        --     h4 = "foam",
+        --     h3 = "pine",
+        --     h5 = "rose",
+        --     h6 = "gold",
+        -- },
         styles = {
             bold = true,
             italic = false,
@@ -34,8 +34,8 @@ return {
             },
             -- Override the builtin palette per variant
             moon = {
-                -- base = "#191724",
-                base = "#181616",
+                base = "#060606",
+                -- base = "#181616",
                 -- base = "#000000",
                 -- overlay = "#000000",
             },

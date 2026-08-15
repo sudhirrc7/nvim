@@ -60,7 +60,7 @@ return {
         opts.extensions = false
     end,
 }
-
+--
 -- return {
 --     "nvim-lualine/lualine.nvim",
 --
@@ -217,6 +217,17 @@ return {
 --         })
 --
 --         ins_left({
+--             "branch",
+--
+--             icon = "",
+--
+--             color = {
+--                 fg = colors.violet,
+--                 gui = "bold",
+--             },
+--         })
+--
+--         ins_left({
 --             "filename",
 --
 --             cond = conditions.buffer_not_empty,
@@ -278,7 +289,7 @@ return {
 --             end,
 --         })
 --
---         ins_left({
+--         ins_right({
 --             -- LSP server name
 --             function()
 --                 local msg = "No Active Lsp"
@@ -306,7 +317,7 @@ return {
 --                 return msg
 --             end,
 --
---             icon = " LSP:",
+--             icon = " :",
 --
 --             color = {
 --                 fg = colors.fg,
@@ -345,22 +356,11 @@ return {
 --         })
 --
 --         ins_right({
---             "branch",
---
---             icon = "",
---
---             color = {
---                 fg = colors.violet,
---                 gui = "bold",
---             },
---         })
---
---         ins_right({
 --             "diff",
 --
 --             symbols = {
 --                 added = " ",
---                 modified = "󰝤 ",
+--                 modified = "󰏬 ",
 --                 removed = " ",
 --             },
 --

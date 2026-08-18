@@ -4,7 +4,7 @@
 
 local map = vim.keymap.set
 local o = vim.opt
-
+local MiniFiles = require("mini.files")
 local lazy = require("lazy")
 
 map("n", "<leader>ij", require("treesj").toggle)
@@ -93,6 +93,7 @@ map("n", "<leader>lr", function() vim.fn.system({ "xdg-open", "https://github.co
 map("n", "<leader>lx", "<cmd>LazyExtras<cr>", { desc = "Extras" })
 map("n", "<leader>lc", function() LazyVim.news.changelog() end, { desc = "LazyVim Changelog" })
 
+map("n", "\\", function() MiniFiles.open() end, { desc = "MiniFiles Open" })
 map("n", "<leader>lu", function() lazy.update() end, { desc = "Lazy Update" })
 map("n", "<leader>lC", function() lazy.check() end, { desc = "Lazy Check" })
 map("n", "<leader>ls", function() lazy.sync() end, { desc = "Lazy Sync" })

@@ -1,29 +1,94 @@
 return {
-    "olimorris/onedarkpro.nvim",
-    enabled = false,
-    priority = 1000, -- Ensure it loads first
-    opts = {
-        styles = { -- For example, to apply bold and italic, use "bold,italic"
-            types = "NONE", -- Style that is applied to types
-            methods = "NONE", -- Style that is applied to methods
-            numbers = "NONE", -- Style that is applied to numbers
-            strings = "NONE", -- Style that is applied to strings
-            comments = "italic", -- Style that is applied to comments
-            keywords = "NONE", -- Style that is applied to keywords
-            constants = "NONE", -- Style that is applied to constants
-            functions = "NONE", -- Style that is applied to functions
-            operators = "NONE", -- Style that is applied to operators
-            variables = "NONE", -- Style that is applied to variables
-            parameters = "NONE", -- Style that is applied to parameters
-            conditionals = "NONE", -- Style that is applied to conditionals
-            virtual_text = "NONE", -- Style that is applied to virtual text
-        },
-        options = {
-            cursorline = true, -- Use cursorline highlighting?
-            transparency = true, -- Use a transparent background?
-            terminal_colors = true, -- Use the theme's colors for Neovim's :terminal?
-            lualine_transparency = true, -- Center bar transparency?
-            highlight_inactive_windows = false, -- When the window is out of focus, change the normal background?
+    {
+        "olimorris/onedarkpro.nvim",
+        priority = 1000,
+        enabled = false,
+        opts = {
+            highlights = {
+                ["@variable.rocq"] = { fg = "${green}" },
+                ["@variable.imp"] = { fg = "${purple}" },
+                ["@variable.qualid"] = { fg = "${green}", bold = true },
+                ["@variable.metavariable"] = {
+                    fg = "${orange}",
+                    italic = true,
+                    bold = true,
+                },
+                ["@variable.quantifier"] = { fg = "${purple}" },
+                ["@number.rocq"] = { fg = "${cyan}" },
+                ["@string.rocq"] = { fg = "${blue}" },
+                ["@string.special.rocq"] = { fg = "${green}" },
+                ["@variable.builtin.rocq"] = { fg = "${red}" },
+                ["@comment.rocq"] = { fg = "${comment}", italic = true },
+                ["@punctuation.special.rocq"] = { fg = "${red}" },
+
+                ["@keyword.modifier"] = {
+                    fg = "${purple}",
+                    italic = true,
+                    bold = true,
+                },
+                ["@keyword.directive"] = {
+                    fg = "${purple}",
+                    italic = true,
+                    bold = true,
+                },
+                ["@keyword.directive.fail"] = { fg = "${red}", bold = true },
+                ["@keyword.directive.language"] = { fg = "${orange}" },
+                ["@keyword.declaration"] = {
+                    fg = "${orange}",
+                    italic = true,
+                    bold = true,
+                },
+                ["@keyword.declaration.inductive"] = {
+                    fg = "#E56BB1",
+                    italic = true,
+                    bold = true,
+                },
+                ["@keyword.module"] = { fg = "${purple}", bold = true },
+                ["@keyword.notation"] = { fg = "${orange}", bold = true },
+                ["@keyword.control"] = {
+                    fg = "${purple}",
+                    italic = true,
+                    bold = true,
+                },
+                ["@keyword.control.abort"] = { fg = "${red}", bold = true },
+                ["@keyword.control.imp"] = {
+                    fg = "#E56BB1",
+                    italic = true,
+                    bold = true,
+                },
+
+                ["@keyword.tactic"] = { fg = "${cyan}", bold = true },
+                ["@keyword.tactical"] = { fg = "${purple}", bold = true },
+                ["@keyword.directive.ltac"] = { fg = "${orange}", bold = true },
+                ["@proof.dash"] = { fg = "${green}", bold = true },
+                ["@proof.plus"] = { fg = "${orange}", bold = true },
+                ["@proof.star"] = { fg = "${red}", bold = true },
+                ["@proof.block"] = { fg = "${orange}", bold = true },
+
+                ["@type.rocq"] = { fg = "${yellow}", bold = true },
+                ["@type.builtin"] = { fg = "${yellow}", bold = true },
+                ["@type.definition"] = { fg = "${yellow}", bold = true },
+
+                ["@operator.rocq"] = { fg = "${red}" },
+                ["@punctuation.delimiter"] = { fg = "${blue}" },
+                ["@punctuation.bracket"] = { fg = "${blue}" },
+                ["@punctuation.bracket.braces"] = { fg = "${purple}" },
+
+                ["@module"] = { fg = "${purple}", bold = true },
+                ["@module.path.rocq"] = { fg = "${orange}", bold = true },
+                ["@module.name"] = { fg = "${green}", bold = true },
+
+                ["@function.rocq"] = { fg = "${red}", bold = true },
+                ["@function.call.rocq"] = { fg = "${blue}", bold = true },
+                ["@variable.parameter"] = { fg = "${yellow}", bold = true },
+                ["@variable.parameter.tactic"] = { fg = "${purple}" },
+                ["@constructor"] = {
+                    fg = "${yellow}",
+                    italic = false,
+                    bold = true,
+                },
+                ["@attribute"] = { fg = "${blue}" },
+            },
         },
     },
 }

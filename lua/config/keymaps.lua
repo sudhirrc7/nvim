@@ -353,3 +353,170 @@ if vim.g.neovide then
         vim.g.neovide_scale_factor = 1.0
     end, { desc = "Reset zoom" })
 end
+
+local run_term_win = nil
+
+vim.keymap.set("n", "<leader>ir", function()
+    local file = vim.fn.expand("%:p")
+    local ft = vim.bo.filetype
+    if file == "" then
+        vim.notify("Please save the file first")
+        return
+    end
+    local cmd
+    if ft == "cpp" then
+        cmd = "g++ "
+            .. vim.fn.shellescape(file)
+            .. " -o /tmp/nvim_run && /tmp/nvim_run"
+    elseif ft == "c" then
+        cmd = "gcc "
+            .. vim.fn.shellescape(file)
+            .. " -o /tmp/nvim_run && /tmp/nvim_run"
+    elseif ft == "python" then
+        cmd = "python3 " .. vim.fn.shellescape(file)
+    elseif ft == "javascript" then
+        cmd = "node " .. vim.fn.shellescape(file)
+    elseif ft == "go" then
+        cmd = "go run " .. vim.fn.shellescape(file)
+    else
+        vim.notify("Unsupported filetype: " .. ft)
+        return
+    end
+    -- Save current file
+    vim.cmd("write")
+
+    -- Reuse existing terminal window if it's still open,
+    -- otherwise create a new bottom split
+    if run_term_win and vim.api.nvim_win_is_valid(run_term_win) then
+        vim.api.nvim_set_current_win(run_term_win)
+        local old_buf = vim.api.nvim_get_current_buf()
+        vim.cmd("enew") -- fresh empty buffer in the same window
+        if vim.api.nvim_buf_is_valid(old_buf) then
+            pcall(vim.api.nvim_buf_delete, old_buf, { force = true })
+        end
+    else
+        vim.cmd("botright new")
+        vim.cmd("resize 15")
+        run_term_win = vim.api.nvim_get_current_win()
+    end
+
+    -- Run command through shell
+    vim.fn.jobstart({ "sh", "-c", cmd }, { term = true })
+    -- Enter terminal mode
+    vim.cmd("startinsert")
+end, {
+    desc = "Run current file",
+})
+
+vim.keymap.set("n", "<leader>iR", function()
+    local file = vim.fn.expand("%:p")
+    local dir = vim.fn.expand("%:p:h")
+    local ft = vim.bo.filetype
+    if file == "" then
+        vim.notify("Please save the file first")
+        return
+    end
+
+    local input_file = dir .. "/input.txt"
+    local output_file = dir .. "/output.txt"
+
+    -- Create input.txt if it doesn't exist yet
+    if vim.fn.filereadable(input_file) == 0 then
+        vim.fn.writefile({}, input_file)
+    end
+
+    local redirect = " < "
+        .. vim.fn.shellescape(input_file)
+        .. " > "
+        .. vim.fn.shellescape(output_file)
+
+    local cmd
+    if ft == "cpp" then
+        cmd = "g++ "
+            .. vim.fn.shellescape(file)
+            .. " -o /tmp/nvim_run && /tmp/nvim_run"
+            .. redirect
+    elseif ft == "c" then
+        cmd = "gcc "
+            .. vim.fn.shellescape(file)
+            .. " -o /tmp/nvim_run && /tmp/nvim_run"
+            .. redirect
+    elseif ft == "python" then
+        cmd = "python3 " .. vim.fn.shellescape(file) .. redirect
+    elseif ft == "javascript" then
+        cmd = "node " .. vim.fn.shellescape(file) .. redirect
+    elseif ft == "go" then
+        cmd = "go run " .. vim.fn.shellescape(file) .. redirect
+    else
+        vim.notify("Unsupported filetype: " .. ft)
+        return
+    end
+
+    -- Save current file
+    vim.cmd("write")
+
+    -- Reuse existing terminal window if it's still open,
+    -- otherwise create a new bottom split
+    if run_term_win and vim.api.nvim_win_is_valid(run_term_win) then
+        vim.api.nvim_set_current_win(run_term_win)
+        local old_buf = vim.api.nvim_get_current_buf()
+        vim.cmd("enew") -- fresh empty buffer in the same window
+        if vim.api.nvim_buf_is_valid(old_buf) then
+            pcall(vim.api.nvim_buf_delete, old_buf, { force = true })
+        end
+    else
+        vim.cmd("botright new")
+        vim.cmd("resize 15")
+        run_term_win = vim.api.nvim_get_current_win()
+    end
+
+    -- Run command through shell
+    vim.fn.jobstart({ "sh", "-c", cmd }, { term = true })
+
+    -- Enter terminal mode
+    vim.cmd("startinsert")
+end, {
+    desc = "Run current file (CP mode: input.txt -> output.txt)",
+})
+
+vim.keymap.set("n", "<leader>ic", function()
+    local dir = vim.fn.expand("%:p:h")
+    if dir == "" then
+        vim.notify("Please save the file first")
+        return
+    end
+
+    local input_file = dir .. "/input.txt"
+    local output_file = dir .. "/output.txt"
+
+    -- Create input.txt / output.txt if they don't exist
+    if vim.fn.filereadable(input_file) == 0 then
+        vim.fn.writefile({}, input_file)
+    end
+    if vim.fn.filereadable(output_file) == 0 then
+        vim.fn.writefile({}, output_file)
+    end
+
+    -- Remember the current (solution) buffer/window
+    local sol_win = vim.api.nvim_get_current_win()
+
+    -- Open a vertical split to the right for input.txt
+    vim.cmd("rightbelow vsplit " .. vim.fn.fnameescape(input_file))
+    local input_win = vim.api.nvim_get_current_win()
+
+    -- Below input.txt, open output.txt (horizontal split)
+    vim.cmd("belowright split " .. vim.fn.fnameescape(output_file))
+    local output_win = vim.api.nvim_get_current_win()
+
+    -- Make the right column roughly half the screen width
+    vim.api.nvim_set_current_win(input_win)
+    vim.cmd("vertical resize " .. math.floor(vim.o.columns / 2))
+
+    -- Balance the two right windows (input/output) vertically
+    vim.cmd("wincmd =")
+
+    -- Return focus to the solution window
+    vim.api.nvim_set_current_win(sol_win)
+end, {
+    desc = "Open CP layout: solution | input.txt / output.txt",
+})

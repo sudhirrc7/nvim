@@ -358,7 +358,7 @@ end
 
 local run_term_win = nil
 
-vim.keymap.set("n", "<leader>ir", function()
+vim.keymap.set("n", "<leader>iq", function()
     local file = vim.fn.expand("%:p")
     local ft = vim.bo.filetype
     if file == "" then
@@ -367,7 +367,7 @@ vim.keymap.set("n", "<leader>ir", function()
     end
     local cmd
     if ft == "cpp" then
-        cmd = "g++ "
+        cmd = "g++-16 "
             .. vim.fn.shellescape(file)
             .. " -o /tmp/nvim_run && /tmp/nvim_run"
     elseif ft == "c" then
@@ -386,6 +386,8 @@ vim.keymap.set("n", "<leader>ir", function()
             .. " -o /tmp/nvim_run && /tmp/nvim_run"
     elseif ft == "typescript" then
         cmd = "deno run " .. vim.fn.shellescape(file)
+    elseif ft == "java" then
+        cmd = "java " .. vim.fn.shellescape(file)
     else
         vim.notify("Unsupported filetype: " .. ft)
         return
@@ -416,7 +418,7 @@ end, {
     desc = "Run current file",
 })
 
-vim.keymap.set("n", "<leader>iR", function()
+vim.keymap.set("n", "<leader>ir", function()
     local file = vim.fn.expand("%:p")
     local dir = vim.fn.expand("%:p:h")
     local ft = vim.bo.filetype
@@ -440,7 +442,7 @@ vim.keymap.set("n", "<leader>iR", function()
 
     local cmd
     if ft == "cpp" then
-        cmd = "g++ "
+        cmd = "g++-16 "
             .. vim.fn.shellescape(file)
             .. " -o /tmp/nvim_run && /tmp/nvim_run"
             .. redirect
@@ -462,6 +464,8 @@ vim.keymap.set("n", "<leader>iR", function()
             .. redirect
     elseif ft == "typescript" then
         cmd = "deno run " .. vim.fn.shellescape(file) .. redirect
+    elseif ft == "java" then
+        cmd = "java " .. vim.fn.shellescape(file) .. redirect
     else
         vim.notify("Unsupported filetype: " .. ft)
         return

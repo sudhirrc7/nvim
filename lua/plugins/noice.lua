@@ -7,7 +7,7 @@ return {
         },
         lsp = {
             progress = {
-                enabled = true,
+                enabled = false,
             },
         },
         presets = {

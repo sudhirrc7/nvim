@@ -1,0 +1,97 @@
+{
+    "CP Template": {
+        "prefix": "cptemp",
+        "body": [
+            "#include <bits/stdc++.h>",
+            "using namespace std;",
+            "",
+            "#define ll long long",
+            "#define pb push_back",
+            "#define all(x) (x).begin(), (x).end()",
+            "",
+            "void solve() {",
+            "    $0",
+            "}",
+            "",
+            "int main() {",
+            "    ios_base::sync_with_stdio(false);",
+            "    cin.tie(NULL);",
+            "    int t = 1;",
+            "    cin >> t;",
+            "    while (t--) solve();",
+            "    return 0;",
+            "}"
+        ],
+        "description": "Basic competitive programming template with fast I/O"
+    },
+    "Fast IO": {
+        "prefix": "cpio",
+        "body": [
+            "ios_base::sync_with_stdio(false);",
+            "cin.tie(NULL);"
+        ],
+        "description": "Fast input/output setup"
+    },
+    "Segment Tree": {
+        "prefix": "cpseg",
+        "body": [
+            "struct SegTree {",
+            "    int n;",
+            "    vector<ll> tree;",
+            "    SegTree(int n) : n(n), tree(4 * n, 0) {}",
+            "",
+            "    void update(int node, int start, int end, int idx, ll val) {",
+            "        if (start == end) { tree[node] = val; return; }",
+            "        int mid = (start + end) / 2;",
+            "        if (idx <= mid) update(2*node, start, mid, idx, val);",
+            "        else update(2*node+1, mid+1, end, idx, val);",
+            "        tree[node] = tree[2*node] + tree[2*node+1];",
+            "    }",
+            "",
+            "    ll query(int node, int start, int end, int l, int r) {",
+            "        if (r < start || end < l) return 0;",
+            "        if (l <= start && end <= r) return tree[node];",
+            "        int mid = (start + end) / 2;",
+            "        return query(2*node, start, mid, l, r) + query(2*node+1, mid+1, end, l, r);",
+            "    }",
+            "};"
+        ],
+        "description": "Segment tree for range sum queries"
+    },
+    "DSU": {
+        "prefix": "cpdsu",
+        "body": [
+            "struct DSU {",
+            "    vector<int> parent, rank_;",
+            "    DSU(int n) : parent(n), rank_(n, 0) {",
+            "        iota(parent.begin(), parent.end(), 0);",
+            "    }",
+            "    int find(int x) {",
+            "        if (parent[x] != x) parent[x] = find(parent[x]);",
+            "        return parent[x];",
+            "    }",
+            "    void unite(int x, int y) {",
+            "        x = find(x); y = find(y);",
+            "        if (x == y) return;",
+            "        if (rank_[x] < rank_[y]) swap(x, y);",
+            "        parent[y] = x;",
+            "        if (rank_[x] == rank_[y]) rank_[x]++;",
+            "    }",
+            "};"
+        ],
+        "description": "Disjoint Set Union (Union-Find)"
+    },
+    "Binary Search": {
+        "prefix": "cpbs",
+        "body": [
+            "ll lo = $1, hi = $2;",
+            "while (lo < hi) {",
+            "    ll mid = lo + (hi - lo) / 2;",
+            "    if ($3) hi = mid;",
+            "    else lo = mid + 1;",
+            "}",
+            "$0"
+        ],
+        "description": "Binary search on answer template"
+    }
+}

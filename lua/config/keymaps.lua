@@ -354,6 +354,8 @@ if vim.g.neovide then
     end, { desc = "Reset zoom" })
 end
 
+-------- this is used for the CP work----------------------
+
 local run_term_win = nil
 
 vim.keymap.set("n", "<leader>ir", function()
@@ -378,6 +380,12 @@ vim.keymap.set("n", "<leader>ir", function()
         cmd = "node " .. vim.fn.shellescape(file)
     elseif ft == "go" then
         cmd = "go run " .. vim.fn.shellescape(file)
+    elseif ft == "rust" then
+        cmd = "rustc "
+            .. vim.fn.shellescape(file)
+            .. " -o /tmp/nvim_run && /tmp/nvim_run"
+    elseif ft == "typescript" then
+        cmd = "deno run " .. vim.fn.shellescape(file)
     else
         vim.notify("Unsupported filetype: " .. ft)
         return
@@ -447,6 +455,13 @@ vim.keymap.set("n", "<leader>iR", function()
         cmd = "node " .. vim.fn.shellescape(file) .. redirect
     elseif ft == "go" then
         cmd = "go run " .. vim.fn.shellescape(file) .. redirect
+    elseif ft == "rust" then
+        cmd = "rustc "
+            .. vim.fn.shellescape(file)
+            .. " -o /tmp/nvim_run && /tmp/nvim_run"
+            .. redirect
+    elseif ft == "typescript" then
+        cmd = "deno run " .. vim.fn.shellescape(file) .. redirect
     else
         vim.notify("Unsupported filetype: " .. ft)
         return
@@ -506,7 +521,7 @@ vim.keymap.set("n", "<leader>ic", function()
 
     -- Below input.txt, open output.txt (horizontal split)
     vim.cmd("belowright split " .. vim.fn.fnameescape(output_file))
-    local output_win = vim.api.nvim_get_current_win()
+    -- local output_win = vim.api.nvim_get_current_win()
 
     -- Make the right column roughly half the screen width
     vim.api.nvim_set_current_win(input_win)

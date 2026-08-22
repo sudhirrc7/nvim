@@ -93,7 +93,7 @@ map("n", "<leader>lr", function() vim.fn.system({ "xdg-open", "https://github.co
 map("n", "<leader>lx", "<cmd>LazyExtras<cr>", { desc = "Extras" })
 map("n", "<leader>lc", function() LazyVim.news.changelog() end, { desc = "LazyVim Changelog" })
 
-map("n", "\\", function() MiniFiles.open() end, { desc = "MiniFiles Open" })
+map("n", "\\\\", function() MiniFiles.open() end, { desc = "MiniFiles Open" })
 map("n", "<leader>lu", function() lazy.update() end, { desc = "Lazy Update" })
 map("n", "<leader>lC", function() lazy.check() end, { desc = "Lazy Check" })
 map("n", "<leader>ls", function() lazy.sync() end, { desc = "Lazy Sync" })
@@ -354,7 +354,7 @@ if vim.g.neovide then
     end, { desc = "Reset zoom" })
 end
 
--------- this is used for the CP work----------------------
+-------- this is used for the Competitive Programming work----------------------
 
 local run_term_win = nil
 
@@ -385,7 +385,7 @@ vim.keymap.set("n", "<leader>iq", function()
             .. vim.fn.shellescape(file)
             .. " -o /tmp/nvim_run && /tmp/nvim_run"
     elseif ft == "typescript" then
-        cmd = "deno run " .. vim.fn.shellescape(file)
+        cmd = "bun run " .. vim.fn.shellescape(file)
     elseif ft == "java" then
         cmd = "java " .. vim.fn.shellescape(file)
     else
@@ -463,7 +463,7 @@ vim.keymap.set("n", "<leader>ir", function()
             .. " -o /tmp/nvim_run && /tmp/nvim_run"
             .. redirect
     elseif ft == "typescript" then
-        cmd = "deno run " .. vim.fn.shellescape(file) .. redirect
+        cmd = "bun run " .. vim.fn.shellescape(file) .. redirect
     elseif ft == "java" then
         cmd = "java " .. vim.fn.shellescape(file) .. redirect
     else

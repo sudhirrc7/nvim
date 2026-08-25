@@ -356,6 +356,8 @@ end
 
 -------- this is used for the Competitive Programming work----------------------
 
+----------------- this keymap just runs the code and shows the output in the bottom terminal --------------------
+
 local run_term_win = nil
 
 vim.keymap.set("n", "<leader>iq", function()
@@ -418,22 +420,113 @@ end, {
     desc = "Run current file",
 })
 
+------- this is tried and tested keymap but it shows the terminal at the bottom ------
+
+-- vim.keymap.set("n", "<leader>ir", function()
+--     local file = vim.fn.expand("%:p")
+--     local dir = vim.fn.expand("%:p:h")
+--     local ft = vim.bo.filetype
+--     if file == "" then
+--         vim.notify("Please save the file first")
+--         return
+--     end
+--
+--     local input_file = dir .. "/input.txt"
+--     local output_file = dir .. "/output.txt"
+--
+--     -- Create input.txt if it doesn't exist yet
+--     if vim.fn.filereadable(input_file) == 0 then
+--         vim.fn.writefile({}, input_file)
+--     end
+--
+--     local redirect = " < "
+--         .. vim.fn.shellescape(input_file)
+--         .. " > "
+--         .. vim.fn.shellescape(output_file)
+--
+--     local cmd
+--     if ft == "cpp" then
+--         cmd = "g++-16 "
+--             .. vim.fn.shellescape(file)
+--             .. " -o /tmp/nvim_run && /tmp/nvim_run"
+--             .. redirect
+--     elseif ft == "c" then
+--         cmd = "gcc "
+--             .. vim.fn.shellescape(file)
+--             .. " -o /tmp/nvim_run && /tmp/nvim_run"
+--             .. redirect
+--     elseif ft == "python" then
+--         cmd = "python3 " .. vim.fn.shellescape(file) .. redirect
+--     elseif ft == "javascript" then
+--         cmd = "node " .. vim.fn.shellescape(file) .. redirect
+--     elseif ft == "go" then
+--         cmd = "go run " .. vim.fn.shellescape(file) .. redirect
+--     elseif ft == "rust" then
+--         cmd = "rustc "
+--             .. vim.fn.shellescape(file)
+--             .. " -o /tmp/nvim_run && /tmp/nvim_run"
+--             .. redirect
+--     elseif ft == "typescript" then
+--         cmd = "bun run " .. vim.fn.shellescape(file) .. redirect
+--     elseif ft == "java" then
+--         cmd = "java " .. vim.fn.shellescape(file) .. redirect
+--     else
+--         vim.notify("Unsupported filetype: " .. ft)
+--         return
+--     end
+--
+--     -- Save current file
+--     vim.cmd("write")
+--
+--     -- Reuse existing terminal window if it's still open,
+--     -- otherwise create a new bottom split
+--     if run_term_win and vim.api.nvim_win_is_valid(run_term_win) then
+--         vim.api.nvim_set_current_win(run_term_win)
+--         local old_buf = vim.api.nvim_get_current_buf()
+--         vim.cmd("enew") -- fresh empty buffer in the same window
+--         if vim.api.nvim_buf_is_valid(old_buf) then
+--             pcall(vim.api.nvim_buf_delete, old_buf, { force = true })
+--         end
+--     else
+--         vim.cmd("botright new")
+--         vim.cmd("resize 15")
+--         run_term_win = vim.api.nvim_get_current_win()
+--     end
+--
+--     -- Run command through shell
+--     vim.fn.jobstart({ "sh", "-c", cmd }, { term = true })
+--
+--     -- Enter terminal mode
+--     vim.cmd("startinsert")
+-- end, {
+--     desc = "Run current file (CP mode: input.txt -> output.txt)",
+-- })
+
+----- this is new approach shows bottom buffer only if there are any issues in the code ----
+
+local run_error_win = nil
+local run_error_buf = nil
+
 vim.keymap.set("n", "<leader>ir", function()
     local file = vim.fn.expand("%:p")
     local dir = vim.fn.expand("%:p:h")
     local ft = vim.bo.filetype
+
     if file == "" then
-        vim.notify("Please save the file first")
+        vim.notify("Please save the file first", vim.log.levels.WARN)
         return
     end
 
     local input_file = dir .. "/input.txt"
     local output_file = dir .. "/output.txt"
 
-    -- Create input.txt if it doesn't exist yet
+    -- Create input.txt if it doesn't exist
     if vim.fn.filereadable(input_file) == 0 then
         vim.fn.writefile({}, input_file)
     end
+
+    -- Save current file
+    vim.cmd("write")
 
     local redirect = " < "
         .. vim.fn.shellescape(input_file)
@@ -441,6 +534,7 @@ vim.keymap.set("n", "<leader>ir", function()
         .. vim.fn.shellescape(output_file)
 
     local cmd
+
     if ft == "cpp" then
         cmd = "g++-16 "
             .. vim.fn.shellescape(file)
@@ -467,36 +561,98 @@ vim.keymap.set("n", "<leader>ir", function()
     elseif ft == "java" then
         cmd = "java " .. vim.fn.shellescape(file) .. redirect
     else
-        vim.notify("Unsupported filetype: " .. ft)
+        vim.notify("Unsupported filetype: " .. ft, vim.log.levels.WARN)
         return
     end
 
-    -- Save current file
-    vim.cmd("write")
+    local stderr = {}
 
-    -- Reuse existing terminal window if it's still open,
-    -- otherwise create a new bottom split
-    if run_term_win and vim.api.nvim_win_is_valid(run_term_win) then
-        vim.api.nvim_set_current_win(run_term_win)
-        local old_buf = vim.api.nvim_get_current_buf()
-        vim.cmd("enew") -- fresh empty buffer in the same window
-        if vim.api.nvim_buf_is_valid(old_buf) then
-            pcall(vim.api.nvim_buf_delete, old_buf, { force = true })
-        end
-    else
-        vim.cmd("botright new")
-        vim.cmd("resize 15")
-        run_term_win = vim.api.nvim_get_current_win()
-    end
+    -- Run the command once
+    vim.fn.jobstart({ "sh", "-c", cmd }, {
+        stdout_buffered = true,
+        stderr_buffered = true,
 
-    -- Run command through shell
-    vim.fn.jobstart({ "sh", "-c", cmd }, { term = true })
+        on_stderr = function(_, data)
+            if data then
+                for _, line in ipairs(data) do
+                    if line ~= "" then
+                        table.insert(stderr, line)
+                    end
+                end
+            end
+        end,
 
-    -- Enter terminal mode
-    vim.cmd("startinsert")
+        on_exit = function(_, exit_code)
+            vim.schedule(function()
+                -- =========================
+                -- SUCCESS
+                -- =========================
+                if exit_code == 0 then
+                    vim.notify("success", vim.log.levels.INFO)
+
+                    -- Refresh output.txt if already open
+                    local output_buf = vim.fn.bufnr(output_file)
+
+                    if
+                        output_buf ~= -1
+                        and vim.api.nvim_buf_is_valid(output_buf)
+                    then
+                        vim.api.nvim_buf_call(output_buf, function()
+                            vim.cmd("edit!")
+                        end)
+                    end
+
+                    return
+                end
+
+                -- =========================
+                -- ERROR
+                -- =========================
+
+                -- Create/reuse error buffer
+                if
+                    not run_error_buf
+                    or not vim.api.nvim_buf_is_valid(run_error_buf)
+                then
+                    run_error_buf = vim.api.nvim_create_buf(false, true)
+
+                    vim.bo[run_error_buf].bufhidden = "hide"
+                    vim.bo[run_error_buf].filetype = "text"
+                    vim.api.nvim_buf_set_name(run_error_buf, "Run Errors")
+                end
+
+                -- Put captured errors into buffer
+                vim.bo[run_error_buf].modifiable = true
+
+                vim.api.nvim_buf_set_lines(run_error_buf, 0, -1, false, stderr)
+
+                vim.bo[run_error_buf].modifiable = false
+
+                -- Reuse existing error window
+                if
+                    run_error_win
+                    and vim.api.nvim_win_is_valid(run_error_win)
+                then
+                    vim.api.nvim_win_set_buf(run_error_win, run_error_buf)
+                else
+                    -- Open bottom split only on error
+                    vim.cmd("botright new")
+                    vim.cmd("resize 15")
+
+                    run_error_win = vim.api.nvim_get_current_win()
+
+                    vim.api.nvim_win_set_buf(run_error_win, run_error_buf)
+                end
+            end)
+        end,
+    })
 end, {
-    desc = "Run current file (CP mode: input.txt -> output.txt)",
+    desc = "Run current file (input.txt -> output.txt)",
 })
+
+------------------- end of the new approach ----------------------------------------------------------
+
+------------------------- this is a keymap to create out and input txt files and if they exist already then use them --------------------
 
 vim.keymap.set("n", "<leader>ic", function()
     local dir = vim.fn.expand("%:p:h")

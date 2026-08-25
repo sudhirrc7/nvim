@@ -148,7 +148,7 @@ ac("BufWritePre", {
 vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
     pattern = "*.txt",
     callback = function()
-        vim.opt_local.number = false
+        vim.opt_local.number = true
         vim.opt_local.relativenumber = false
         vim.opt_local.spell = false
     end,

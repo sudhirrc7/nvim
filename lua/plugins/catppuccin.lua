@@ -3,6 +3,13 @@ return {
     name = "catppuccin",
     priority = 1000,
     opts = {
+        custom_highlights = function(colors)
+            return {
+                WinSeparator = {
+                    fg = colors.lavender,
+                },
+            }
+        end,
         no_italic = false,
         term_colors = true,
         transparent_background = false,

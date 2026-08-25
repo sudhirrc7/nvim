@@ -13,7 +13,7 @@ require("lazy").setup({
             "LazyVim/LazyVim",
             import = "lazyvim.plugins",
             opts = {
-                colorscheme = "rose-pine-main",
+                colorscheme = "catppuccin-mocha",
             },
         },
         {

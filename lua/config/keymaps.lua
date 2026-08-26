@@ -588,7 +588,7 @@ vim.keymap.set("n", "<leader>ir", function()
                 -- SUCCESS
                 -- =========================
                 if exit_code == 0 then
-                    vim.notify("success", vim.log.levels.INFO)
+                    -- vim.notify("success", vim.log.levels.INFO)
 
                     -- Refresh output.txt if already open
                     local output_buf = vim.fn.bufnr(output_file)

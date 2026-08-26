@@ -11,7 +11,7 @@ vim.o.softtabstop = 4
 vim.o.shiftround = true
 vim.o.shiftwidth = 4
 vim.bo.shiftwidth = 4
-
+vim.opt.autoread = true
 -- Optimizations on startup
 vim.loader.enable()
 vim.g.omni_sql_no_default_maps = 1

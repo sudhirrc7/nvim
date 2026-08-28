@@ -3,6 +3,11 @@ return {
     lazy = false,
     priority = 1000,
     opts = {
+        on_highlights = function(highlights, colors)
+            highlights.WinSeparator = {
+                fg = colors.blue,
+            }
+        end,
         transparent = false,
         styles = {
             sidebars = "transparent",

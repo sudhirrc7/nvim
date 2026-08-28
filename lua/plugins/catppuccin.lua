@@ -5,6 +5,15 @@ return {
     opts = {
         custom_highlights = function(colors)
             return {
+                Normal = {
+                    bg = "#181825",
+                },
+                -- NormalNC = {
+                --     bg = "#181825",
+                -- },
+                -- EndOfBuffer = {
+                --     bg = "#181825",
+                -- },
                 WinSeparator = {
                     fg = colors.lavender,
                 },
@@ -12,7 +21,7 @@ return {
         end,
         no_italic = false,
         term_colors = true,
-        transparent_background = false,
+        transparent_background = true,
         styles = {
             comments = { "italic" },
             conditionals = {},

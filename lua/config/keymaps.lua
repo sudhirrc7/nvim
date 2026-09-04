@@ -22,15 +22,15 @@ map("n", "<leader>?", searching_brave, {
 })
 
 local fyler = require("fyler")
-vim.keymap.set("n", "<leader>ie", function()
+map("n", "<leader>ie", function()
     fyler.open({ kind = "split_left_most" })
 end, { desc = "Fyler.nvim - Open" })
 
-vim.keymap.set("n", "<leader>if", function()
+map("n", "<leader>if", function()
     fyler.open()
 end, { desc = "Fyler.nvim - Open" })
 
-vim.keymap.set("n", "<leader>iE", function()
+map("n", "<leader>iE", function()
     fyler.open({ kind = "split_right_most" })
 end, { desc = "Fyler.nvim - Open" })
 
@@ -54,7 +54,7 @@ map(
 )
 
 -- Add N blank lines above the current line (e.g. 2]<CR> gone here... wait, use [<CR>)
-vim.keymap.set("n", "[<CR>", function()
+map("n", "[<CR>", function()
     local count = vim.v.count1
     local pos = vim.api.nvim_win_get_cursor(0)
     local lnum, col = pos[1], pos[2]
@@ -69,7 +69,7 @@ vim.keymap.set("n", "[<CR>", function()
 end, { desc = "Add N blank lines above" })
 
 -- Add N blank lines below the current line
-vim.keymap.set("n", "]<CR>", function()
+map("n", "]<CR>", function()
     local count = vim.v.count1
     local pos = vim.api.nvim_win_get_cursor(0)
     local lnum, col = pos[1], pos[2]
@@ -144,9 +144,13 @@ map("n", "<", "<<", { desc = "Deindent" })
 map("n", ">", ">>", { desc = "Indent" })
 
 -- keymaps
-vim.keymap.set("n", "<leader>sk", function()
+map("n", "<leader>sk", function()
     Snacks.picker.keymaps({ layout = "select" })
 end, { desc = "show keymaps" })
+
+----buffer switch keymaps
+map("n", "<Tab>", "<cmd>bnext<CR>", { desc = "go to next buffer" })
+map("n", "<S-Tab>", "<cmd>bprevious<CR>", { desc = "go to next buffer" })
 
 -- Save without formatting
 map(
@@ -288,7 +292,7 @@ map("n", "<leader>_", "<C-W>s", { desc = "Split Window Below", remap = true })
 map("n", "<leader>\\", "<C-W>v", { desc = "Split Window Right", remap = true })
 
 -- this option toggles the blink cmp can be useful when i want to not display any suggestions
-vim.keymap.set("n", "<leader>tc", function()
+map("n", "<leader>tc", function()
     vim.g.blink_auto_show = not vim.g.blink_auto_show
 
     -- Hide any currently visible completion menu
@@ -300,7 +304,7 @@ vim.keymap.set("n", "<leader>tc", function()
     )
 end, { desc = "Toggle Blink auto completion" })
 
-vim.keymap.set({ "n", "i" }, "<C-q>", function()
+map({ "n", "i" }, "<C-q>", function()
     vim.g.blink_auto_show = not vim.g.blink_auto_show
     require("blink.cmp").hide()
 end, { desc = "Toggle Blink auto completion" })
@@ -360,7 +364,7 @@ end
 
 local run_term_win = nil
 
-vim.keymap.set("n", "<leader>iq", function()
+map("n", "<leader>iq", function()
     local file = vim.fn.expand("%:p")
     local ft = vim.bo.filetype
     if file == "" then
@@ -422,7 +426,7 @@ end, {
 
 ------- this is tried and tested keymap but it shows the terminal at the bottom ------
 
--- vim.keymap.set("n", "<leader>ir", function()
+-- map("n", "<leader>ir", function()
 --     local file = vim.fn.expand("%:p")
 --     local dir = vim.fn.expand("%:p:h")
 --     local ft = vim.bo.filetype
@@ -507,7 +511,7 @@ end, {
 local run_error_win = nil
 local run_error_buf = nil
 
-vim.keymap.set("n", "<leader>ir", function()
+map("n", "<leader>ir", function()
     local file = vim.fn.expand("%:p")
     local dir = vim.fn.expand("%:p:h")
     local ft = vim.bo.filetype
@@ -654,7 +658,7 @@ end, {
 
 ------------------------- this is a keymap to create out and input txt files and if they exist already then use them --------------------
 
-vim.keymap.set("n", "<leader>ic", function()
+map("n", "<leader>ic", function()
     local dir = vim.fn.expand("%:p:h")
     if dir == "" then
         vim.notify("Please save the file first")
@@ -695,3 +699,16 @@ vim.keymap.set("n", "<leader>ic", function()
 end, {
     desc = "Open CP layout: solution | input.txt / output.txt",
 })
+
+----------------------clear multicursors------------------------------
+
+vim.keymap.del("n", "<C-l>")
+
+if vim.fn.has("nvim-0.13") == 1 then
+    vim.keymap.set("n", "<C-l>", function()
+        local ns = vim.api.nvim_create_namespace("nvim.multicursor")
+        vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
+    end, {
+        desc = "Clear multicursors",
+    })
+end

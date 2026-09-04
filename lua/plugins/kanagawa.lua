@@ -1,13 +1,13 @@
 return {
     "rebelot/kanagawa.nvim",
-    enabled = false,
+    enabled = true,
     opts = {
         commentStyle = { italic = false, bold = false },
         functionStyle = { italic = false, bold = false },
         keywordStyle = { italic = false, bold = false },
         statementStyle = { bold = false, italic = false },
         typeStyle = { italic = false, bold = false },
-        transparent = true, -- do not set background color
+        transparent = false, -- do not set background color
         overrides = function(colors)
             local theme = colors.theme
             return {
@@ -39,13 +39,13 @@ return {
             },
             theme = {
                 -- change specific usages for a certain theme, or for all of them
-                all = {
-                    ui = {
-                        bg_gutter = "none",
-                    },
-                },
+                -- all = {
+                --     ui = {},
+                -- },
                 dragon = {
                     ui = {
+
+                        bg_gutter = "#121212",
                         float = {
                             bg = "none",
                         },

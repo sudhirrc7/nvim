@@ -205,7 +205,7 @@ return {
         {
             "<leader>it",
             function()
-                Snacks.picker.treesitter()
+                Snacks.picker.treesitter({ layout = "default" })
             end,
             desc = "Treesitter",
         },

@@ -7,10 +7,20 @@ return {
     -- },
     opts = {
         columns = {
-            "icon",
             -- "permissions",
             -- "size",
             -- "mtime",
+            "icon",
+        },
+        win_options = {
+            wrap = false,
+            signcolumn = "no",
+            cursorcolumn = false,
+            foldcolumn = "0",
+            spell = false,
+            list = false,
+            conceallevel = 3,
+            concealcursor = "nvic",
         },
         skip_confirm_for_simple_edits = true,
         prompt_save_on_select_new_entry = false,

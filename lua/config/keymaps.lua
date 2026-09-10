@@ -177,7 +177,7 @@ map("n", "<M-CR>", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
 
 -- Toggle statusline
 map("n", "<leader>uX", function()
-    if o.laststatus:get() == 0 then
+    if o.laststatus == 0 then
         o.laststatus = 3
     else
         o.laststatus = 0
@@ -711,4 +711,12 @@ if vim.fn.has("nvim-0.13") == 1 then
     end, {
         desc = "Clear multicursors",
     })
+end
+
+if vim.fn.has("nvim-0.13") == 1 then
+    local multicursor_ns = vim.api.nvim_create_namespace("nvim.multicursor")
+    vim.keymap.set("n", "<Esc>", function()
+        vim.cmd.nohlsearch()
+        vim.api.nvim_buf_clear_namespace(0, multicursor_ns, 0, -1)
+    end, { desc = "Clear search highligts & multicursors" })
 end

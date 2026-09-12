@@ -866,7 +866,14 @@ vim.api.nvim_create_autocmd("BufWinLeave", {
 
 -- ============================================================
 -- <leader>ir
--- Run current file against ALL input files
+-- Compile/build ONCE, then run current file against ALL inputs
+--
+-- C++ / C / Rust / Go:
+--     Compile/build once
+--     Reuse executable for every test
+--
+-- Python / JavaScript / TypeScript / Java:
+--     Run normally for every test
 -- ============================================================
 
 map("n", "<leader>ir", function()
@@ -882,44 +889,115 @@ map("n", "<leader>ir", function()
     vim.cmd("write")
 
     -- --------------------------------------------------------
-    -- Determine compiler / runner
+    -- Temporary executable
     -- --------------------------------------------------------
 
-    local function get_command(input_file, output_file)
+    local executable = vim.fn.tempname()
+
+    -- --------------------------------------------------------
+    -- Languages that should be compiled/built ONCE
+    -- --------------------------------------------------------
+
+    local compiled_language = ft == "cpp"
+        or ft == "c"
+        or ft == "rust"
+        or ft == "go"
+
+    -- --------------------------------------------------------
+    -- Get compile/build command
+    -- --------------------------------------------------------
+
+    local function get_compile_command()
+        if ft == "cpp" then
+            return "g++-16 "
+                .. vim.fn.shellescape(file)
+                .. " -o "
+                .. vim.fn.shellescape(executable)
+        elseif ft == "c" then
+            return "gcc "
+                .. vim.fn.shellescape(file)
+                .. " -o "
+                .. vim.fn.shellescape(executable)
+        elseif ft == "rust" then
+            return "rustc "
+                .. vim.fn.shellescape(file)
+                .. " -o "
+                .. vim.fn.shellescape(executable)
+        elseif ft == "go" then
+            return "go build -o "
+                .. vim.fn.shellescape(executable)
+                .. " "
+                .. vim.fn.shellescape(file)
+        end
+
+        return nil
+    end
+
+    -- --------------------------------------------------------
+    -- Get execution command
+    --
+    -- IMPORTANT:
+    -- This function NEVER compiles.
+    -- It only runs the already-built executable/script.
+    -- --------------------------------------------------------
+
+    local function get_run_command(input_file, output_file)
         local redirect = " < "
             .. vim.fn.shellescape(input_file)
             .. " > "
             .. vim.fn.shellescape(output_file)
 
-        if ft == "cpp" then
-            return "g++-16 "
-                .. vim.fn.shellescape(file)
-                .. " -o /tmp/nvim_run && /tmp/nvim_run"
-                .. redirect
-        elseif ft == "c" then
-            return "gcc "
-                .. vim.fn.shellescape(file)
-                .. " -o /tmp/nvim_run && /tmp/nvim_run"
-                .. redirect
+        -- ================================================
+        -- Already compiled executable
+        -- ================================================
+
+        if compiled_language then
+            return vim.fn.shellescape(executable) .. redirect
+
+        -- ================================================
+        -- Python
+        -- ================================================
         elseif ft == "python" then
             return "python3 " .. vim.fn.shellescape(file) .. redirect
+
+        -- ================================================
+        -- JavaScript
+        -- ================================================
         elseif ft == "javascript" then
             return "node " .. vim.fn.shellescape(file) .. redirect
-        elseif ft == "go" then
-            return "go run " .. vim.fn.shellescape(file) .. redirect
-        elseif ft == "rust" then
-            return "rustc "
-                .. vim.fn.shellescape(file)
-                .. " -o /tmp/nvim_run && /tmp/nvim_run"
-                .. redirect
+
+        -- ================================================
+        -- TypeScript
+        -- ================================================
         elseif ft == "typescript" then
             return "bun run " .. vim.fn.shellescape(file) .. redirect
+
+        -- ================================================
+        -- Java
+        -- ================================================
         elseif ft == "java" then
             return "java " .. vim.fn.shellescape(file) .. redirect
-        else
-            vim.notify("Unsupported filetype: " .. ft, vim.log.levels.WARN)
-            return nil
         end
+
+        return nil
+    end
+
+    -- --------------------------------------------------------
+    -- Check supported filetype
+    -- --------------------------------------------------------
+
+    local supported = ft == "cpp"
+        or ft == "c"
+        or ft == "rust"
+        or ft == "go"
+        or ft == "python"
+        or ft == "javascript"
+        or ft == "typescript"
+        or ft == "java"
+
+    if not supported then
+        vim.notify("Unsupported filetype: " .. ft, vim.log.levels.WARN)
+        return
     end
 
     -- --------------------------------------------------------
@@ -928,7 +1006,10 @@ map("n", "<leader>ir", function()
 
     local test_cases = {}
 
+    -- ========================================================
     -- First: input.txt
+    -- ========================================================
+
     local input_file = dir .. "/input.txt"
 
     if vim.fn.filereadable(input_file) == 1 then
@@ -939,7 +1020,10 @@ map("n", "<leader>ir", function()
         })
     end
 
+    -- ========================================================
     -- Then: input1.txt, input2.txt, ...
+    -- ========================================================
+
     local index = 1
 
     while true do
@@ -958,37 +1042,63 @@ map("n", "<leader>ir", function()
         index = index + 1
     end
 
+    -- --------------------------------------------------------
+    -- No tests
+    -- --------------------------------------------------------
+
     if #test_cases == 0 then
         vim.notify(
             "No input files found. Press <leader>ic first.",
             vim.log.levels.WARN
         )
+
         return
     end
 
     -- --------------------------------------------------------
-    -- Run test cases sequentially
+    -- Run tests sequentially
     -- --------------------------------------------------------
 
     local current_test = 1
 
     local function run_next_test()
+        -- ====================================================
+        -- ALL TESTS COMPLETE
+        -- ====================================================
+
         if current_test > #test_cases then
             vim.notify(
                 "All " .. #test_cases .. " test cases completed",
                 vim.log.levels.INFO
             )
+
+            -- Cleanup executable
+            if compiled_language then
+                vim.fn.delete(executable)
+            end
+
             return
         end
 
         local test = test_cases[current_test]
 
+        -- ====================================================
         -- Create output file if it doesn't exist
+        -- ====================================================
+
         if vim.fn.filereadable(test.output) == 0 then
             vim.fn.writefile({}, test.output)
         end
 
-        local cmd = get_command(test.input, test.output)
+        -- ====================================================
+        -- Get run command
+        --
+        -- NOTE:
+        -- For C++ / C / Rust / Go this simply executes
+        -- the already-created executable.
+        -- ====================================================
+
+        local cmd = get_run_command(test.input, test.output)
 
         if not cmd then
             return
@@ -996,9 +1106,21 @@ map("n", "<leader>ir", function()
 
         local stderr = {}
 
-        vim.fn.jobstart({ "sh", "-c", cmd }, {
+        -- ====================================================
+        -- Run current test
+        -- ====================================================
+
+        vim.fn.jobstart({
+            "sh",
+            "-c",
+            cmd,
+        }, {
             stdout_buffered = true,
             stderr_buffered = true,
+
+            -- ============================================
+            -- STDERR
+            -- ============================================
 
             on_stderr = function(_, data)
                 if data then
@@ -1010,6 +1132,10 @@ map("n", "<leader>ir", function()
                 end
             end,
 
+            -- ============================================
+            -- PROCESS EXIT
+            -- ============================================
+
             on_exit = function(_, exit_code)
                 vim.schedule(function()
                     -- ====================================
@@ -1017,7 +1143,10 @@ map("n", "<leader>ir", function()
                     -- ====================================
 
                     if exit_code ~= 0 then
+                        -- --------------------------------
                         -- Create/reuse error buffer
+                        -- --------------------------------
+
                         if
                             not run_error_buf
                             or not vim.api.nvim_buf_is_valid(run_error_buf)
@@ -1025,6 +1154,7 @@ map("n", "<leader>ir", function()
                             run_error_buf = vim.api.nvim_create_buf(false, true)
 
                             vim.bo[run_error_buf].bufhidden = "hide"
+
                             vim.bo[run_error_buf].filetype = "text"
 
                             vim.api.nvim_buf_set_name(
@@ -1033,18 +1163,42 @@ map("n", "<leader>ir", function()
                             )
                         end
 
-                        -- Add test case information
+                        -- --------------------------------
+                        -- Error information
+                        -- --------------------------------
+
                         local error_lines = {
+
                             "========================================",
+
                             "ERROR - Test Case "
                                 .. (test.index == 0 and "0" or test.index),
+
                             "Input:  " .. vim.fn.fnamemodify(test.input, ":t"),
+
                             "Output: " .. vim.fn.fnamemodify(test.output, ":t"),
+
                             "========================================",
+
                             "",
                         }
 
-                        vim.list_extend(error_lines, stderr)
+                        -- --------------------------------
+                        -- Add stderr
+                        -- --------------------------------
+
+                        if #stderr > 0 then
+                            vim.list_extend(error_lines, stderr)
+                        else
+                            table.insert(
+                                error_lines,
+                                "Program exited with code " .. exit_code
+                            )
+                        end
+
+                        -- --------------------------------
+                        -- Put error into buffer
+                        -- --------------------------------
 
                         vim.bo[run_error_buf].modifiable = true
 
@@ -1058,7 +1212,10 @@ map("n", "<leader>ir", function()
 
                         vim.bo[run_error_buf].modifiable = false
 
+                        -- --------------------------------
                         -- Reuse existing error window
+                        -- --------------------------------
+
                         if
                             run_error_win
                             and vim.api.nvim_win_is_valid(run_error_win)
@@ -1068,8 +1225,8 @@ map("n", "<leader>ir", function()
                                 run_error_buf
                             )
                         else
-                            -- Open bottom split only on error
                             vim.cmd("botright new")
+
                             vim.cmd("resize 15")
 
                             run_error_win = vim.api.nvim_get_current_win()
@@ -1087,15 +1244,26 @@ map("n", "<leader>ir", function()
                             vim.log.levels.ERROR
                         )
 
+                        -- --------------------------------
+                        -- STOP
+                        --
+                        -- Do not continue because this
+                        -- is the original <leader>ir
+                        -- behavior.
+                        -- --------------------------------
+
                         return
                     end
 
-                    -- ====================================
+                    -- ====================================================
                     -- SUCCESS
-                    -- ====================================
+                    -- ====================================================
 
-                    -- Refresh output file if already open
                     local output_buf = vim.fn.bufnr(test.output)
+
+                    -- --------------------------------
+                    -- Refresh output file if open
+                    -- --------------------------------
 
                     if
                         output_buf ~= -1
@@ -1106,7 +1274,10 @@ map("n", "<leader>ir", function()
                         end)
                     end
 
+                    -- --------------------------------
                     -- Move to next test
+                    -- --------------------------------
+
                     current_test = current_test + 1
 
                     run_next_test()
@@ -1115,9 +1286,188 @@ map("n", "<leader>ir", function()
         })
     end
 
-    run_next_test()
+    -- ========================================================
+    -- COMPILE / BUILD ONCE
+    -- ========================================================
+
+    if compiled_language then
+        local compile_command = get_compile_command()
+
+        local compile_stderr = {}
+
+        vim.notify(
+            "Building " .. vim.fn.fnamemodify(file, ":t") .. "...",
+            vim.log.levels.INFO
+        )
+
+        -- ====================================================
+        -- Compile/build
+        -- ====================================================
+
+        local compile_job = vim.fn.jobstart({
+            "sh",
+            "-c",
+            compile_command,
+        }, {
+            stdout_buffered = true,
+            stderr_buffered = true,
+
+            -- ========================================
+            -- Compiler stderr
+            -- ========================================
+
+            on_stderr = function(_, data)
+                if data then
+                    for _, line in ipairs(data) do
+                        if line ~= "" then
+                            table.insert(compile_stderr, line)
+                        end
+                    end
+                end
+            end,
+
+            -- ========================================
+            -- Compilation finished
+            -- ========================================
+
+            on_exit = function(_, exit_code)
+                vim.schedule(function()
+                    -- =================================
+                    -- Compilation failed
+                    -- =================================
+
+                    if exit_code ~= 0 then
+                        local lines = {
+
+                            "========================================",
+
+                            "COMPILATION / BUILD FAILED",
+
+                            "========================================",
+
+                            "",
+
+                            "File: " .. vim.fn.fnamemodify(file, ":t"),
+
+                            "",
+                        }
+
+                        if #compile_stderr > 0 then
+                            vim.list_extend(lines, compile_stderr)
+                        else
+                            table.insert(
+                                lines,
+                                "Compiler exited with code " .. exit_code
+                            )
+                        end
+
+                        table.insert(lines, "")
+
+                        table.insert(
+                            lines,
+                            "========================================"
+                        )
+
+                        -- ----------------------------
+                        -- Reuse result/error buffer
+                        -- ----------------------------
+
+                        if
+                            not run_error_buf
+                            or not vim.api.nvim_buf_is_valid(run_error_buf)
+                        then
+                            run_error_buf = vim.api.nvim_create_buf(false, true)
+
+                            vim.bo[run_error_buf].bufhidden = "hide"
+
+                            vim.bo[run_error_buf].filetype = "text"
+
+                            vim.api.nvim_buf_set_name(
+                                run_error_buf,
+                                "Run Errors"
+                            )
+                        end
+
+                        vim.bo[run_error_buf].modifiable = true
+
+                        vim.api.nvim_buf_set_lines(
+                            run_error_buf,
+                            0,
+                            -1,
+                            false,
+                            lines
+                        )
+
+                        vim.bo[run_error_buf].modifiable = false
+
+                        if
+                            run_error_win
+                            and vim.api.nvim_win_is_valid(run_error_win)
+                        then
+                            vim.api.nvim_win_set_buf(
+                                run_error_win,
+                                run_error_buf
+                            )
+                        else
+                            vim.cmd("botright new")
+
+                            vim.cmd("resize 15")
+
+                            run_error_win = vim.api.nvim_get_current_win()
+
+                            vim.api.nvim_win_set_buf(
+                                run_error_win,
+                                run_error_buf
+                            )
+                        end
+
+                        vim.notify("Compilation failed", vim.log.levels.ERROR)
+
+                        -- Cleanup
+                        vim.fn.delete(executable)
+
+                        return
+                    end
+
+                    -- =================================
+                    -- Compilation successful
+                    -- =================================
+
+                    vim.notify(
+                        "Build successful. Running "
+                            .. #test_cases
+                            .. " test cases...",
+                        vim.log.levels.INFO
+                    )
+
+                    -- =================================
+                    -- Run tests
+                    -- =================================
+
+                    run_next_test()
+                end)
+            end,
+        })
+
+        if compile_job <= 0 then
+            vim.notify("Failed to start compiler", vim.log.levels.ERROR)
+
+            vim.fn.delete(executable)
+
+            return
+        end
+    else
+        -- ====================================================
+        -- Interpreted languages
+        --
+        -- No compilation.
+        -- Just start running the tests.
+        -- ====================================================
+
+        run_next_test()
+    end
 end, {
-    desc = "Run all CP test cases",
+    desc = "Build once and run all CP test cases",
 })
 
 -- ============================================================
@@ -1451,7 +1801,22 @@ end
 --
 -- Run ALL tests and compare against expected output.
 --
--- It continues even if a test fails.
+-- IMPORTANT:
+-- Compiled languages are compiled ONLY ONCE.
+--
+-- C++:
+--     g++-16 solution.cpp -o /tmp/nvim_cp_run
+--              ↓
+--     Test 1 -> /tmp/nvim_cp_run
+--     Test 2 -> /tmp/nvim_cp_run
+--     Test 3 -> /tmp/nvim_cp_run
+--
+-- C / Rust work the same way.
+--
+-- Python / JS / Go / TypeScript / Java are executed
+-- separately for every test.
+--
+-- Every individual test has a 4 second timeout.
 -- ============================================================
 
 map("n", "<leader>iR", function()
@@ -1485,7 +1850,10 @@ map("n", "<leader>iR", function()
         return
     end
 
+    -- ========================================================
     -- Close previous results
+    -- ========================================================
+
     close_cp_result_window()
 
     -- ========================================================
@@ -1497,7 +1865,91 @@ map("n", "<leader>iR", function()
     local current_test = 1
 
     -- ========================================================
-    -- Show final detailed results
+    -- Executable path for compiled languages
+    -- ========================================================
+
+    local executable = "/tmp/nvim_cp_run"
+
+    -- ========================================================
+    -- Determine whether language needs compilation
+    -- ========================================================
+
+    local compiled_language = ft == "cpp" or ft == "c" or ft == "rust"
+
+    -- ========================================================
+    -- Build compile command
+    -- ========================================================
+
+    local function get_compile_command()
+        if ft == "cpp" then
+            return "g++-16 "
+                .. vim.fn.shellescape(file)
+                .. " -o "
+                .. vim.fn.shellescape(executable)
+        elseif ft == "c" then
+            return "gcc "
+                .. vim.fn.shellescape(file)
+                .. " -o "
+                .. vim.fn.shellescape(executable)
+        elseif ft == "rust" then
+            return "rustc "
+                .. vim.fn.shellescape(file)
+                .. " -o "
+                .. vim.fn.shellescape(executable)
+        end
+
+        return nil
+    end
+
+    -- ========================================================
+    -- Build execution command
+    --
+    -- This ONLY runs the program.
+    -- It does NOT compile.
+    -- ========================================================
+
+    local function get_run_command(input_file, actual_file)
+        local redirect = " < "
+            .. vim.fn.shellescape(input_file)
+            .. " > "
+            .. vim.fn.shellescape(actual_file)
+
+        if compiled_language then
+            return vim.fn.shellescape(executable) .. redirect
+        elseif ft == "python" then
+            return "python3 " .. vim.fn.shellescape(file) .. redirect
+        elseif ft == "javascript" then
+            return "node " .. vim.fn.shellescape(file) .. redirect
+        elseif ft == "go" then
+            return "go run " .. vim.fn.shellescape(file) .. redirect
+        elseif ft == "typescript" then
+            return "bun run " .. vim.fn.shellescape(file) .. redirect
+        elseif ft == "java" then
+            return "java " .. vim.fn.shellescape(file) .. redirect
+        end
+
+        return nil
+    end
+
+    -- ========================================================
+    -- Check supported language
+    -- ========================================================
+
+    if
+        not compiled_language
+        and ft ~= "python"
+        and ft ~= "javascript"
+        and ft ~= "go"
+        and ft ~= "typescript"
+        and ft ~= "java"
+    then
+        vim.notify("Unsupported filetype: " .. ft, vim.log.levels.WARN)
+
+        return
+    end
+
+    -- ========================================================
+    -- Show final results
     -- ========================================================
 
     local function show_results()
@@ -1641,7 +2093,10 @@ map("n", "<leader>iR", function()
 
         table.insert(lines, "========================================")
 
+        -- ====================================================
         -- Show result window
+        -- ====================================================
+
         show_cp_result(lines, 20)
 
         vim.notify(
@@ -1667,6 +2122,7 @@ map("n", "<leader>iR", function()
 
         if current_test > #test_cases then
             show_results()
+
             return
         end
 
@@ -1674,19 +2130,23 @@ map("n", "<leader>iR", function()
 
         local test_name = "Test " .. (test.index + 1)
 
-        -- Temporary output file
+        -- ====================================================
+        -- Temporary actual output
+        -- ====================================================
+
         local actual_file = "/tmp/nvim_cp_actual_" .. test.index .. ".txt"
 
         vim.fn.delete(actual_file)
 
         -- ====================================================
-        -- Build command
+        -- Build run command
         -- ====================================================
 
-        local cmd = get_cp_run_command(file, ft, test.input, actual_file)
+        local cmd = get_run_command(test.input, actual_file)
 
         if not cmd then
             vim.notify("Unsupported filetype: " .. ft, vim.log.levels.WARN)
+
             return
         end
 
@@ -1695,26 +2155,29 @@ map("n", "<leader>iR", function()
         local finished = false
         local job_id = nil
 
-        -- IMPORTANT:
-        -- Use vim.uv instead of vim.loop
+        -- ====================================================
+        -- Start execution timer
+        --
+        -- This measures ONLY this test execution.
+        -- Compilation time is NOT included here.
+        -- ====================================================
+
         local start_time = vim.uv.hrtime()
 
         -- ====================================================
-        -- Create timer
+        -- Create timeout timer
         -- ====================================================
 
         local timer = vim.uv.new_timer()
 
-        -- IMPORTANT:
-        -- new_timer() can theoretically return nil,
-        -- so LuaLS requires this check.
         if not timer then
             vim.notify("Failed to create timeout timer", vim.log.levels.ERROR)
+
             return
         end
 
         -- ====================================================
-        -- 4 SECOND TIMEOUT
+        -- 4 SECOND TEST TIMEOUT
         -- ====================================================
 
         timer:start(
@@ -1731,7 +2194,7 @@ map("n", "<leader>iR", function()
                 timer:stop()
                 timer:close()
 
-                -- Stop running job
+                -- Stop current program
                 if job_id then
                     vim.fn.jobstop(job_id)
                 end
@@ -1755,9 +2218,9 @@ map("n", "<leader>iR", function()
                     timeout = true,
                 })
 
-                -- Remove temporary output
                 vim.fn.delete(actual_file)
 
+                -- IMPORTANT:
                 -- Continue to next test
                 current_test = current_test + 1
 
@@ -1766,7 +2229,7 @@ map("n", "<leader>iR", function()
         )
 
         -- ====================================================
-        -- Start program
+        -- RUN TEST
         -- ====================================================
 
         job_id = vim.fn.jobstart({
@@ -1797,8 +2260,7 @@ map("n", "<leader>iR", function()
 
             on_exit = function(_, exit_code)
                 vim.schedule(function()
-                    -- Timer may have already
-                    -- handled timeout.
+                    -- Timer already handled it
                     if finished then
                         return
                     end
@@ -1809,7 +2271,7 @@ map("n", "<leader>iR", function()
                     timer:close()
 
                     -- =================================
-                    -- Calculate execution time
+                    -- Execution time
                     -- =================================
 
                     local elapsed = (vim.uv.hrtime() - start_time) / 1000000
@@ -1817,7 +2279,7 @@ map("n", "<leader>iR", function()
                     local elapsed_ms = math.floor(elapsed + 0.5)
 
                     -- =================================
-                    -- Compilation / runtime error
+                    -- Program error
                     -- =================================
 
                     if exit_code ~= 0 then
@@ -1842,7 +2304,8 @@ map("n", "<leader>iR", function()
                         -- =================================
                     else
                         local passed, expected, actual =
-                            compare_output(test.expected, actual_file)
+                            
+compare_output(test.expected, actual_file)
 
                         table.insert(results, {
                             name = test_name,
@@ -1859,7 +2322,10 @@ map("n", "<leader>iR", function()
                         })
                     end
 
+                    -- =================================
                     -- Remove temporary output
+                    -- =================================
+
                     vim.fn.delete(actual_file)
 
                     -- =================================
@@ -1875,12 +2341,122 @@ map("n", "<leader>iR", function()
     end
 
     -- ========================================================
-    -- Start testing
+    -- COMPILE ONCE
+    --
+    -- Only C / C++ / Rust come here.
     -- ========================================================
 
-    run_next_test()
+    if compiled_language then
+        local compile_command = get_compile_command()
+
+        local compile_stderr = {}
+
+        local compile_finished = false
+
+        vim.notify(
+            "Compiling " .. vim.fn.fnamemodify(file, ":t") .. "...",
+            vim.log.levels.INFO
+        )
+
+        local compile_job = vim.fn.jobstart({
+            "sh",
+            "-c",
+            compile_command,
+        }, {
+            stdout_buffered = true,
+            stderr_buffered = true,
+
+            on_stderr = function(_, data)
+                if data then
+                    for _, line in ipairs(data) do
+                        if line ~= "" then
+                            table.insert(compile_stderr, line)
+                        end
+                    end
+                end
+            end,
+
+            on_exit = function(_, exit_code)
+                vim.schedule(function()
+                    if compile_finished then
+                        return
+                    end
+
+                    compile_finished = true
+
+                    -- =================================
+                    -- Compilation failed
+                    -- =================================
+
+                    if exit_code ~= 0 then
+                        local lines = {
+                            "========================================",
+                            "COMPILATION FAILED",
+                            "========================================",
+                            "",
+                            "File: " .. vim.fn.fnamemodify(file, ":t"),
+                            "",
+                        }
+
+                        if #compile_stderr > 0 then
+                            vim.list_extend(lines, compile_stderr)
+                        else
+                            table.insert(
+                                lines,
+                                "Compiler exited with code " .. exit_code
+                            )
+                        end
+
+                        table.insert(lines, "")
+
+                        table.insert(
+                            lines,
+                            "========================================"
+                        )
+
+                        show_cp_result(lines, 20)
+
+                        vim.notify("Compilation failed", vim.log.levels.ERROR)
+
+                        return
+                    end
+
+                    -- =================================
+                    -- Compilation successful
+                    -- =================================
+
+                    vim.notify(
+                        "Compilation successful. Running "
+                            .. #test_cases
+                            .. " tests...",
+                        vim.log.levels.INFO
+                    )
+
+                    -- =================================
+                    -- NOW run all tests
+                    -- =================================
+
+                    run_next_test()
+                end)
+            end,
+        })
+
+        if compile_job <= 0 then
+            vim.notify("Failed to start compiler", vim.log.levels.ERROR)
+
+            return
+        end
+    else
+        -- ====================================================
+        -- Interpreted languages
+        --
+        -- No compilation step.
+        -- ====================================================
+
+        run_next_test()
+    end
 end, {
-    desc = "Run and compare all CP tests",
+    desc = "Compile once and run all CP tests",
 })
 
 -- ============================================================

@@ -1,6 +1,6 @@
 return {
     "srcery-colors/srcery-vim",
-    lazy = true,
-    enabled = false,
+    lazy = false,
+    enabled = true,
     priority = 1000,
 }

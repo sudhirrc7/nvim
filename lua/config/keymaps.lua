@@ -866,14 +866,21 @@ vim.api.nvim_create_autocmd("BufWinLeave", {
 
 -- ============================================================
 -- <leader>ir
--- Compile/build ONCE, then run current file against ALL inputs
+--
+-- BUILD ONCE, THEN GENERATE OUTPUT FOR ALL TEST CASES
 --
 -- C++ / C / Rust / Go:
---     Compile/build once
+--     Build once
 --     Reuse executable for every test
 --
 -- Python / JavaScript / TypeScript / Java:
---     Run normally for every test
+--     Run directly for every test
+--
+-- Every test has a 4 second timeout.
+--
+-- If a test times out or crashes:
+--     - Stop the current program
+--     - Stop the entire <leader>ir run
 -- ============================================================
 
 map("n", "<leader>ir", function()
@@ -888,24 +895,48 @@ map("n", "<leader>ir", function()
 
     vim.cmd("write")
 
-    -- --------------------------------------------------------
+    -- ========================================================
+    -- Configuration
+    -- ========================================================
+
+    local CP_TIMEOUT = 10
+
+    -- ========================================================
     -- Temporary executable
-    -- --------------------------------------------------------
+    -- ========================================================
 
     local executable = vim.fn.tempname()
 
-    -- --------------------------------------------------------
-    -- Languages that should be compiled/built ONCE
-    -- --------------------------------------------------------
+    -- ========================================================
+    -- Compiled languages
+    -- ========================================================
 
     local compiled_language = ft == "cpp"
         or ft == "c"
         or ft == "rust"
         or ft == "go"
 
-    -- --------------------------------------------------------
+    -- ========================================================
+    -- Supported languages
+    -- ========================================================
+
+    local supported = ft == "cpp"
+        or ft == "c"
+        or ft == "rust"
+        or ft == "go"
+        or ft == "python"
+        or ft == "javascript"
+        or ft == "typescript"
+        or ft == "java"
+
+    if not supported then
+        vim.notify("Unsupported filetype: " .. ft, vim.log.levels.WARN)
+        return
+    end
+
+    -- ========================================================
     -- Get compile/build command
-    -- --------------------------------------------------------
+    -- ========================================================
 
     local function get_compile_command()
         if ft == "cpp" then
@@ -933,81 +964,52 @@ map("n", "<leader>ir", function()
         return nil
     end
 
-    -- --------------------------------------------------------
-    -- Get execution command
+    -- ========================================================
+    -- Get direct program command
     --
     -- IMPORTANT:
-    -- This function NEVER compiles.
-    -- It only runs the already-built executable/script.
-    -- --------------------------------------------------------
+    -- No "sh -c" here.
+    -- ========================================================
 
-    local function get_run_command(input_file, output_file)
-        local redirect = " < "
-            .. vim.fn.shellescape(input_file)
-            .. " > "
-            .. vim.fn.shellescape(output_file)
-
-        -- ================================================
-        -- Already compiled executable
-        -- ================================================
-
+    local function get_program_command()
         if compiled_language then
-            return vim.fn.shellescape(executable) .. redirect
-
-        -- ================================================
-        -- Python
-        -- ================================================
+            return {
+                executable,
+            }
         elseif ft == "python" then
-            return "python3 " .. vim.fn.shellescape(file) .. redirect
-
-        -- ================================================
-        -- JavaScript
-        -- ================================================
+            return {
+                "python3",
+                file,
+            }
         elseif ft == "javascript" then
-            return "node " .. vim.fn.shellescape(file) .. redirect
-
-        -- ================================================
-        -- TypeScript
-        -- ================================================
+            return {
+                "node",
+                file,
+            }
         elseif ft == "typescript" then
-            return "bun run " .. vim.fn.shellescape(file) .. redirect
-
-        -- ================================================
-        -- Java
-        -- ================================================
+            return {
+                "bun",
+                "run",
+                file,
+            }
         elseif ft == "java" then
-            return "java " .. vim.fn.shellescape(file) .. redirect
+            return {
+                "java",
+                file,
+            }
         end
 
         return nil
     end
 
-    -- --------------------------------------------------------
-    -- Check supported filetype
-    -- --------------------------------------------------------
-
-    local supported = ft == "cpp"
-        or ft == "c"
-        or ft == "rust"
-        or ft == "go"
-        or ft == "python"
-        or ft == "javascript"
-        or ft == "typescript"
-        or ft == "java"
-
-    if not supported then
-        vim.notify("Unsupported filetype: " .. ft, vim.log.levels.WARN)
-        return
-    end
-
-    -- --------------------------------------------------------
-    -- Find all input files
-    -- --------------------------------------------------------
+    -- ========================================================
+    -- Find input files
+    -- ========================================================
 
     local test_cases = {}
 
     -- ========================================================
-    -- First: input.txt
+    -- input.txt
     -- ========================================================
 
     local input_file = dir .. "/input.txt"
@@ -1021,7 +1023,7 @@ map("n", "<leader>ir", function()
     end
 
     -- ========================================================
-    -- Then: input1.txt, input2.txt, ...
+    -- input1.txt, input2.txt, ...
     -- ========================================================
 
     local index = 1
@@ -1042,9 +1044,9 @@ map("n", "<leader>ir", function()
         index = index + 1
     end
 
-    -- --------------------------------------------------------
-    -- No tests
-    -- --------------------------------------------------------
+    -- ========================================================
+    -- No input files
+    -- ========================================================
 
     if #test_cases == 0 then
         vim.notify(
@@ -1055,11 +1057,15 @@ map("n", "<leader>ir", function()
         return
     end
 
-    -- --------------------------------------------------------
-    -- Run tests sequentially
-    -- --------------------------------------------------------
+    -- ========================================================
+    -- Current test
+    -- ========================================================
 
     local current_test = 1
+
+    -- ========================================================
+    -- Run next test
+    -- ========================================================
 
     local function run_next_test()
         -- ====================================================
@@ -1067,20 +1073,21 @@ map("n", "<leader>ir", function()
         -- ====================================================
 
         if current_test > #test_cases then
+            if compiled_language then
+                vim.fn.delete(executable)
+            end
+
             vim.notify(
                 "All " .. #test_cases .. " test cases completed",
                 vim.log.levels.INFO
             )
 
-            -- Cleanup executable
-            if compiled_language then
-                vim.fn.delete(executable)
-            end
-
             return
         end
 
         local test = test_cases[current_test]
+
+        local test_number = test.index == 0 and "0" or tostring(test.index)
 
         -- ====================================================
         -- Create output file if it doesn't exist
@@ -1091,61 +1098,308 @@ map("n", "<leader>ir", function()
         end
 
         -- ====================================================
-        -- Get run command
-        --
-        -- NOTE:
-        -- For C++ / C / Rust / Go this simply executes
-        -- the already-created executable.
+        -- Read input
         -- ====================================================
 
-        local cmd = get_run_command(test.input, test.output)
+        local input_lines = vim.fn.readfile(test.input)
 
-        if not cmd then
+        local input_data = table.concat(input_lines, "\n")
+
+        -- Make sure input ends with newline
+        if input_data ~= "" then
+            input_data = input_data .. "\n"
+        end
+
+        -- ====================================================
+        -- Program command
+        -- ====================================================
+
+        local command = get_program_command()
+
+        if not command then
+            vim.notify(
+                "Unable to determine program command",
+                vim.log.levels.ERROR
+            )
+
+            if compiled_language then
+                vim.fn.delete(executable)
+            end
+
             return
         end
 
+        -- ====================================================
+        -- Capture stdout / stderr
+        -- ====================================================
+
+        local stdout = {}
         local stderr = {}
 
+        local finished = false
+        local job_id = nil
+
         -- ====================================================
-        -- Run current test
+        -- Start timing
         -- ====================================================
 
-        vim.fn.jobstart({
-            "sh",
-            "-c",
-            cmd,
-        }, {
-            stdout_buffered = true,
-            stderr_buffered = true,
+        local start_time = vim.uv.hrtime()
 
-            -- ============================================
+        -- ====================================================
+        -- Create timeout timer
+        -- ====================================================
+
+        local timer = vim.uv.new_timer()
+
+        if not timer then
+            vim.notify("Failed to create timeout timer", vim.log.levels.ERROR)
+
+            if compiled_language then
+                vim.fn.delete(executable)
+            end
+
+            return
+        end
+
+        -- ====================================================
+        -- 4 SECOND TIMEOUT
+        -- ====================================================
+
+        timer:start(
+            CP_TIMEOUT * 1000,
+            0,
+
+            vim.schedule_wrap(function()
+                if finished then
+                    return
+                end
+
+                finished = true
+
+                timer:stop()
+                timer:close()
+
+                -- --------------------------------------------
+                -- Kill program
+                -- --------------------------------------------
+
+                if job_id then
+                    vim.fn.jobstop(job_id)
+                end
+
+                -- --------------------------------------------
+                -- Cleanup executable
+                -- --------------------------------------------
+
+                if compiled_language then
+                    vim.fn.delete(executable)
+                end
+
+                -- --------------------------------------------
+                -- Show timeout
+                -- --------------------------------------------
+
+                local lines = {
+                    "========================================",
+                    "TIMEOUT - Test Case " .. test_number,
+                    "========================================",
+                    "",
+                    "Input:  " .. vim.fn.fnamemodify(test.input, ":t"),
+                    "Output: " .. vim.fn.fnamemodify(test.output, ":t"),
+                    "",
+                    "Time limit: " .. CP_TIMEOUT .. " seconds",
+                    "",
+                    "The program was stopped because it",
+                    "exceeded the time limit.",
+                    "",
+                    "========================================",
+                }
+
+                -- --------------------------------------------
+                -- Reuse result/error buffer
+                -- --------------------------------------------
+
+                if
+                    not run_error_buf
+                    or not vim.api.nvim_buf_is_valid(run_error_buf)
+                then
+                    run_error_buf = vim.api.nvim_create_buf(false, true)
+
+                    vim.bo[run_error_buf].bufhidden = "hide"
+
+                    vim.bo[run_error_buf].filetype = "text"
+
+                    vim.api.nvim_buf_set_name(run_error_buf, "Run Errors")
+                end
+
+                vim.bo[run_error_buf].modifiable = true
+
+                vim.api.nvim_buf_set_lines(run_error_buf, 0, -1, false, lines)
+
+                vim.bo[run_error_buf].modifiable = false
+
+                -- --------------------------------------------
+                -- Show bottom window
+                -- --------------------------------------------
+
+                if
+                    run_error_win
+                    and vim.api.nvim_win_is_valid(run_error_win)
+                then
+                    vim.api.nvim_win_set_buf(run_error_win, run_error_buf)
+                else
+                    vim.cmd("botright new")
+                    vim.cmd("resize 15")
+
+                    run_error_win = vim.api.nvim_get_current_win()
+
+                    vim.api.nvim_win_set_buf(run_error_win, run_error_buf)
+                end
+
+                vim.notify(
+                    "Test case "
+                        .. test_number
+                        .. " timed out after "
+                        .. CP_TIMEOUT
+                        .. " seconds",
+                    vim.log.levels.ERROR
+                )
+            end)
+        )
+
+        -- ====================================================
+        -- Start program DIRECTLY
+        -- ====================================================
+
+        job_id = vim.fn.jobstart(command, {
+            stdin = "pipe",
+
+            stdout_buffered = false,
+            stderr_buffered = false,
+
+            -- ========================================
+            -- STDOUT
+            -- ========================================
+
+            on_stdout = function(_, data)
+                if not data then
+                    return
+                end
+
+                for _, line in ipairs(data) do
+                    table.insert(stdout, line)
+                end
+            end,
+
+            -- ========================================
             -- STDERR
-            -- ============================================
+            -- ========================================
 
             on_stderr = function(_, data)
-                if data then
-                    for _, line in ipairs(data) do
-                        if line ~= "" then
-                            table.insert(stderr, line)
-                        end
+                if not data then
+                    return
+                end
+
+                for _, line in ipairs(data) do
+                    if line ~= "" then
+                        table.insert(stderr, line)
                     end
                 end
             end,
 
-            -- ============================================
+            -- ========================================
             -- PROCESS EXIT
-            -- ============================================
+            -- ========================================
 
             on_exit = function(_, exit_code)
                 vim.schedule(function()
-                    -- ====================================
-                    -- ERROR
-                    -- ====================================
+                    -- =================================
+                    -- Timeout already handled
+                    -- =================================
+
+                    if finished then
+                        return
+                    end
+
+                    finished = true
+
+                    timer:stop()
+                    timer:close()
+
+                    -- =================================
+                    -- Execution time
+                    -- =================================
+
+                    local elapsed = (vim.uv.hrtime() - start_time) / 1000000
+
+                    local elapsed_ms = math.floor(elapsed + 0.5)
+
+                    -- =================================
+                    -- Runtime error
+                    -- =================================
 
                     if exit_code ~= 0 then
-                        -- --------------------------------
+                        -- -----------------------------
+                        -- Cleanup
+                        -- -----------------------------
+
+                        if compiled_language then
+                            vim.fn.delete(executable)
+                        end
+
+                        -- -----------------------------
+                        -- Error buffer
+                        -- -----------------------------
+
+                        local error_lines = {
+
+                            "========================================",
+
+                            "ERROR - Test Case " .. test_number,
+
+                            "========================================",
+
+                            "",
+
+                            "Input:  " .. vim.fn.fnamemodify(test.input, ":t"),
+
+                            "Output: " .. vim.fn.fnamemodify(test.output, ":t"),
+
+                            "",
+
+                            "Exit code: " .. exit_code,
+
+                            "Execution time: " .. elapsed_ms .. " ms",
+
+                            "",
+                        }
+
+                        if #stderr > 0 then
+                            table.insert(error_lines, "Program Error:")
+
+                            table.insert(
+                                error_lines,
+                                "----------------------------------------"
+                            )
+
+                            vim.list_extend(error_lines, stderr)
+                        else
+                            table.insert(
+                                error_lines,
+                                "Program exited unexpectedly."
+                            )
+                        end
+
+                        table.insert(error_lines, "")
+
+                        table.insert(
+                            error_lines,
+                            "========================================"
+                        )
+
+                        -- -----------------------------
                         -- Create/reuse error buffer
-                        -- --------------------------------
+                        -- -----------------------------
 
                         if
                             not run_error_buf
@@ -1163,43 +1417,6 @@ map("n", "<leader>ir", function()
                             )
                         end
 
-                        -- --------------------------------
-                        -- Error information
-                        -- --------------------------------
-
-                        local error_lines = {
-
-                            "========================================",
-
-                            "ERROR - Test Case "
-                                .. (test.index == 0 and "0" or test.index),
-
-                            "Input:  " .. vim.fn.fnamemodify(test.input, ":t"),
-
-                            "Output: " .. vim.fn.fnamemodify(test.output, ":t"),
-
-                            "========================================",
-
-                            "",
-                        }
-
-                        -- --------------------------------
-                        -- Add stderr
-                        -- --------------------------------
-
-                        if #stderr > 0 then
-                            vim.list_extend(error_lines, stderr)
-                        else
-                            table.insert(
-                                error_lines,
-                                "Program exited with code " .. exit_code
-                            )
-                        end
-
-                        -- --------------------------------
-                        -- Put error into buffer
-                        -- --------------------------------
-
                         vim.bo[run_error_buf].modifiable = true
 
                         vim.api.nvim_buf_set_lines(
@@ -1212,9 +1429,9 @@ map("n", "<leader>ir", function()
 
                         vim.bo[run_error_buf].modifiable = false
 
-                        -- --------------------------------
-                        -- Reuse existing error window
-                        -- --------------------------------
+                        -- -----------------------------
+                        -- Show bottom window
+                        -- -----------------------------
 
                         if
                             run_error_win
@@ -1238,32 +1455,47 @@ map("n", "<leader>ir", function()
                         end
 
                         vim.notify(
-                            "Test case "
-                                .. (test.index == 0 and "0" or test.index)
-                                .. " failed",
+                            "Test case " .. test_number .. " failed",
                             vim.log.levels.ERROR
                         )
 
                         -- --------------------------------
-                        -- STOP
-                        --
-                        -- Do not continue because this
-                        -- is the original <leader>ir
-                        -- behavior.
+                        -- STOP ENTIRE RUN
                         -- --------------------------------
 
                         return
                     end
 
-                    -- ====================================================
+                    -- =================================
                     -- SUCCESS
-                    -- ====================================================
+                    -- =================================
+
+                    -- ---------------------------------
+                    -- Write program output
+                    -- ---------------------------------
+
+                    local output_lines = {}
+
+                    for _, line in ipairs(stdout) do
+                        table.insert(output_lines, line)
+                    end
+
+                    -- Remove final empty lines that
+                    -- can be produced by stdout capture.
+                    while
+                        #output_lines > 0
+                        and output_lines[#output_lines] == ""
+                    do
+                        table.remove(output_lines)
+                    end
+
+                    vim.fn.writefile(output_lines, test.output)
+
+                    -- ---------------------------------
+                    -- Refresh output buffer if open
+                    -- ---------------------------------
 
                     local output_buf = vim.fn.bufnr(test.output)
-
-                    -- --------------------------------
-                    -- Refresh output file if open
-                    -- --------------------------------
 
                     if
                         output_buf ~= -1
@@ -1274,9 +1506,9 @@ map("n", "<leader>ir", function()
                         end)
                     end
 
-                    -- --------------------------------
-                    -- Move to next test
-                    -- --------------------------------
+                    -- ---------------------------------
+                    -- Next test
+                    -- ---------------------------------
 
                     current_test = current_test + 1
 
@@ -1284,10 +1516,42 @@ map("n", "<leader>ir", function()
                 end)
             end,
         })
+
+        -- ====================================================
+        -- Job failed to start
+        -- ====================================================
+
+        if job_id <= 0 then
+            timer:stop()
+            timer:close()
+
+            if compiled_language then
+                vim.fn.delete(executable)
+            end
+
+            vim.notify("Failed to start program", vim.log.levels.ERROR)
+
+            return
+        end
+
+        -- ====================================================
+        -- Send input
+        -- ====================================================
+
+        if input_data ~= "" then
+            vim.fn.chansend(job_id, input_data)
+        end
+
+        -- ====================================================
+        -- IMPORTANT:
+        -- Close stdin so programs waiting for EOF don't hang.
+        -- ====================================================
+
+        vim.fn.chanclose(job_id, "stdin")
     end
 
     -- ========================================================
-    -- COMPILE / BUILD ONCE
+    -- BUILD ONCE
     -- ========================================================
 
     if compiled_language then
@@ -1327,7 +1591,7 @@ map("n", "<leader>ir", function()
             end,
 
             -- ========================================
-            -- Compilation finished
+            -- Compile finished
             -- ========================================
 
             on_exit = function(_, exit_code)
@@ -1338,17 +1602,11 @@ map("n", "<leader>ir", function()
 
                     if exit_code ~= 0 then
                         local lines = {
-
                             "========================================",
-
                             "COMPILATION / BUILD FAILED",
-
                             "========================================",
-
                             "",
-
                             "File: " .. vim.fn.fnamemodify(file, ":t"),
-
                             "",
                         }
 
@@ -1368,9 +1626,9 @@ map("n", "<leader>ir", function()
                             "========================================"
                         )
 
-                        -- ----------------------------
-                        -- Reuse result/error buffer
-                        -- ----------------------------
+                        -- --------------------------------
+                        -- Create/reuse error buffer
+                        -- --------------------------------
 
                         if
                             not run_error_buf
@@ -1400,6 +1658,10 @@ map("n", "<leader>ir", function()
 
                         vim.bo[run_error_buf].modifiable = false
 
+                        -- --------------------------------
+                        -- Show bottom window
+                        -- --------------------------------
+
                         if
                             run_error_win
                             and vim.api.nvim_win_is_valid(run_error_win)
@@ -1410,7 +1672,6 @@ map("n", "<leader>ir", function()
                             )
                         else
                             vim.cmd("botright new")
-
                             vim.cmd("resize 15")
 
                             run_error_win = vim.api.nvim_get_current_win()
@@ -1423,14 +1684,13 @@ map("n", "<leader>ir", function()
 
                         vim.notify("Compilation failed", vim.log.levels.ERROR)
 
-                        -- Cleanup
                         vim.fn.delete(executable)
 
                         return
                     end
 
                     -- =================================
-                    -- Compilation successful
+                    -- Build successful
                     -- =================================
 
                     vim.notify(
@@ -1458,16 +1718,13 @@ map("n", "<leader>ir", function()
         end
     else
         -- ====================================================
-        -- Interpreted languages
-        --
-        -- No compilation.
-        -- Just start running the tests.
+        -- Interpreted language
         -- ====================================================
 
         run_next_test()
     end
 end, {
-    desc = "Build once and run all CP test cases",
+    desc = "Build once and generate CP outputs",
 })
 
 -- ============================================================
@@ -1548,7 +1805,7 @@ end, {
 -- CP Helpers
 -- ============================================================
 
-local CP_TIMEOUT = 4
+local CP_TIMEOUT = 10
 
 local run_error_win = nil
 local run_error_buf = nil
@@ -2304,8 +2561,7 @@ map("n", "<leader>iR", function()
                         -- =================================
                     else
                         local passed, expected, actual =
-                            
-compare_output(test.expected, actual_file)
+                            compare_output(test.expected, actual_file)
 
                         table.insert(results, {
                             name = test_name,
@@ -2464,18 +2720,16 @@ end, {
 --
 -- QUICK CP TEST SUMMARY
 --
--- Runs ALL tests and shows:
+-- Improvements:
 --
--- ✓ Test 1        12 ms
--- ✓ Test 2         8 ms
--- ✗ Test 3        21 ms
---
--- Passed:     2/3
--- Failed:     1/3
--- Total time: 41 ms
--- Max test:   21 ms
---
--- Uses a 4 second timeout for every test.
+-- 1. C / C++ / Rust / Go are compiled ONCE.
+-- 2. Executable is reused for every test.
+-- 3. No "sh -c" wrapper for program execution.
+-- 4. Input is sent directly through stdin.
+-- 5. Output is captured directly from stdout.
+-- 6. Each test has its own 4 second timeout.
+-- 7. Tests continue even when one fails.
+-- 8. Execution time is measured using vim.uv.hrtime().
 -- ============================================================
 
 map("n", "<leader>ia", function()
@@ -2491,7 +2745,7 @@ map("n", "<leader>ia", function()
     vim.cmd("write")
 
     -- ========================================================
-    -- Find all test cases
+    -- Find tests
     -- ========================================================
 
     local test_cases, error_message = find_cp_tests(dir)
@@ -2524,6 +2778,109 @@ map("n", "<leader>ia", function()
     local current_test = 1
 
     -- ========================================================
+    -- Temporary executable
+    -- ========================================================
+
+    local executable = vim.fn.tempname()
+
+    -- ========================================================
+    -- Compiled languages
+    -- ========================================================
+
+    local compiled_language = ft == "cpp"
+        or ft == "c"
+        or ft == "rust"
+        or ft == "go"
+
+    -- ========================================================
+    -- Build command
+    -- ========================================================
+
+    local function get_compile_command()
+        if ft == "cpp" then
+            return "g++-16 "
+                .. vim.fn.shellescape(file)
+                .. " -o "
+                .. vim.fn.shellescape(executable)
+        elseif ft == "c" then
+            return "gcc "
+                .. vim.fn.shellescape(file)
+                .. " -o "
+                .. vim.fn.shellescape(executable)
+        elseif ft == "rust" then
+            return "rustc "
+                .. vim.fn.shellescape(file)
+                .. " -o "
+                .. vim.fn.shellescape(executable)
+        elseif ft == "go" then
+            return "go build -o "
+                .. vim.fn.shellescape(executable)
+                .. " "
+                .. vim.fn.shellescape(file)
+        end
+
+        return nil
+    end
+
+    -- ========================================================
+    -- Get program command
+    --
+    -- IMPORTANT:
+    -- These are direct executable commands.
+    -- There is NO sh -c here.
+    -- ========================================================
+
+    local function get_program_command()
+        if compiled_language then
+            return {
+                executable,
+            }
+        elseif ft == "python" then
+            return {
+                "python3",
+                file,
+            }
+        elseif ft == "javascript" then
+            return {
+                "node",
+                file,
+            }
+        elseif ft == "typescript" then
+            return {
+                "bun",
+                "run",
+                file,
+            }
+        elseif ft == "java" then
+            return {
+                "java",
+                file,
+            }
+        end
+
+        return nil
+    end
+
+    -- ========================================================
+    -- Supported languages
+    -- ========================================================
+
+    local supported = ft == "cpp"
+        or ft == "c"
+        or ft == "rust"
+        or ft == "go"
+        or ft == "python"
+        or ft == "javascript"
+        or ft == "typescript"
+        or ft == "java"
+
+    if not supported then
+        vim.notify("Unsupported filetype: " .. ft, vim.log.levels.WARN)
+
+        return
+    end
+
+    -- ========================================================
     -- Run next test
     -- ========================================================
 
@@ -2539,7 +2896,10 @@ map("n", "<leader>ia", function()
             local total_time = 0
             local max_time = 0
 
-            -- Calculate statistics
+            -- =================================================
+            -- Statistics
+            -- =================================================
+
             for _, result in ipairs(results) do
                 if result.passed then
                     passed = passed + 1
@@ -2553,7 +2913,7 @@ map("n", "<leader>ia", function()
             end
 
             -- =================================================
-            -- Build summary buffer
+            -- Summary
             -- =================================================
 
             local lines = {
@@ -2563,7 +2923,10 @@ map("n", "<leader>ia", function()
                 "",
             }
 
-            -- Individual tests
+            -- =================================================
+            -- Individual results
+            -- =================================================
+
             for _, result in ipairs(results) do
                 local symbol = result.passed and "✓" or "✗"
 
@@ -2588,7 +2951,7 @@ map("n", "<leader>ia", function()
             end
 
             -- =================================================
-            -- Final statistics
+            -- Statistics
             -- =================================================
 
             table.insert(lines, "")
@@ -2613,10 +2976,6 @@ map("n", "<leader>ia", function()
 
             -- =================================================
             -- Show result buffer
-            --
-            -- IMPORTANT:
-            -- This always opens the buffer, even when all
-            -- tests pass.
             -- =================================================
 
             show_cp_result(lines, 12)
@@ -2647,6 +3006,14 @@ map("n", "<leader>ia", function()
                 )
             end
 
+            -- =================================================
+            -- Cleanup
+            -- =================================================
+
+            if compiled_language then
+                vim.fn.delete(executable)
+            end
+
             return
         end
 
@@ -2658,42 +3025,70 @@ map("n", "<leader>ia", function()
 
         local test_name = "Test " .. (test.index + 1)
 
-        -- Temporary actual output
-        local actual_file = "/tmp/nvim_cp_actual_" .. test.index .. ".txt"
-
-        vim.fn.delete(actual_file)
-
         -- ====================================================
-        -- Build command
+        -- Read input
         -- ====================================================
 
-        local cmd = get_cp_run_command(file, ft, test.input, actual_file)
+        local input_lines = read_file(test.input)
 
-        if not cmd then
+        local input_data = table.concat(input_lines, "\n")
+
+        -- Make sure stdin ends with newline
+        if input_data ~= "" then
+            input_data = input_data .. "\n"
+        end
+
+        -- ====================================================
+        -- Expected output
+        -- ====================================================
+
+        local expected = normalize_output(read_file(test.expected))
+
+        -- ====================================================
+        -- Program command
+        -- ====================================================
+
+        local command = get_program_command()
+
+        if not command then
             vim.notify("Unsupported filetype: " .. ft, vim.log.levels.WARN)
+
             return
         end
 
+        -- ====================================================
+        -- Captured stdout/stderr
+        -- ====================================================
+
+        local stdout = {}
         local stderr = {}
 
         local finished = false
         local job_id = nil
 
+        -- ====================================================
+        -- Start timing
+        --
+        -- This starts immediately before the actual program
+        -- process is launched.
+        -- ====================================================
+
         local start_time = vim.uv.hrtime()
 
         -- ====================================================
-        -- Create 4-second timeout timer
+        -- Timeout timer
         -- ====================================================
 
         local timer = vim.uv.new_timer()
 
         if not timer then
             vim.notify("Failed to create timeout timer", vim.log.levels.ERROR)
+
             return
         end
 
         -- ====================================================
-        -- TIMEOUT
+        -- 4 SECOND TIMEOUT
         -- ====================================================
 
         timer:start(
@@ -2710,18 +3105,24 @@ map("n", "<leader>ia", function()
                 timer:stop()
                 timer:close()
 
-                -- Stop running program
+                -- ----------------------------------------------
+                -- Stop program
+                -- ----------------------------------------------
+
                 if job_id then
                     vim.fn.jobstop(job_id)
                 end
 
+                -- ----------------------------------------------
                 -- Record timeout
+                -- ----------------------------------------------
+
                 table.insert(results, {
                     name = test_name,
 
                     passed = false,
 
-                    expected = normalize_output(read_file(test.expected)),
+                    expected = expected,
 
                     actual = {},
 
@@ -2734,10 +3135,10 @@ map("n", "<leader>ia", function()
                     timeout = true,
                 })
 
-                vim.fn.delete(actual_file)
+                -- ----------------------------------------------
+                -- Continue
+                -- ----------------------------------------------
 
-                -- IMPORTANT:
-                -- Continue to next test
                 current_test = current_test + 1
 
                 run_next()
@@ -2745,27 +3146,45 @@ map("n", "<leader>ia", function()
         )
 
         -- ====================================================
-        -- Run program
+        -- Start program DIRECTLY
+        --
+        -- No shell.
         -- ====================================================
 
-        job_id = vim.fn.jobstart({
-            "sh",
-            "-c",
-            cmd,
-        }, {
-            stdout_buffered = true,
-            stderr_buffered = true,
+        job_id = vim.fn.jobstart(command, {
+            stdin = "pipe",
+
+            stdout_buffered = false,
+            stderr_buffered = false,
+
+            -- ========================================
+            -- STDOUT
+            -- ========================================
+
+            on_stdout = function(_, data)
+                if not data then
+                    return
+                end
+
+                for _, line in ipairs(data) do
+                    if line ~= "" then
+                        table.insert(stdout, line)
+                    end
+                end
+            end,
 
             -- ========================================
             -- STDERR
             -- ========================================
 
             on_stderr = function(_, data)
-                if data then
-                    for _, line in ipairs(data) do
-                        if line ~= "" then
-                            table.insert(stderr, line)
-                        end
+                if not data then
+                    return
+                end
+
+                for _, line in ipairs(data) do
+                    if line ~= "" then
+                        table.insert(stderr, line)
                     end
                 end
             end,
@@ -2776,7 +3195,10 @@ map("n", "<leader>ia", function()
 
             on_exit = function(_, exit_code)
                 vim.schedule(function()
-                    -- Timeout already handled it
+                    -- =================================
+                    -- Timeout already handled
+                    -- =================================
+
                     if finished then
                         return
                     end
@@ -2795,7 +3217,13 @@ map("n", "<leader>ia", function()
                     local elapsed_ms = math.floor(elapsed + 0.5)
 
                     -- =================================
-                    -- Runtime / compilation error
+                    -- Actual output
+                    -- =================================
+
+                    local actual = normalize_output(stdout)
+
+                    -- =================================
+                    -- Runtime error
                     -- =================================
 
                     if exit_code ~= 0 then
@@ -2804,32 +3232,40 @@ map("n", "<leader>ia", function()
 
                             passed = false,
 
-                            expected = normalize_output(
-                                read_file(test.expected)
-                            ),
+                            expected = expected,
 
-                            actual = {},
+                            actual = actual,
 
                             error = stderr,
 
                             time = elapsed_ms,
                         })
-
-                        -- =================================
-                        -- Normal execution
-                        -- =================================
                     else
-                        local passed =
-                            compare_output(test.expected, actual_file)
+                        -- =============================
+                        -- Compare output
+                        -- =============================
+
+                        local passed = true
+
+                        if #expected ~= #actual then
+                            passed = false
+                        else
+                            for i = 1, #expected do
+                                if expected[i] ~= actual[i] then
+                                    passed = false
+                                    break
+                                end
+                            end
+                        end
 
                         table.insert(results, {
                             name = test_name,
 
                             passed = passed,
 
-                            expected = {},
+                            expected = expected,
 
-                            actual = {},
+                            actual = actual,
 
                             error = {},
 
@@ -2837,11 +3273,8 @@ map("n", "<leader>ia", function()
                         })
                     end
 
-                    -- Remove temporary output
-                    vim.fn.delete(actual_file)
-
                     -- =================================
-                    -- Continue to next test
+                    -- Continue
                     -- =================================
 
                     current_test = current_test + 1
@@ -2850,13 +3283,157 @@ map("n", "<leader>ia", function()
                 end)
             end,
         })
+
+        -- ====================================================
+        -- Check job creation
+        -- ====================================================
+
+        if job_id <= 0 then
+            timer:stop()
+            timer:close()
+
+            vim.notify("Failed to start program", vim.log.levels.ERROR)
+
+            return
+        end
+
+        -- ====================================================
+        -- Send input directly to stdin
+        -- ====================================================
+
+        if input_data ~= "" then
+            vim.fn.chansend(job_id, input_data)
+        end
+
+        -- ====================================================
+        -- Close stdin
+        --
+        -- This is VERY important for programs that read until
+        -- EOF.
+        -- ====================================================
+
+        vim.fn.chanclose(job_id, "stdin")
     end
 
     -- ========================================================
-    -- Start
+    -- COMPILE / BUILD ONCE
     -- ========================================================
 
-    run_next()
+    if compiled_language then
+        local compile_command = get_compile_command()
+
+        local compile_stderr = {}
+
+        vim.notify(
+            "Building " .. vim.fn.fnamemodify(file, ":t") .. "...",
+            vim.log.levels.INFO
+        )
+
+        -- ====================================================
+        -- Compile
+        -- ====================================================
+
+        local compile_job = vim.fn.jobstart({
+            "sh",
+            "-c",
+            compile_command,
+        }, {
+            stdout_buffered = true,
+            stderr_buffered = true,
+
+            -- ========================================
+            -- Compiler stderr
+            -- ========================================
+
+            on_stderr = function(_, data)
+                if data then
+                    for _, line in ipairs(data) do
+                        if line ~= "" then
+                            table.insert(compile_stderr, line)
+                        end
+                    end
+                end
+            end,
+
+            -- ========================================
+            -- Compilation finished
+            -- ========================================
+
+            on_exit = function(_, exit_code)
+                vim.schedule(function()
+                    -- =================================
+                    -- Compilation failed
+                    -- =================================
+
+                    if exit_code ~= 0 then
+                        local lines = {
+                            "========================================",
+                            "COMPILATION / BUILD FAILED",
+                            "========================================",
+                            "",
+                            "File: " .. vim.fn.fnamemodify(file, ":t"),
+                            "",
+                        }
+
+                        if #compile_stderr > 0 then
+                            vim.list_extend(lines, compile_stderr)
+                        else
+                            table.insert(
+                                lines,
+                                "Compiler exited with code " .. exit_code
+                            )
+                        end
+
+                        table.insert(lines, "")
+
+                        table.insert(
+                            lines,
+                            "========================================"
+                        )
+
+                        show_cp_result(lines, 15)
+
+                        vim.notify("Compilation failed", vim.log.levels.ERROR)
+
+                        vim.fn.delete(executable)
+
+                        return
+                    end
+
+                    -- =================================
+                    -- Build successful
+                    -- =================================
+
+                    vim.notify(
+                        "Build successful. Running "
+                            .. #test_cases
+                            .. " tests...",
+                        vim.log.levels.INFO
+                    )
+
+                    -- =================================
+                    -- Start tests
+                    -- =================================
+
+                    run_next()
+                end)
+            end,
+        })
+
+        if compile_job <= 0 then
+            vim.notify("Failed to start compiler", vim.log.levels.ERROR)
+
+            vim.fn.delete(executable)
+
+            return
+        end
+    else
+        -- ====================================================
+        -- Interpreted languages
+        -- ====================================================
+
+        run_next()
+    end
 end, {
     desc = "Quick CP test summary",
 })

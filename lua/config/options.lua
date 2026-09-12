@@ -101,12 +101,12 @@ if os.getenv("WSL_DISTRO_NAME") ~= nil then
     o.clipboard = "unnamedplus"
 end
 
-vim.opt.fillchars:append({
-    vert = "|",
-    horiz = "-", -- horizontal separator line
-    horizup = "+", -- junction: horiz line meets vert line going up
-    horizdown = "+", -- junction: horiz line meets vert line going down
-    vertleft = "+", -- junction: vert line with opening to the left
-    vertright = "+", -- junction: vert line with opening to the right
-    verthoriz = "+", -- junction: all four lines meet (a "+" crossing)
-})
+-- vim.opt.fillchars:append({
+--     vert = "|",
+--     horiz = "-", -- horizontal separator line
+--     horizup = "+", -- junction: horiz line meets vert line going up
+--     horizdown = "+", -- junction: horiz line meets vert line going down
+--     vertleft = "+", -- junction: vert line with opening to the left
+--     vertright = "+", -- junction: vert line with opening to the right
+--     verthoriz = "+", -- junction: all four lines meet (a "+" crossing)
+-- })

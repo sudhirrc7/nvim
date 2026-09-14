@@ -7,6 +7,48 @@ local o = vim.opt
 local MiniFiles = require("mini.files")
 local lazy = require("lazy")
 
+map("n", "<leader>ul", function()
+    local enabled = not vim.wo.number
+
+    -- Set defaults for future windows
+    vim.opt_global.number = enabled
+    vim.opt_global.relativenumber = enabled
+
+    -- Update all existing windows
+    for _, win in ipairs(vim.api.nvim_list_wins()) do
+        if vim.api.nvim_win_is_valid(win) then
+            vim.wo[win].number = enabled
+            vim.wo[win].relativenumber = enabled
+        end
+    end
+end, { desc = "Toggle line numbers globally" })
+
+map("n", "<leader>uL", function()
+    -- If relative numbers are currently enabled, switch to normal numbers
+    if vim.wo.relativenumber then
+        vim.opt_global.number = true
+        vim.opt_global.relativenumber = false
+
+        for _, win in ipairs(vim.api.nvim_list_wins()) do
+            if vim.api.nvim_win_is_valid(win) then
+                vim.wo[win].number = true
+                vim.wo[win].relativenumber = false
+            end
+        end
+    else
+        -- Otherwise switch to relative numbers
+        vim.opt_global.number = true
+        vim.opt_global.relativenumber = true
+
+        for _, win in ipairs(vim.api.nvim_list_wins()) do
+            if vim.api.nvim_win_is_valid(win) then
+                vim.wo[win].number = true
+                vim.wo[win].relativenumber = true
+            end
+        end
+    end
+end, { desc = "Toggle relative/normal line numbers" })
+
 -- Incremental Selection
 map({ "n", "x", "o" }, "<A-o>", function()
     if vim.treesitter.get_parser(nil, nil, { error = false }) then

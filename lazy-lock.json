@@ -87,6 +87,7 @@
   "solarized-osaka.nvim": { "branch": "main", "commit": "a21176efde15fab21fabda0bf2ba123ed6d7332d" },
   "soviet.nvim": { "branch": "main", "commit": "bc0c2782699ec900ca6e15eff83a48bca0d7f99e" },
   "srcery-vim": { "branch": "master", "commit": "d4889a85c26702217838da941f921042c17b6397" },
+  "statuscol.nvim": { "branch": "main", "commit": "887b8a03ea3804628505c9002fd07bd06a3db2e0" },
   "tiny-inline-diagnostic.nvim": { "branch": "main", "commit": "6264451f14119d63a52580e5198d6baf8518b0b2" },
   "todo-comments.nvim": { "branch": "main", "commit": "31e3c38ce9b29781e4422fc0322eb0a21f4e8668" },
   "tokyodark.nvim": { "branch": "master", "commit": "659aff3c73dc2e0159314050a81671f0b2eaad01" },

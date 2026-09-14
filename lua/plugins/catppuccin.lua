@@ -12,7 +12,7 @@ return {
         end,
         no_italic = false,
         term_colors = true,
-        transparent_background = false,
+        transparent_background = true,
         styles = {
             comments = { "italic" },
             conditionals = {},

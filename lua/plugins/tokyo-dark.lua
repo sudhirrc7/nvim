@@ -1,5 +1,6 @@
 return {
     "tiagovla/tokyodark.nvim",
+    enabled = false,
     opts = {
         -- custom options here
     },

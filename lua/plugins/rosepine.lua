@@ -34,7 +34,8 @@ return {
             },
             -- Override the builtin palette per variant
             moon = {
-                base = "#1A1A1A",
+                base = "#141415",
+                -- base = "#1A1A1A",
                 -- base = "#181616",
                 -- base = "#000000",
                 -- overlay = "#000000",

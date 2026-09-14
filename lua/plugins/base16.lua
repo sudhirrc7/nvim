@@ -1,1 +1,1 @@
-return { "RRethy/base16-nvim" }
+return { "RRethy/base16-nvim", enabled = false }

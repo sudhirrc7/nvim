@@ -1,12 +1,12 @@
 return {
     "scottmckendry/cyberdream.nvim",
     lazy = false,
-    enabled = false,
+    enabled = true,
     priority = 1000,
     opts = {
-        transparent = true,
+        transparent = false,
         cache = true,
-        borderless_pickers = false,
+        borderless_pickers = true,
         italic_comments = false,
         colors = {
             -- Override colors for both light and dark variants

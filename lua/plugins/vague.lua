@@ -1,7 +1,8 @@
 return {
     "vague-theme/vague.nvim",
-    enabled = false,
+    enabled = true,
     opts = {
-        transparent = true, -- If true, background is not set
+        transparent = false,
+        italic = false, -- Disable italic globally
     },
 }

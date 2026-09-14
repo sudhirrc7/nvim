@@ -7,6 +7,27 @@ local o = vim.opt
 local MiniFiles = require("mini.files")
 local lazy = require("lazy")
 
+-- Incremental Selection
+map({ "n", "x", "o" }, "<A-o>", function()
+    if vim.treesitter.get_parser(nil, nil, { error = false }) then
+        require("vim.treesitter._select").select_parent(vim.v.count1)
+    else
+        vim.lsp.buf.selection_range(vim.v.count1)
+    end
+end, {
+    desc = "Select parent treesitter node or outer incremental lsp selections",
+})
+
+map({ "n", "x", "o" }, "<A-i>", function()
+    if vim.treesitter.get_parser(nil, nil, { error = false }) then
+        require("vim.treesitter._select").select_child(vim.v.count1)
+    else
+        vim.lsp.buf.selection_range(-vim.v.count1)
+    end
+end, {
+    desc = "Select child treesitter node or inner incremental lsp selections",
+})
+
 map("n", "<leader>ij", require("treesj").toggle)
 -- Search current word
 local searching_brave = function()

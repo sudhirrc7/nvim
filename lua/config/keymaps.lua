@@ -7,47 +7,55 @@ local o = vim.opt
 local MiniFiles = require("mini.files")
 local lazy = require("lazy")
 
-map("n", "<leader>ul", function()
-    local enabled = not vim.wo.number
+vim.keymap.del("n", "<leader>ul")
+vim.keymap.del("n", "<leader>uL")
 
-    -- Set defaults for future windows
-    vim.opt_global.number = enabled
-    vim.opt_global.relativenumber = enabled
+local line_number_mode = "relative"
+local previous_line_number_mode = "relative"
 
-    -- Update all existing windows
+local function set_line_numbers(mode)
+    line_number_mode = mode
+
+    local number = mode ~= "off"
+    local relative = mode == "relative"
+
+    vim.opt_global.number = number
+    vim.opt_global.relativenumber = relative
+
     for _, win in ipairs(vim.api.nvim_list_wins()) do
         if vim.api.nvim_win_is_valid(win) then
-            vim.wo[win].number = enabled
-            vim.wo[win].relativenumber = enabled
+            vim.wo[win].number = number
+            vim.wo[win].relativenumber = relative
         end
     end
-end, { desc = "Toggle line numbers globally" })
+end
 
-map("n", "<leader>uL", function()
-    -- If relative numbers are currently enabled, switch to normal numbers
-    if vim.wo.relativenumber then
-        vim.opt_global.number = true
-        vim.opt_global.relativenumber = false
-
-        for _, win in ipairs(vim.api.nvim_list_wins()) do
-            if vim.api.nvim_win_is_valid(win) then
-                vim.wo[win].number = true
-                vim.wo[win].relativenumber = false
-            end
-        end
+-- <leader>ul → toggle numbers
+map("n", "<leader>ul", function()
+    if line_number_mode == "off" then
+        set_line_numbers(previous_line_number_mode)
     else
-        -- Otherwise switch to relative numbers
-        vim.opt_global.number = true
-        vim.opt_global.relativenumber = true
-
-        for _, win in ipairs(vim.api.nvim_list_wins()) do
-            if vim.api.nvim_win_is_valid(win) then
-                vim.wo[win].number = true
-                vim.wo[win].relativenumber = true
-            end
-        end
+        previous_line_number_mode = line_number_mode
+        set_line_numbers("off")
     end
-end, { desc = "Toggle relative/normal line numbers" })
+end, { desc = "Toggle line numbers" })
+
+-- <leader>uL → normal ↔ relative
+map("n", "<leader>uL", function()
+    if line_number_mode == "off" then
+        set_line_numbers(
+            previous_line_number_mode == "relative" and "normal" or "relative"
+        )
+    elseif line_number_mode == "relative" then
+        set_line_numbers("normal")
+    else
+        set_line_numbers("relative")
+    end
+
+    if line_number_mode ~= "off" then
+        previous_line_number_mode = line_number_mode
+    end
+end, { desc = "Toggle relative line numbers" })
 
 -- Incremental Selection
 map({ "n", "x", "o" }, "<A-o>", function()

@@ -45,6 +45,7 @@ return {
                     "#000000",
                     "#232136",
                     "#030200",
+                    "#242425",
                 }
 
                 vim.g.rose_pine_base_index = (vim.g.rose_pine_base_index or 1)

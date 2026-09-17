@@ -27,6 +27,7 @@ return {
         notifier = {
             enabled = true,
             style = "compact",
+            top_down = false,
         },
         -- terminal = {
         --     win = {

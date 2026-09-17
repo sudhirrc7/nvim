@@ -12,7 +12,7 @@ return {
         end,
         no_italic = false,
         term_colors = true,
-        transparent_background = true,
+        transparent_background = false,
         styles = {
             comments = { "italic" },
             conditionals = {},
@@ -28,9 +28,10 @@ return {
         },
         color_overrides = {
             mocha = {
-                base = "#181825",
-                -- mantle = "#000000",
-                -- crust = "#000000",
+                -- base = "#181825",
+                base = "#000000",
+                mantle = "#000000",
+                crust = "#000000",
             },
         },
         float = {

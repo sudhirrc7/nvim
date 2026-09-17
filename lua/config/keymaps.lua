@@ -947,7 +947,7 @@ vim.api.nvim_create_autocmd("BufWinLeave", {
 -- Python / JavaScript / TypeScript / Java:
 --     Run directly for every test
 --
--- Every test has a 4 second timeout.
+-- Every test has a 10 second timeout.
 --
 -- If a test times out or crashes:
 --     - Stop the current program
@@ -1124,7 +1124,6 @@ map("n", "<leader>ir", function()
             "No input files found. Press <leader>ic first.",
             vim.log.levels.WARN
         )
-
         return
     end
 
@@ -1233,7 +1232,7 @@ map("n", "<leader>ir", function()
         end
 
         -- ====================================================
-        -- 4 SECOND TIMEOUT
+        -- TIMEOUT
         -- ====================================================
 
         timer:start(
@@ -1297,7 +1296,6 @@ map("n", "<leader>ir", function()
                     run_error_buf = vim.api.nvim_create_buf(false, true)
 
                     vim.bo[run_error_buf].bufhidden = "hide"
-
                     vim.bo[run_error_buf].filetype = "text"
 
                     vim.api.nvim_buf_set_name(run_error_buf, "Run Errors")
@@ -1345,8 +1343,11 @@ map("n", "<leader>ir", function()
         job_id = vim.fn.jobstart(command, {
             stdin = "pipe",
 
-            stdout_buffered = false,
-            stderr_buffered = false,
+            -- IMPORTANT:
+            -- Buffer stdout/stderr so we receive complete lines
+            -- instead of arbitrary chunks.
+            stdout_buffered = true,
+            stderr_buffered = true,
 
             -- ========================================
             -- STDOUT
@@ -1423,25 +1424,15 @@ map("n", "<leader>ir", function()
                         -- -----------------------------
 
                         local error_lines = {
-
                             "========================================",
-
                             "ERROR - Test Case " .. test_number,
-
                             "========================================",
-
                             "",
-
                             "Input:  " .. vim.fn.fnamemodify(test.input, ":t"),
-
                             "Output: " .. vim.fn.fnamemodify(test.output, ":t"),
-
                             "",
-
                             "Exit code: " .. exit_code,
-
                             "Execution time: " .. elapsed_ms .. " ms",
-
                             "",
                         }
 
@@ -1514,7 +1505,6 @@ map("n", "<leader>ir", function()
                             )
                         else
                             vim.cmd("botright new")
-
                             vim.cmd("resize 15")
 
                             run_error_win = vim.api.nvim_get_current_win()
@@ -1551,14 +1541,20 @@ map("n", "<leader>ir", function()
                         table.insert(output_lines, line)
                     end
 
-                    -- Remove final empty lines that
-                    -- can be produced by stdout capture.
+                    -- ---------------------------------
+                    -- Remove ONLY trailing empty lines
+                    -- ---------------------------------
+
                     while
                         #output_lines > 0
                         and output_lines[#output_lines] == ""
                     do
                         table.remove(output_lines)
                     end
+
+                    -- ---------------------------------
+                    -- Write output
+                    -- ---------------------------------
 
                     vim.fn.writefile(output_lines, test.output)
 

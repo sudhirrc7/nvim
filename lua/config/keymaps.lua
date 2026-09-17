@@ -7,11 +7,23 @@ local o = vim.opt
 local MiniFiles = require("mini.files")
 local lazy = require("lazy")
 
+-- ============================================================
+-- REMOVE LAZYVIM DEFAULT MAPPINGS
+-- ============================================================
+
 vim.keymap.del("n", "<leader>ul")
 vim.keymap.del("n", "<leader>uL")
 
+-- ============================================================
+-- LINE NUMBER STATE
+-- ============================================================
+
 local line_number_mode = "relative"
 local previous_line_number_mode = "relative"
+
+-- ============================================================
+-- SET LINE NUMBER MODE
+-- ============================================================
 
 local function set_line_numbers(mode)
     line_number_mode = mode
@@ -19,18 +31,50 @@ local function set_line_numbers(mode)
     local number = mode ~= "off"
     local relative = mode == "relative"
 
+    -- Global defaults
     vim.opt_global.number = number
     vim.opt_global.relativenumber = relative
 
+    -- Apply to all currently existing windows
     for _, win in ipairs(vim.api.nvim_list_wins()) do
         if vim.api.nvim_win_is_valid(win) then
-            vim.wo[win].number = number
-            vim.wo[win].relativenumber = relative
+            vim.api.nvim_set_option_value("number", number, {
+                win = win,
+            })
+
+            vim.api.nvim_set_option_value("relativenumber", relative, {
+                win = win,
+            })
         end
     end
 end
 
--- <leader>ul → toggle numbers
+-- ============================================================
+-- AUTOCMD
+-- Keep buffers/windows synchronized
+-- ============================================================
+
+local line_number_group =
+    vim.api.nvim_create_augroup("LineNumberSync", { clear = true })
+
+vim.api.nvim_create_autocmd({
+    "BufEnter",
+    "BufWinEnter",
+    "WinEnter",
+}, {
+    group = line_number_group,
+
+    callback = function()
+        vim.wo.number = line_number_mode ~= "off"
+        vim.wo.relativenumber = line_number_mode == "relative"
+    end,
+})
+
+-- ============================================================
+-- <leader>ul
+-- TOGGLE LINE NUMBERS ON/OFF
+-- ============================================================
+
 map("n", "<leader>ul", function()
     if line_number_mode == "off" then
         set_line_numbers(previous_line_number_mode)
@@ -38,9 +82,15 @@ map("n", "<leader>ul", function()
         previous_line_number_mode = line_number_mode
         set_line_numbers("off")
     end
-end, { desc = "Toggle line numbers" })
+end, {
+    desc = "Toggle line numbers",
+})
 
--- <leader>uL → normal ↔ relative
+-- ============================================================
+-- <leader>uL
+-- TOGGLE NORMAL ↔ RELATIVE
+-- ============================================================
+
 map("n", "<leader>uL", function()
     if line_number_mode == "off" then
         set_line_numbers(
@@ -55,7 +105,9 @@ map("n", "<leader>uL", function()
     if line_number_mode ~= "off" then
         previous_line_number_mode = line_number_mode
     end
-end, { desc = "Toggle relative line numbers" })
+end, {
+    desc = "Toggle relative line numbers",
+})
 
 -- Incremental Selection
 map({ "n", "x", "o" }, "<A-o>", function()

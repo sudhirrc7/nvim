@@ -3,14 +3,22 @@
 -- Add any additional keymaps here
 
 local map = vim.keymap.set
-local o = vim.opt
+-- local o = vim.opt
 local MiniFiles = require("mini.files")
 local lazy = require("lazy")
+
+map("o", "c", function()
+    return "_"
+end, {
+    expr = true,
+    desc = "Comment current line",
+})
 
 -- ============================================================
 -- REMOVE LAZYVIM DEFAULT MAPPINGS
 -- ============================================================
-
+map("n", "<S-w>", "b", { desc = "Previous word" })
+map("n", "<S-e>", "ge", { desc = "Previous word end" })
 vim.keymap.del("n", "<leader>ul")
 vim.keymap.del("n", "<leader>uL")
 
@@ -22,36 +30,57 @@ local line_number_mode = "relative"
 local previous_line_number_mode = "relative"
 
 -- ============================================================
+-- CHECK IF WINDOW IS A NORMAL EDITOR WINDOW
+-- ============================================================
+
+local function is_normal_window(win)
+    if not vim.api.nvim_win_is_valid(win) then
+        return false
+    end
+
+    local bufnr = vim.api.nvim_win_get_buf(win)
+
+    -- Only normal file buffers
+    return vim.bo[bufnr].buftype == ""
+end
+
+-- ============================================================
+-- APPLY LINE NUMBER MODE
+-- ============================================================
+
+local function apply_line_numbers(win)
+    if not is_normal_window(win) then
+        return
+    end
+
+    local number = line_number_mode ~= "off"
+    local relative = line_number_mode == "relative"
+
+    vim.api.nvim_set_option_value("number", number, {
+        win = win,
+    })
+
+    vim.api.nvim_set_option_value("relativenumber", relative, {
+        win = win,
+    })
+end
+
+-- ============================================================
 -- SET LINE NUMBER MODE
 -- ============================================================
 
 local function set_line_numbers(mode)
     line_number_mode = mode
 
-    local number = mode ~= "off"
-    local relative = mode == "relative"
-
-    -- Global defaults
-    vim.opt_global.number = number
-    vim.opt_global.relativenumber = relative
-
-    -- Apply to all currently existing windows
+    -- Apply ONLY to normal editor windows
     for _, win in ipairs(vim.api.nvim_list_wins()) do
-        if vim.api.nvim_win_is_valid(win) then
-            vim.api.nvim_set_option_value("number", number, {
-                win = win,
-            })
-
-            vim.api.nvim_set_option_value("relativenumber", relative, {
-                win = win,
-            })
-        end
+        apply_line_numbers(win)
     end
 end
 
 -- ============================================================
 -- AUTOCMD
--- Keep buffers/windows synchronized
+-- Keep ONLY normal windows synchronized
 -- ============================================================
 
 local line_number_group =
@@ -65,8 +94,7 @@ vim.api.nvim_create_autocmd({
     group = line_number_group,
 
     callback = function()
-        vim.wo.number = line_number_mode ~= "off"
-        vim.wo.relativenumber = line_number_mode == "relative"
+        apply_line_numbers(vim.api.nvim_get_current_win())
     end,
 })
 
@@ -253,14 +281,18 @@ map("n", "<leader>fT", "<Nop>")
 -- end, { desc = "Toggle transparency" })
 
 -- -- this is used to toggle the transparency of the catppuccin theme on the fly
--- local config1 = {
---     transparent_background = true,
--- }
--- map("n", "<leader>tc", function()
---     config1.transparent_background = not config.transparent_background
---     require("catppuccin").setup(config1)
---     vim.cmd.colorscheme("catppuccin-mocha")
--- end, { desc = "Toggle transparency" })
+local config1 = {
+    transparent_background = true,
+    float = {
+        transparent = true, -- enables transparency on floating windows
+        solid = true, -- use nvchad styling for floating windows
+    },
+}
+map("n", "<leader>t1", function()
+    config1.transparent_background = not config1.transparent_background
+    require("catppuccin").setup(config1)
+    vim.cmd.colorscheme("catppuccin-mocha")
+end, { desc = "Toggle transparency" })
 
 -- Identation
 map("n", "<", "<<", { desc = "Deindent" })
@@ -287,8 +319,8 @@ map(
 -- Increment/decrement
 -- map("n", "+", "<C-a>")
 
--- toggle oil
-map("n", "-", "<cmd>Oil<cr>", { desc = "toggle oil lua" })
+-- -- toggle oil
+-- map("n", "-", "<cmd>Oil<cr>", { desc = "toggle oil lua" })
 
 --toggle code diff
 map("n", "<leader>cd", "<cmd>CodeDiff<cr>", { desc = "Toggle codediff" })
@@ -300,10 +332,10 @@ map("n", "<M-CR>", "<cmd>e #<cr>", { desc = "Switch to Other Buffer" })
 
 -- Toggle statusline
 map("n", "<leader>uX", function()
-    if o.laststatus == 0 then
-        o.laststatus = 3
+    if vim.o.laststatus == 0 then
+        vim.o.laststatus = 3
     else
-        o.laststatus = 0
+        vim.o.laststatus = 0
     end
 end, { desc = "Toggle Statusline" })
 
@@ -829,7 +861,7 @@ end, {
 vim.keymap.del("n", "<C-l>")
 
 if vim.fn.has("nvim-0.13") == 1 then
-    vim.keymap.set("n", "<C-l>", function()
+    map("n", "<C-l>", function()
         local ns = vim.api.nvim_create_namespace("nvim.multicursor")
         vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
     end, {
@@ -839,7 +871,7 @@ end
 
 if vim.fn.has("nvim-0.13") == 1 then
     local multicursor_ns = vim.api.nvim_create_namespace("nvim.multicursor")
-    vim.keymap.set("n", "<Esc>", function()
+    map("n", "<Esc>", function()
         vim.cmd.nohlsearch()
         vim.api.nvim_buf_clear_namespace(0, multicursor_ns, 0, -1)
     end, { desc = "Clear search highligts & multicursors" })
@@ -3556,3 +3588,12 @@ map("n", "<leader>ia", function()
 end, {
     desc = "Quick CP test summary",
 })
+
+--------------create cp folders for C++ lnagueges-------------------
+
+map("n", "<leader>im", function()
+    vim.fn.jobstart({ "fish", "-c", "cppfolders" }, {
+        cwd = vim.fn.getcwd(),
+        detach = true,
+    })
+end, { desc = "Create C++ folders" })

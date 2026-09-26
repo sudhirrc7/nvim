@@ -6,4 +6,7 @@ return {
             -- auto_cmd = true,
         })
     end,
+    keys = {
+        { "<leader>ig", "<cmd>GuessIndent<cr>", { desc = "GuessBufferIndent" } },
+    },
 }

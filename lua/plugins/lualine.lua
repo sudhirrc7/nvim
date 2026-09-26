@@ -21,8 +21,8 @@ return {
     enabled = true,
     lazy = false,
     opts = function(_, opts)
-        -- opts.options.component_separators = { left = "", right = "" }
-        -- opts.options.section_separators = { left = "", right = "" }
+        opts.options.component_separators = { left = "", right = "" }
+        opts.options.section_separators = { left = "", right = "" }
 
         opts.sections.lualine_a = {
             {
@@ -60,7 +60,97 @@ return {
         opts.extensions = false
     end,
 }
+
+-- return {
+--     "nvim-lualine/lualine.nvim",
+--     enabled = true,
+--     lazy = false,
 --
+--     opts = function(_, opts)
+--         opts.options.component_separators = {
+--             left = "",
+--             right = "",
+--         }
+--
+--         opts.options.section_separators = {
+--             left = "",
+--             right = "",
+--         }
+--
+--         opts.sections.lualine_a = {
+--             {
+--                 "mode",
+--             },
+--         }
+--
+--         -- Git branch + buffers
+--         opts.sections.lualine_b = {
+--             {
+--                 "branch",
+--                 icon = "",
+--             },
+--             {
+--                 "diff",
+--                 symbols = {
+--                     added = " ",
+--                     modified = " ",
+--                     removed = " ",
+--                 },
+--             },
+--             {
+--                 "buffers",
+--                 mode = 0,
+--                 show_filename_only = true,
+--                 hide_filename_extension = false,
+--                 show_modified_status = true,
+--
+--                 buffers_color = {
+--                     active = "lualine_a_normal",
+--                     inactive = "lualine_b_inactive",
+--                 },
+--
+--                 symbols = {
+--                     modified = " ●",
+--                     alternate_file = "",
+--                     directory = "",
+--                 },
+--             },
+--         }
+--
+--         opts.sections.lualine_c[4] = {
+--             LazyVim.lualine.pretty_path({
+--                 filename_hl = "Bold",
+--                 modified_hl = "MatchParen",
+--                 directory_hl = "Conceal",
+--             }),
+--         }
+--
+--         if vim.g.lualine_info_extras == true then
+--             table.insert(opts.sections.lualine_x, 2, { "lsp_status" })
+--             table.insert(opts.sections.lualine_x, 2, formatter)
+--             table.insert(opts.sections.lualine_x, 2, linter)
+--         end
+--
+--         opts.sections.lualine_y = {
+--             "progress",
+--         }
+--
+--         opts.sections.lualine_z = {
+--             {
+--                 "location",
+--                 separator = "",
+--             },
+--             {
+--                 padding = {
+--                     left = 0,
+--                     right = 1,
+--                 },
+--             },
+--         }
+--
+--         opts.extensions = false
+--     end,
+-- }
 -- return {
 --     "nvim-lualine/lualine.nvim",
 --

@@ -7,14 +7,14 @@ return {
             function()
                 require("close_buffers").delete({ type = "hidden" })
             end,
-            "Close Hidden Buffers",
+            desc = "Close Hidden Buffers",
         },
         {
             "<leader>tu",
             function()
                 require("close_buffers").delete({ type = "nameless" })
             end,
-            "Close Nameless Buffers",
+            desc = "Close Nameless Buffers",
         },
     },
 }

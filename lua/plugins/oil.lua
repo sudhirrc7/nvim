@@ -1,6 +1,7 @@
 return {
     "stevearc/oil.nvim",
     lazy = false,
+    enabled = true,
     -- dependencies = {
     --     "nvim-tree/nvim-web-devicons",
     --     optional = true,
@@ -38,6 +39,7 @@ return {
     },
   -- stylua: ignore
   keys = {
-    { "-", function() require("oil").toggle_float() end, desc = "Toggle Oil" },
+    { "-", "<cmd>Oil<cr>", { desc = "toggle oil lua" } },
+    { "<leader>i-", function() require("oil").toggle_float() end, desc = "Toggle Oil" },
   },
 }

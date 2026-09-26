@@ -15,6 +15,7 @@ return {
                     multilines = {
                         always_show = true,
                         enabled = true,
+                        severity = { vim.diagnostic.severity.ERROR },
                     },
                 },
             })
@@ -34,3 +35,29 @@ return {
         },
     },
 }
+
+--- use this along with the autocmd for the floating diagnostics
+
+-- return {
+--     {
+--         "neovim/nvim-lspconfig",
+--         opts = {
+--             diagnostics = {
+--                 virtual_text = false,
+--
+--                 float = {
+--                     border = "rounded",
+--                     source = "if_many",
+--                     header = "",
+--                     prefix = "",
+--                     focusable = false,
+--                 },
+--
+--                 signs = true,
+--                 underline = true,
+--                 update_in_insert = false,
+--                 severity_sort = true,
+--             },
+--         },
+--     },
+-- }

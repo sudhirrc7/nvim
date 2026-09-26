@@ -26,7 +26,7 @@ return {
         },
         notifier = {
             enabled = true,
-            style = "compact",
+            style = "minimal",
             top_down = false,
         },
         -- terminal = {
@@ -143,13 +143,13 @@ return {
         },
         indent = {
             enabled = false,
-            -- indent = {
-            --     char = "┊",
-            -- },
-            -- scope = {
-            --     enabled = true,
-            --     char = "┊",
-            -- },
+            indent = {
+                char = "┊",
+            },
+            scope = {
+                enabled = true,
+                char = "┊",
+            },
         },
         scroll = {
             animate = {

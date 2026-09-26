@@ -154,3 +154,16 @@ vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
         vim.opt_local.wrap = false
     end,
 })
+
+-- vim.api.nvim_create_autocmd("CursorHold", {
+--     callback = function()
+--         vim.diagnostic.open_float(nil, {
+--             focus = false,
+--             scope = "cursor",
+--             border = "none",
+--             source = "if_many",
+--             header = "",
+--             prefix = "",
+--         })
+--     end,
+-- })

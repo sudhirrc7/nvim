@@ -1,0 +1,118 @@
+{
+    "CP Template": {
+        "prefix": "cptemp",
+        "body": [
+            "const data = require(\"fs\").readFileSync(0, \"utf8\").split(/\\\\s+/).filter(Boolean);",
+            "let pos = 0;",
+            "const next = () => data[pos++];",
+            "const nextInt = () => Number(data[pos++]);",
+            "const out = [];",
+            "",
+            "function solve() {",
+            "    ${1:const n = nextInt();}",
+            "    $0",
+            "}",
+            "",
+            "let t = ${2:nextInt()};",
+            "while (t-- > 0) solve();",
+            "console.log(out.join(\"\\\\n\"));"
+        ],
+        "description": "Read all stdin as tokens, collect output, multi-test"
+    },
+    "Min Heap": {
+        "prefix": "cpheap",
+        "body": [
+            "class MinHeap {",
+            "    constructor(cmp = (a, b) => a - b) {",
+            "        this.h = [];",
+            "        this.cmp = cmp;",
+            "    }",
+            "    get size() {",
+            "        return this.h.length;",
+            "    }",
+            "    push(x) {",
+            "        const h = this.h;",
+            "        h.push(x);",
+            "        let i = h.length - 1;",
+            "        while (i > 0) {",
+            "            const p = (i - 1) >> 1;",
+            "            if (this.cmp(h[i], h[p]) >= 0) break;",
+            "            [h[i], h[p]] = [h[p], h[i]];",
+            "            i = p;",
+            "        }",
+            "    }",
+            "    pop() {",
+            "        const h = this.h;",
+            "        const top = h[0];",
+            "        const last = h.pop();",
+            "        if (h.length > 0) {",
+            "            h[0] = last;",
+            "            let i = 0;",
+            "            for (;;) {",
+            "                const l = 2 * i + 1, r = l + 1;",
+            "                let m = i;",
+            "                if (l < h.length && this.cmp(h[l], h[m]) < 0) m = l;",
+            "                if (r < h.length && this.cmp(h[r], h[m]) < 0) m = r;",
+            "                if (m === i) break;",
+            "                [h[i], h[m]] = [h[m], h[i]];",
+            "                i = m;",
+            "            }",
+            "        }",
+            "        return top;",
+            "    }",
+            "}"
+        ],
+        "description": "Binary min-heap with custom comparator"
+    },
+    "Modular Arithmetic": {
+        "prefix": "cpmod",
+        "body": [
+            "const MOD = ${1:1000000007n};",
+            "",
+            "function binpow(b, e, m = MOD) {",
+            "    let r = 1n;",
+            "    b %= m;",
+            "    while (e > 0n) {",
+            "        if (e & 1n) r = (r * b) % m;",
+            "        b = (b * b) % m;",
+            "        e >>= 1n;",
+            "    }",
+            "    return r;",
+            "}"
+        ],
+        "description": "BigInt binary exponentiation (safe for 1e9+7 products)"
+    },
+    "GCD": {
+        "prefix": "cpgcd",
+        "body": [
+            "const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));",
+            "const lcm = (a, b) => (a / gcd(a, b)) * b;"
+        ],
+        "description": "gcd and lcm"
+    },
+    "DSU": {
+        "prefix": "cpdsu",
+        "body": [
+            "class DSU {",
+            "    constructor(n) {",
+            "        this.parent = Array.from({ length: n }, (_, i) => i);",
+            "        this.size = new Array(n).fill(1);",
+            "    }",
+            "    find(x) {",
+            "        while (this.parent[x] !== x) x = this.parent[x] = this.parent[this.parent[x]];",
+            "        return x;",
+            "    }",
+            "    union(a, b) {",
+            "        a = this.find(a);",
+            "        b = this.find(b);",
+            "        if (a === b) return false;",
+            "        if (this.size[a] < this.size[b]) [a, b] = [b, a];",
+            "        this.parent[b] = a;",
+            "        this.size[a] += this.size[b];",
+            "        return true;",
+            "    }",
+            "}"
+        ],
+        "description": "Union-find with path compression and union by size"
+    }
+}

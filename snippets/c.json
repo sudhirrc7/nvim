@@ -1,0 +1,98 @@
+{
+    "CP Template": {
+        "prefix": "cptemp",
+        "body": [
+            "#include <stdio.h>",
+            "#include <stdlib.h>",
+            "#include <string.h>",
+            "#include <stdbool.h>",
+            "",
+            "typedef long long ll;",
+            "",
+            "void solve(void) {",
+            "    $0",
+            "}",
+            "",
+            "int main(void) {",
+            "    int tt = 1;",
+            "    ${1:scanf(\"%d\", &tt);}",
+            "    while (tt--) solve();",
+            "    return 0;",
+            "}"
+        ],
+        "description": "C template with multi-test loop"
+    },
+    "Modular Arithmetic": {
+        "prefix": "cpmod",
+        "body": [
+            "#define MOD ${1:1000000007LL}",
+            "",
+            "long long binpow(long long b, long long e, long long m) {",
+            "    long long r = 1;",
+            "    b %= m;",
+            "    if (b < 0) b += m;",
+            "    for (; e > 0; e >>= 1, b = b * b % m)",
+            "        if (e & 1) r = r * b % m;",
+            "    return r;",
+            "}"
+        ],
+        "description": "MOD and binary exponentiation"
+    },
+    "GCD": {
+        "prefix": "cpgcd",
+        "body": [
+            "long long gcd(long long a, long long b) { return b ? gcd(b, a % b) : a; }",
+            "long long lcm(long long a, long long b) { return a / gcd(a, b) * b; }"
+        ],
+        "description": "gcd and lcm for long long"
+    },
+    "qsort Comparator": {
+        "prefix": "cpsort",
+        "body": [
+            "int cmp_ll(const void* a, const void* b) {",
+            "    long long x = *(const long long*)a, y = *(const long long*)b;",
+            "    return (x > y) - (x < y);",
+            "}",
+            "// qsort(arr, n, sizeof(long long), cmp_ll);"
+        ],
+        "description": "Ascending comparator for long long + qsort call"
+    },
+    "Sieve": {
+        "prefix": "cpsieve",
+        "body": [
+            "#define MAXV ${1:1000001}",
+            "bool composite[MAXV];",
+            "",
+            "void sieve(void) {",
+            "    composite[0] = composite[1] = true;",
+            "    for (long long i = 2; i * i < MAXV; i++)",
+            "        if (!composite[i])",
+            "            for (long long j = i * i; j < MAXV; j += i) composite[j] = true;",
+            "}"
+        ],
+        "description": "Sieve of Eratosthenes up to MAXV"
+    },
+    "DSU": {
+        "prefix": "cpdsu",
+        "body": [
+            "#define MAXN ${1:200005}",
+            "int parent[MAXN], size_[MAXN];",
+            "",
+            "void dsu_init(int n) {",
+            "    for (int i = 0; i < n; i++) parent[i] = i, size_[i] = 1;",
+            "}",
+            "",
+            "int find(int x) { return parent[x] == x ? x : (parent[x] = find(parent[x])); }",
+            "",
+            "bool unite(int a, int b) {",
+            "    a = find(a), b = find(b);",
+            "    if (a == b) return false;",
+            "    if (size_[a] < size_[b]) { int t = a; a = b; b = t; }",
+            "    parent[b] = a;",
+            "    size_[a] += size_[b];",
+            "    return true;",
+            "}"
+        ],
+        "description": "Union-find with path compression and union by size"
+    }
+}

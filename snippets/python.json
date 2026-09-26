@@ -1,0 +1,321 @@
+{
+    "CP Template": {
+        "prefix": "cptemp",
+        "body": [
+            "import sys",
+            "",
+            "input = sys.stdin.readline",
+            "",
+            "",
+            "def solve():",
+            "    ${1:n = int(input())}",
+            "    $0",
+            "",
+            "",
+            "def main():",
+            "    t = ${2:int(input())}",
+            "    for _ in range(t):",
+            "        solve()",
+            "",
+            "",
+            "main()"
+        ],
+        "description": "Fast input + multi-test template"
+    },
+    "Input Helpers": {
+        "prefix": "cpio",
+        "body": [
+            "import sys",
+            "",
+            "input = sys.stdin.readline",
+            "",
+            "",
+            "def ii():",
+            "    return int(input())",
+            "",
+            "",
+            "def mi():",
+            "    return map(int, input().split())",
+            "",
+            "",
+            "def li():",
+            "    return list(map(int, input().split()))",
+            "",
+            "",
+            "def si():",
+            "    return input().strip()"
+        ],
+        "description": "ii / mi / li / si input shortcuts"
+    },
+    "Token Reader": {
+        "prefix": "cptok",
+        "body": [
+            "import sys",
+            "",
+            "data = sys.stdin.buffer.read().split()",
+            "pos = 0",
+            "",
+            "",
+            "def nxt():",
+            "    global pos",
+            "    pos += 1",
+            "    return data[pos - 1]"
+        ],
+        "description": "Read all of stdin at once and pull tokens (fastest input)"
+    },
+    "Common Imports": {
+        "prefix": "cpimp",
+        "body": [
+            "from bisect import bisect_left, bisect_right",
+            "from collections import Counter, defaultdict, deque",
+            "from functools import lru_cache",
+            "from heapq import heappop, heappush",
+            "from itertools import accumulate, combinations, permutations, product",
+            "from math import ceil, comb, gcd, inf, isqrt, lcm, log2"
+        ],
+        "description": "collections, heapq, bisect, itertools, math"
+    },
+    "Bootstrap Recursion": {
+        "prefix": "cpboot",
+        "body": [
+            "from types import GeneratorType",
+            "",
+            "",
+            "def bootstrap(f, stack=[]):",
+            "    def wrappedfunc(*args, **kwargs):",
+            "        if stack:",
+            "            return f(*args, **kwargs)",
+            "        to = f(*args, **kwargs)",
+            "        while True:",
+            "            if type(to) is GeneratorType:",
+            "                stack.append(to)",
+            "                to = next(to)",
+            "            else:",
+            "                stack.pop()",
+            "                if not stack:",
+            "                    break",
+            "                to = stack[-1].send(to)",
+            "        return to",
+            "",
+            "    return wrappedfunc",
+            "",
+            "",
+            "# @bootstrap",
+            "# def dfs(u, p):",
+            "#     for v in adj[u]:",
+            "#         if v != p:",
+            "#             yield dfs(v, u)",
+            "#     yield None"
+        ],
+        "description": "PyRival bootstrap: deep recursion without stack overflow (use yield)"
+    },
+    "Deep Recursion (Thread)": {
+        "prefix": "cprec",
+        "body": [
+            "import sys",
+            "import threading",
+            "",
+            "sys.setrecursionlimit(1 << 25)",
+            "threading.stack_size(1 << 27)",
+            "threading.Thread(target=${1:main}).start()"
+        ],
+        "description": "Raise recursion limit and run main in a thread with a big stack"
+    },
+    "DSU": {
+        "prefix": "cpdsu",
+        "body": [
+            "class DSU:",
+            "    def __init__(self, n):",
+            "        self.parent = list(range(n))",
+            "        self.size = [1] * n",
+            "",
+            "    def find(self, x):",
+            "        while self.parent[x] != x:",
+            "            self.parent[x] = self.parent[self.parent[x]]",
+            "            x = self.parent[x]",
+            "        return x",
+            "",
+            "    def union(self, a, b):",
+            "        a, b = self.find(a), self.find(b)",
+            "        if a == b:",
+            "            return False",
+            "        if self.size[a] < self.size[b]:",
+            "            a, b = b, a",
+            "        self.parent[b] = a",
+            "        self.size[a] += self.size[b]",
+            "        return True"
+        ],
+        "description": "Union-find with path compression and union by size"
+    },
+    "Fenwick Tree": {
+        "prefix": "cpfen",
+        "body": [
+            "class Fenwick:",
+            "    def __init__(self, n):",
+            "        self.n = n",
+            "        self.t = [0] * (n + 1)",
+            "",
+            "    def add(self, i, v):",
+            "        i += 1",
+            "        while i <= self.n:",
+            "            self.t[i] += v",
+            "            i += i & -i",
+            "",
+            "    def sum(self, i):  # [0, i]",
+            "        i += 1",
+            "        s = 0",
+            "        while i > 0:",
+            "            s += self.t[i]",
+            "            i -= i & -i",
+            "        return s",
+            "",
+            "    def range_sum(self, l, r):  # [l, r]",
+            "        return self.sum(r) - (self.sum(l - 1) if l else 0)"
+        ],
+        "description": "BIT, 0-indexed point add / prefix sum"
+    },
+    "Segment Tree": {
+        "prefix": "cpseg",
+        "body": [
+            "class SegTree:",
+            "    def __init__(self, data, func=${1:min}, default=${2:float(\"inf\")}):",
+            "        self.n = len(data)",
+            "        self.func = func",
+            "        self.default = default",
+            "        self.t = [default] * self.n + list(data)",
+            "        for i in range(self.n - 1, 0, -1):",
+            "            self.t[i] = func(self.t[2 * i], self.t[2 * i + 1])",
+            "",
+            "    def update(self, i, v):",
+            "        i += self.n",
+            "        self.t[i] = v",
+            "        while i > 1:",
+            "            i >>= 1",
+            "            self.t[i] = self.func(self.t[2 * i], self.t[2 * i + 1])",
+            "",
+            "    def query(self, l, r):  # [l, r)",
+            "        res = self.default",
+            "        l += self.n",
+            "        r += self.n",
+            "        while l < r:",
+            "            if l & 1:",
+            "                res = self.func(res, self.t[l])",
+            "                l += 1",
+            "            if r & 1:",
+            "                r -= 1",
+            "                res = self.func(res, self.t[r])",
+            "            l >>= 1",
+            "            r >>= 1",
+            "        return res"
+        ],
+        "description": "Iterative segment tree with any associative function, query on [l, r)"
+    },
+    "Sieve": {
+        "prefix": "cpsieve",
+        "body": [
+            "def sieve(n):",
+            "    is_prime = bytearray([1]) * (n + 1)",
+            "    is_prime[0:2] = b\"\\\\x00\\\\x00\"",
+            "    for i in range(2, int(n**0.5) + 1):",
+            "        if is_prime[i]:",
+            "            is_prime[i * i :: i] = bytearray(len(range(i * i, n + 1, i)))",
+            "    return [i for i in range(n + 1) if is_prime[i]]"
+        ],
+        "description": "Sieve of Eratosthenes, returns list of primes"
+    },
+    "Dijkstra": {
+        "prefix": "cpdij",
+        "body": [
+            "from heapq import heappop, heappush",
+            "",
+            "",
+            "def dijkstra(src, adj):",
+            "    dist = [float(\"inf\")] * len(adj)",
+            "    dist[src] = 0",
+            "    pq = [(0, src)]",
+            "    while pq:",
+            "        d, u = heappop(pq)",
+            "        if d != dist[u]:",
+            "            continue",
+            "        for v, w in adj[u]:",
+            "            if d + w < dist[v]:",
+            "                dist[v] = d + w",
+            "                heappush(pq, (dist[v], v))",
+            "    return dist"
+        ],
+        "description": "Shortest paths with heapq, adj[u] = [(v, w)]"
+    },
+    "BFS": {
+        "prefix": "cpbfs",
+        "body": [
+            "from collections import deque",
+            "",
+            "",
+            "def bfs(src, adj):",
+            "    dist = [-1] * len(adj)",
+            "    dist[src] = 0",
+            "    q = deque([src])",
+            "    while q:",
+            "        u = q.popleft()",
+            "        for v in adj[u]:",
+            "            if dist[v] == -1:",
+            "                dist[v] = dist[u] + 1",
+            "                q.append(v)",
+            "    return dist"
+        ],
+        "description": "Breadth-first search distances from a source"
+    },
+    "Modular Arithmetic": {
+        "prefix": "cpmod",
+        "body": [
+            "MOD = ${1:10**9 + 7}",
+            "",
+            "",
+            "def modinv(a):",
+            "    return pow(a, MOD - 2, MOD)"
+        ],
+        "description": "MOD and inverse via pow"
+    },
+    "nCr (Factorials)": {
+        "prefix": "cpncr",
+        "body": [
+            "MOD = ${1:10**9 + 7}",
+            "MAXF = ${2:200005}",
+            "fact = [1] * MAXF",
+            "for i in range(1, MAXF):",
+            "    fact[i] = fact[i - 1] * i % MOD",
+            "inv_fact = [1] * MAXF",
+            "inv_fact[-1] = pow(fact[-1], MOD - 2, MOD)",
+            "for i in range(MAXF - 1, 0, -1):",
+            "    inv_fact[i - 1] = inv_fact[i] * i % MOD",
+            "",
+            "",
+            "def nCr(n, r):",
+            "    if r < 0 or r > n:",
+            "        return 0",
+            "    return fact[n] * inv_fact[r] % MOD * inv_fact[n - r] % MOD"
+        ],
+        "description": "Precomputed factorials for nCr mod p"
+    },
+    "Binary Search on Answer": {
+        "prefix": "cpbs",
+        "body": [
+            "lo, hi = ${1:0}, ${2:10**18}",
+            "while lo < hi:",
+            "    mid = (lo + hi) // 2",
+            "    if ${3:check(mid)}:",
+            "        hi = mid",
+            "    else:",
+            "        lo = mid + 1",
+            "$0"
+        ],
+        "description": "Smallest x in [lo, hi] where check(x) is True"
+    },
+    "Grid Directions": {
+        "prefix": "cpdir",
+        "body": [
+            "DIRS = [(-1, 0), (0, 1), (1, 0), (0, -1)]"
+        ],
+        "description": "4-directional moves"
+    }
+}

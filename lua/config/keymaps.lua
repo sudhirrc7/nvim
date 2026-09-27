@@ -513,285 +513,6 @@ if vim.g.neovide then
     end, { desc = "Reset zoom" })
 end
 
--------- this is used for the Competitive Programming work----------------------
-
-------- this is tried and tested keymap but it shows the terminal at the bottom ------
-
--- map("n", "<leader>ir", function()
---     local file = vim.fn.expand("%:p")
---     local dir = vim.fn.expand("%:p:h")
---     local ft = vim.bo.filetype
---     if file == "" then
---         vim.notify("Please save the file first")
---         return
---     end
---
---     local input_file = dir .. "/input.txt"
---     local output_file = dir .. "/output.txt"
---
---     -- Create input.txt if it doesn't exist yet
---     if vim.fn.filereadable(input_file) == 0 then
---         vim.fn.writefile({}, input_file)
---     end
---
---     local redirect = " < "
---         .. vim.fn.shellescape(input_file)
---         .. " > "
---         .. vim.fn.shellescape(output_file)
---
---     local cmd
---     if ft == "cpp" then
---         cmd = "g++-16 "
---             .. vim.fn.shellescape(file)
---             .. " -o /tmp/nvim_run && /tmp/nvim_run"
---             .. redirect
---     elseif ft == "c" then
---         cmd = "gcc "
---             .. vim.fn.shellescape(file)
---             .. " -o /tmp/nvim_run && /tmp/nvim_run"
---             .. redirect
---     elseif ft == "python" then
---         cmd = "python3 " .. vim.fn.shellescape(file) .. redirect
---     elseif ft == "javascript" then
---         cmd = "node " .. vim.fn.shellescape(file) .. redirect
---     elseif ft == "go" then
---         cmd = "go run " .. vim.fn.shellescape(file) .. redirect
---     elseif ft == "rust" then
---         cmd = "rustc "
---             .. vim.fn.shellescape(file)
---             .. " -o /tmp/nvim_run && /tmp/nvim_run"
---             .. redirect
---     elseif ft == "typescript" then
---         cmd = "bun run " .. vim.fn.shellescape(file) .. redirect
---     elseif ft == "java" then
---         cmd = "java " .. vim.fn.shellescape(file) .. redirect
---     else
---         vim.notify("Unsupported filetype: " .. ft)
---         return
---     end
---
---     -- Save current file
---     vim.cmd("write")
---
---     -- Reuse existing terminal window if it's still open,
---     -- otherwise create a new bottom split
---     if run_term_win and vim.api.nvim_win_is_valid(run_term_win) then
---         vim.api.nvim_set_current_win(run_term_win)
---         local old_buf = vim.api.nvim_get_current_buf()
---         vim.cmd("enew") -- fresh empty buffer in the same window
---         if vim.api.nvim_buf_is_valid(old_buf) then
---             pcall(vim.api.nvim_buf_delete, old_buf, { force = true })
---         end
---     else
---         vim.cmd("botright new")
---         vim.cmd("resize 15")
---         run_term_win = vim.api.nvim_get_current_win()
---     end
---
---     -- Run command through shell
---     vim.fn.jobstart({ "sh", "-c", cmd }, { term = true })
---
---     -- Enter terminal mode
---     vim.cmd("startinsert")
--- end, {
---     desc = "Run current file (CP mode: input.txt -> output.txt)",
--- })
-
------ this is new approach shows bottom buffer only if there are any issues in the code ----
-
------------- new approach enable this if chatgpt one fails -----------------------------------------
--- local run_error_win = nil
--- local run_error_buf = nil
---
--- map("n", "<leader>ir", function()
---     local file = vim.fn.expand("%:p")
---     local dir = vim.fn.expand("%:p:h")
---     local ft = vim.bo.filetype
---
---     if file == "" then
---         vim.notify("Please save the file first", vim.log.levels.WARN)
---         return
---     end
---
---     local input_file = dir .. "/input.txt"
---     local output_file = dir .. "/output.txt"
---
---     -- Create input.txt if it doesn't exist
---     if vim.fn.filereadable(input_file) == 0 then
---         vim.fn.writefile({}, input_file)
---     end
---
---     -- Save current file
---     vim.cmd("write")
---
---     local redirect = " < "
---         .. vim.fn.shellescape(input_file)
---         .. " > "
---         .. vim.fn.shellescape(output_file)
---
---     local cmd
---
---     if ft == "cpp" then
---         cmd = "g++-16 "
---             .. vim.fn.shellescape(file)
---             .. " -o /tmp/nvim_run && /tmp/nvim_run"
---             .. redirect
---     elseif ft == "c" then
---         cmd = "gcc "
---             .. vim.fn.shellescape(file)
---             .. " -o /tmp/nvim_run && /tmp/nvim_run"
---             .. redirect
---     elseif ft == "python" then
---         cmd = "python3 " .. vim.fn.shellescape(file) .. redirect
---     elseif ft == "javascript" then
---         cmd = "node " .. vim.fn.shellescape(file) .. redirect
---     elseif ft == "go" then
---         cmd = "go run " .. vim.fn.shellescape(file) .. redirect
---     elseif ft == "rust" then
---         cmd = "rustc "
---             .. vim.fn.shellescape(file)
---             .. " -o /tmp/nvim_run && /tmp/nvim_run"
---             .. redirect
---     elseif ft == "typescript" then
---         cmd = "bun run " .. vim.fn.shellescape(file) .. redirect
---     elseif ft == "java" then
---         cmd = "java " .. vim.fn.shellescape(file) .. redirect
---     else
---         vim.notify("Unsupported filetype: " .. ft, vim.log.levels.WARN)
---         return
---     end
---
---     local stderr = {}
---
---     -- Run the command once
---     vim.fn.jobstart({ "sh", "-c", cmd }, {
---         stdout_buffered = true,
---         stderr_buffered = true,
---
---         on_stderr = function(_, data)
---             if data then
---                 for _, line in ipairs(data) do
---                     if line ~= "" then
---                         table.insert(stderr, line)
---                     end
---                 end
---             end
---         end,
---
---         on_exit = function(_, exit_code)
---             vim.schedule(function()
---                 -- =========================
---                 -- SUCCESS
---                 -- =========================
---                 if exit_code == 0 then
---                     -- vim.notify("success", vim.log.levels.INFO)
---
---                     -- Refresh output.txt if already open
---                     local output_buf = vim.fn.bufnr(output_file)
---
---                     if
---                         output_buf ~= -1
---                         and vim.api.nvim_buf_is_valid(output_buf)
---                     then
---                         vim.api.nvim_buf_call(output_buf, function()
---                             vim.cmd("edit!")
---                         end)
---                     end
---
---                     return
---                 end
---
---                 -- =========================
---                 -- ERROR
---                 -- =========================
---
---                 -- Create/reuse error buffer
---                 if
---                     not run_error_buf
---                     or not vim.api.nvim_buf_is_valid(run_error_buf)
---                 then
---                     run_error_buf = vim.api.nvim_create_buf(false, true)
---
---                     vim.bo[run_error_buf].bufhidden = "hide"
---                     vim.bo[run_error_buf].filetype = "text"
---                     vim.api.nvim_buf_set_name(run_error_buf, "Run Errors")
---                 end
---
---                 -- Put captured errors into buffer
---                 vim.bo[run_error_buf].modifiable = true
---
---                 vim.api.nvim_buf_set_lines(run_error_buf, 0, -1, false, stderr)
---
---                 vim.bo[run_error_buf].modifiable = false
---
---                 -- Reuse existing error window
---                 if
---                     run_error_win
---                     and vim.api.nvim_win_is_valid(run_error_win)
---                 then
---                     vim.api.nvim_win_set_buf(run_error_win, run_error_buf)
---                 else
---                     -- Open bottom split only on error
---                     vim.cmd("botright new")
---                     vim.cmd("resize 15")
---
---                     run_error_win = vim.api.nvim_get_current_win()
---
---                     vim.api.nvim_win_set_buf(run_error_win, run_error_buf)
---                 end
---             end)
---         end,
---     })
--- end, {
---     desc = "Run current file (input.txt -> output.txt)",
--- })
---
--- ------------------- end of the new approach ----------------------------------------------------------
---
--- ------------------------- this is a keymap to create out and input txt files and if they exist already then use them --------------------
---
--- map("n", "<leader>ic", function()
---     local dir = vim.fn.expand("%:p:h")
---     if dir == "" then
---         vim.notify("Please save the file first")
---         return
---     end
---
---     local input_file = dir .. "/input.txt"
---     local output_file = dir .. "/output.txt"
---
---     -- Create input.txt / output.txt if they don't exist
---     if vim.fn.filereadable(input_file) == 0 then
---         vim.fn.writefile({}, input_file)
---     end
---     if vim.fn.filereadable(output_file) == 0 then
---         vim.fn.writefile({}, output_file)
---     end
---
---     -- Remember the current (solution) buffer/window
---     local sol_win = vim.api.nvim_get_current_win()
---
---     -- Open a vertical split to the right for input.txt
---     vim.cmd("rightbelow vsplit " .. vim.fn.fnameescape(input_file))
---     local input_win = vim.api.nvim_get_current_win()
---
---     -- Below input.txt, open output.txt (horizontal split)
---     vim.cmd("belowright split " .. vim.fn.fnameescape(output_file))
---     -- local output_win = vim.api.nvim_get_current_win()
---
---     -- Make the right column roughly half the screen width
---     vim.api.nvim_set_current_win(input_win)
---     vim.cmd("vertical resize " .. math.floor(vim.o.columns / 2))
---
---     -- Balance the two right windows (input/output) vertically
---     vim.cmd("wincmd =")
---
---     -- Return focus to the solution window
---     vim.api.nvim_set_current_win(sol_win)
--- end, {
---     desc = "Open CP layout: solution | input.txt / output.txt",
--- })
---
 ----------------------clear multicursors------------------------------
 
 vim.keymap.del("n", "<C-l>")
@@ -940,8 +661,25 @@ local CP_LANGS = {
 -- ============================================================
 
 local function cp_context()
-    local file = vim.fn.expand("%:p")
-    local ft = vim.bo.filetype
+    local buf = vim.api.nvim_get_current_buf()
+
+    -- Called from a test pane: use the solution shown in another window
+    if not CP_LANGS[vim.bo[buf].filetype] then
+        for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+            local b = vim.api.nvim_win_get_buf(win)
+
+            if
+                CP_LANGS[vim.bo[b].filetype]
+                and vim.api.nvim_buf_get_name(b) ~= ""
+            then
+                buf = b
+                break
+            end
+        end
+    end
+
+    local file = vim.api.nvim_buf_get_name(buf)
+    local ft = vim.bo[buf].filetype
 
     if file == "" then
         vim.notify("Please save the file first", vim.log.levels.WARN)
@@ -955,12 +693,15 @@ local function cp_context()
         return nil
     end
 
-    vim.cmd("write")
+    vim.api.nvim_buf_call(buf, function()
+        vim.cmd("write")
+    end)
 
     return {
         file = file,
         dir = vim.fn.fnamemodify(file, ":h"),
         name = vim.fn.fnamemodify(file, ":t"),
+        ft = ft,
         lang = lang,
     }
 end
@@ -976,6 +717,51 @@ local function cp_test_files(dir, index)
 
     return dir .. "/input" .. index .. ".txt",
         dir .. "/output" .. index .. ".txt"
+end
+
+-- Remove leading/trailing blank lines (pasted samples often have them)
+local function cp_trim_lines(lines)
+    while #lines > 0 and lines[1]:match("^%s*$") do
+        table.remove(lines, 1)
+    end
+
+    while #lines > 0 and lines[#lines]:match("^%s*$") do
+        table.remove(lines)
+    end
+
+    return lines
+end
+
+local function cp_save_buf(buf)
+    if not vim.api.nvim_buf_is_valid(buf) or not vim.bo[buf].modified then
+        return false
+    end
+
+    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, cp_trim_lines(lines))
+
+    vim.api.nvim_buf_call(buf, function()
+        vim.cmd("silent noautocmd write")
+    end)
+
+    return true
+end
+
+-- Save every modified input/output buffer in dir
+local function cp_save_tests(dir)
+    local saved = 0
+
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+        local name = vim.api.nvim_buf_get_name(buf)
+        local is_test = name:match("/input%d*%.txt$")
+            or name:match("/output%d*%.txt$")
+
+        if is_test and vim.fs.dirname(name) == dir and cp_save_buf(buf) then
+            saved = saved + 1
+        end
+    end
+
+    return saved
 end
 
 local function cp_find_tests(dir, need_expected)
@@ -1669,6 +1455,9 @@ local function cp_run(opts, on_done)
         return
     end
 
+    -- Run against what's on screen, not stale files
+    cp_save_tests(ctx.dir)
+
     local tests, find_err = cp_find_tests(ctx.dir, opts.need_expected)
 
     if not tests then
@@ -1805,7 +1594,7 @@ map("n", "<leader>iq", function()
         return
     end
 
-    local ft = vim.bo.filetype
+    local ft = ctx.ft
     cp_quick_out[ft] = cp_quick_out[ft] or vim.fn.tempname()
 
     local function shell(argv)
@@ -1839,107 +1628,8 @@ end, {
     desc = "Run current file",
 })
 
--- ============================================================
--- <leader>ic
--- Open/create next input/output pair
--- ============================================================
-
-local cp_test_index = 0
-local cp_layout_active = false
-
-map("n", "<leader>ic", function()
-    local dir = vim.fn.expand("%:p:h")
-
-    if dir == "" then
-        vim.notify("Please save the file first", vim.log.levels.WARN)
-        return
-    end
-
-    -- If the CP layout is no longer active,
-    -- start again from input.txt
-    if not cp_layout_active then
-        cp_test_index = 0
-    end
-
-    local input_file, output_file = cp_test_files(dir, cp_test_index)
-
-    if vim.fn.filereadable(input_file) == 0 then
-        vim.fn.writefile({}, input_file)
-    end
-
-    if vim.fn.filereadable(output_file) == 0 then
-        vim.fn.writefile({}, output_file)
-    end
-
-    local sol_win = vim.api.nvim_get_current_win()
-
-    -- Input on the right, output below it
-    vim.cmd("rightbelow vsplit " .. vim.fn.fnameescape(input_file))
-    local input_win = vim.api.nvim_get_current_win()
-
-    vim.cmd("belowright split " .. vim.fn.fnameescape(output_file))
-
-    vim.api.nvim_set_current_win(input_win)
-    vim.cmd("vertical resize " .. math.floor(vim.o.columns / 2))
-    vim.cmd("wincmd =")
-
-    vim.api.nvim_set_current_win(sol_win)
-
-    cp_layout_active = true
-
-    vim.notify(
-        "Opened "
-            .. vim.fn.fnamemodify(input_file, ":t")
-            .. " + "
-            .. vim.fn.fnamemodify(output_file, ":t")
-    )
-
-    cp_test_index = cp_test_index + 1
-end, {
-    desc = "Open next CP input/output pair",
-})
-
--- ============================================================
--- Reset CP test case counter when input/output windows are closed
--- ============================================================
-
-local cp_layout_group = vim.api.nvim_create_augroup("cp_layout", {
-    clear = true,
-})
-
-vim.api.nvim_create_autocmd("BufWinEnter", {
-    group = cp_layout_group,
-    callback = function()
-        local name = vim.api.nvim_buf_get_name(0)
-
-        if name:match("/input%d*%.txt$") or name:match("/output%d*%.txt$") then
-            cp_layout_active = true
-        end
-    end,
-})
-
-vim.api.nvim_create_autocmd("BufWinLeave", {
-    group = cp_layout_group,
-    callback = function()
-        vim.schedule(function()
-            for _, win in ipairs(vim.api.nvim_list_wins()) do
-                local name =
-                    vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(win))
-
-                if
-                    name:match("/input%d*%.txt$")
-                    or name:match("/output%d*%.txt$")
-                then
-                    return
-                end
-            end
-
-            -- Neither input nor output is open anymore
-            cp_layout_active = false
-            cp_test_index = 0
-        end)
-    end,
-})
+-- Closes the test panel / editor (defined at the bottom of the file)
+local cp_close_views
 
 -- ============================================================
 -- <leader>ir
@@ -2007,6 +1697,9 @@ map("n", "<leader>iC", function()
         return
     end
 
+    -- The panel / editor may show files that are about to go
+    cp_close_views()
+
     local deleted = 0
     local index = 0
 
@@ -2028,10 +1721,6 @@ map("n", "<leader>iC", function()
 
         index = index + 1
     end
-
-    -- Reset test-case state
-    cp_test_index = 0
-    cp_layout_active = false
 
     if deleted > 0 then
         vim.notify(
@@ -2123,34 +1812,38 @@ map("n", "<leader>im", function()
 end, { desc = "Create C++ folders" })
 
 -- ============================================================
--- CP Test Editor (floating)
+-- CP Test Views: side panel + floating editor
 --
--- <leader>il        open the test editor
--- <leader>i1..i9    open / create Test N
+-- <leader>ic        toggle the side panel (code stays visible)
+-- <leader>il        open the floating editor
+-- <leader>i1..i9    show Test N (in the panel if it's open,
+--                   otherwise in the floating editor)
+-- <leader>iw        save all CP test files
 --
 -- Test 1 = input.txt / output.txt
 -- Test 2 = input1.txt / output1.txt ...
 --
--- Inside the editor:
+-- Inside the panel / editor:
 --     <Tab>     switch between input and expected output
 --     ]t / [t   next / previous test
 --     <C-n>     add a new test
+--     <C-s>     save input + expected output
 --     R         replace this pane with the clipboard
 --     <C-x>     delete this test (later tests are renumbered)
 --     q         save and close
 -- ============================================================
 
-local cp_editor = {
-    wins = {},
-    bufs = {},
-    created = {},
-    test = 1,
-    pane = 1,
-    dir = nil,
-    busy = false,
-}
+local cp_panel = { wins = {}, bufs = {}, test = 1, busy = false }
+local cp_editor = { wins = {}, bufs = {}, test = 1, busy = false, float = true }
 
-local CP_EDITOR_KEYS = { "q", "<Tab>", "]t", "[t", "<C-n>", "R", "<C-x>" }
+-- Panel first so that after a delete the editor (if open) gets focus
+local cp_views = { cp_panel, cp_editor }
+
+local CP_VIEW_KEYS =
+    { "q", "<Tab>", "]t", "[t", "<C-n>", "<C-s>", "R", "<C-x>" }
+
+-- Buffers loaded by a view (wiped again once nothing shows them)
+local cp_created = {}
 
 local function cp_count_tests(dir)
     local n = 0
@@ -2162,65 +1855,28 @@ local function cp_count_tests(dir)
     return n
 end
 
--- Remove leading/trailing blank lines (pasted samples often have them)
-local function cp_trim_lines(lines)
-    while #lines > 0 and lines[1]:match("^%s*$") do
-        table.remove(lines, 1)
-    end
-
-    while #lines > 0 and lines[#lines]:match("^%s*$") do
-        table.remove(lines)
-    end
-
-    return lines
-end
-
-local function cp_editor_save(buf)
-    if not vim.api.nvim_buf_is_valid(buf) or not vim.bo[buf].modified then
-        return
-    end
-
-    local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
-    vim.api.nvim_buf_set_lines(buf, 0, -1, false, cp_trim_lines(lines))
-
-    vim.api.nvim_buf_call(buf, function()
-        vim.cmd("silent noautocmd write")
-    end)
-end
-
-local function cp_editor_close()
-    cp_editor.busy = true
-
-    for _, buf in ipairs(cp_editor.bufs) do
-        cp_editor_save(buf)
-
-        for _, lhs in ipairs(CP_EDITOR_KEYS) do
-            pcall(vim.keymap.del, "n", lhs, { buffer = buf })
+local function cp_view_of(win)
+    for _, view in ipairs(cp_views) do
+        if vim.tbl_contains(view.wins, win) then
+            return view
         end
     end
 
-    for _, win in ipairs(cp_editor.wins) do
-        if vim.api.nvim_win_is_valid(win) then
-            pcall(vim.api.nvim_win_close, win, true)
-        end
-    end
-
-    -- Wipe buffers the editor loaded, unless they're shown elsewhere
-    for buf in pairs(cp_editor.created) do
-        if vim.api.nvim_buf_is_valid(buf) and #vim.fn.win_findbuf(buf) == 0 then
-            pcall(vim.api.nvim_buf_delete, buf, { force = true })
-        end
-    end
-
-    cp_editor.wins = {}
-    cp_editor.bufs = {}
-    cp_editor.created = {}
-    cp_editor.busy = false
+    return nil
 end
 
-local function cp_editor_dir()
-    if vim.tbl_contains(cp_editor.wins, vim.api.nvim_get_current_win()) then
-        return cp_editor.dir
+local function cp_view_is_open(view)
+    return #view.wins == 2
+        and vim.api.nvim_win_is_valid(view.wins[1])
+        and vim.api.nvim_win_is_valid(view.wins[2])
+end
+
+-- Test folder: the view's folder when inside one, else the current file's
+local function cp_view_dir()
+    local view = cp_view_of(vim.api.nvim_get_current_win())
+
+    if view then
+        return view.dir
     end
 
     local file = vim.fn.expand("%:p")
@@ -2233,26 +1889,122 @@ local function cp_editor_dir()
     return vim.fn.fnamemodify(file, ":h")
 end
 
-local cp_editor_open
+local function cp_load(path)
+    local existed = vim.fn.bufnr(path) ~= -1
+    local buf = vim.fn.bufadd(path)
 
-local function cp_editor_delete()
-    local dir, n = cp_editor.dir, cp_editor.test
+    vim.fn.bufload(buf)
+
+    if not existed then
+        vim.bo[buf].buflisted = false
+        cp_created[buf] = true
+    end
+
+    return buf
+end
+
+-- Drop keymaps (and loaded buffers) that no view shows anymore
+local function cp_release(bufs)
+    for _, buf in ipairs(bufs) do
+        local shown = vim.iter(cp_views):any(function(view)
+            return vim.tbl_contains(view.bufs, buf)
+        end)
+
+        if vim.api.nvim_buf_is_valid(buf) and not shown then
+            for _, lhs in ipairs(CP_VIEW_KEYS) do
+                pcall(vim.keymap.del, "n", lhs, { buffer = buf })
+            end
+
+            pcall(vim.keymap.del, "i", "<C-s>", { buffer = buf })
+
+            if cp_created[buf] and #vim.fn.win_findbuf(buf) == 0 then
+                pcall(vim.api.nvim_buf_delete, buf, { force = true })
+                cp_created[buf] = nil
+            end
+        end
+    end
+end
+
+-- Clamp Test N so there are no gaps, create its files if missing
+local function cp_prepare_test(dir, n)
+    local count = cp_count_tests(dir)
+
+    -- The runners stop at the first missing test, so no gaps
+    if n > count + 1 then
+        vim.notify(
+            "Test " .. n .. " would leave a gap · opening Test " .. count + 1,
+            vim.log.levels.WARN
+        )
+        n = count + 1
+    end
+
+    local input, output = cp_test_files(dir, n - 1)
+
+    for _, path in ipairs({ input, output }) do
+        if vim.fn.filereadable(path) == 0 then
+            vim.fn.writefile({}, path)
+        end
+    end
+
+    return n, math.max(count, n), input, output
+end
+
+local cp_view_show
+
+local function cp_view_close(view)
+    view.busy = true
+
+    for _, buf in ipairs(view.bufs) do
+        cp_save_buf(buf)
+    end
+
+    local bufs = view.bufs
+    view.bufs = {}
+
+    for _, win in ipairs(view.wins) do
+        if vim.api.nvim_win_is_valid(win) then
+            pcall(vim.api.nvim_win_close, win, true)
+        end
+    end
+
+    view.wins = {}
+    cp_release(bufs)
+    view.busy = false
+end
+
+cp_close_views = function()
+    for _, view in ipairs(cp_views) do
+        cp_view_close(view)
+    end
+end
+
+local function cp_view_delete(view)
+    local dir, n = view.dir, view.test
     local count = cp_count_tests(dir)
 
     if vim.fn.confirm("Delete Test " .. n .. "?", "&Yes\n&No", 2) ~= 1 then
         return
     end
 
-    cp_editor_close()
+    -- Files from Test n onwards get renamed: close every view first
+    local reopen = {}
 
-    -- Files from Test n onwards get renamed, so drop their buffers
+    for _, v in ipairs(cp_views) do
+        if cp_view_is_open(v) then
+            table.insert(reopen, v)
+        end
+
+        cp_view_close(v)
+    end
+
     for i = n - 1, count - 1 do
         for _, path in ipairs({ cp_test_files(dir, i) }) do
             local buf = vim.fn.bufnr(path)
 
             if buf ~= -1 then
-                cp_editor_save(buf)
+                cp_save_buf(buf)
                 pcall(vim.api.nvim_buf_delete, buf, { force = true })
+                cp_created[buf] = nil
             end
         end
     end
@@ -2276,185 +2028,272 @@ local function cp_editor_delete()
     vim.notify("Deleted Test " .. n, vim.log.levels.INFO)
 
     if count > 1 then
-        cp_editor_open(math.min(n, count - 1), 1, dir)
+        for _, v in ipairs(reopen) do
+            cp_view_show(v, math.min(n, count - 1), 1, dir)
+        end
     end
 end
 
-local function cp_editor_keymaps(buf)
-    local function set(lhs, fn, desc)
-        map("n", lhs, fn, { buffer = buf, nowait = true, desc = desc })
+-- Buffer-local keys; they act on whichever view the cursor is in
+local function cp_view_keymaps(buf)
+    local function set(lhs, fn, desc, modes)
+        map(modes or "n", lhs, function()
+            local win = vim.api.nvim_get_current_win()
+            local view = cp_view_of(win)
+
+            if view then
+                fn(view, win == view.wins[2] and 2 or 1)
+            end
+        end, { buffer = buf, nowait = true, desc = desc })
     end
 
-    set("q", cp_editor_close, "Save and close test editor")
+    set("q", cp_view_close, "Save and close")
 
-    set("<Tab>", function()
-        local other = cp_editor.pane == 1 and 2 or 1
-
-        if vim.api.nvim_win_is_valid(cp_editor.wins[other]) then
-            cp_editor.pane = other
-            vim.api.nvim_set_current_win(cp_editor.wins[other])
-        end
+    set("<Tab>", function(view, pane)
+        vim.api.nvim_set_current_win(view.wins[pane == 1 and 2 or 1])
     end, "Switch input / expected output")
 
-    set("]t", function()
-        if cp_editor.test >= cp_count_tests(cp_editor.dir) then
-            vim.notify("Last test · <C-n> adds a new one")
+    -- ]t / [t wrap around: last -> first, first -> last
+    local function cycle(view, pane, step)
+        local count = cp_count_tests(view.dir)
+
+        if count <= 1 then
+            vim.notify("Only one test · <C-n> adds a new one")
             return
         end
 
-        cp_editor_open(cp_editor.test + 1, cp_editor.pane)
-    end, "Next test")
+        cp_view_show(view, (view.test - 1 + step) % count + 1, pane)
+    end
 
-    set("[t", function()
-        if cp_editor.test > 1 then
-            cp_editor_open(cp_editor.test - 1, cp_editor.pane)
-        end
-    end, "Previous test")
+    set("]t", function(view, pane)
+        cycle(view, pane, 1)
+    end, "Next test (wraps)")
 
-    set("<C-n>", function()
-        cp_editor_open(cp_count_tests(cp_editor.dir) + 1, 1)
+    set("[t", function(view, pane)
+        cycle(view, pane, -1)
+    end, "Previous test (wraps)")
+
+    set("<C-n>", function(view)
+        cp_view_show(view, cp_count_tests(view.dir) + 1, 1)
     end, "New test")
+
+    set("<C-s>", function(view)
+        for _, b in ipairs(view.bufs) do
+            cp_save_buf(b)
+        end
+
+        vim.notify("Saved Test " .. view.test, vim.log.levels.INFO)
+    end, "Save input + expected output", { "n", "i" })
 
     set("R", function()
         local text = vim.fn.getreg("+"):gsub("\r", "")
         local lines = cp_trim_lines(vim.split(text, "\n", { plain = true }))
 
-        vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+        vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
     end, "Replace with clipboard")
 
-    set("<C-x>", cp_editor_delete, "Delete test")
+    set("<C-x>", cp_view_delete, "Delete test")
 end
 
-cp_editor_open = function(n, pane, dir)
-    dir = dir or cp_editor_dir()
+-- ============================================================
+-- Panel: full-height column on the right
+-- ============================================================
 
-    if not dir then
-        return
+function cp_panel.create(view, bufs)
+    local top = vim.api.nvim_open_win(bufs[1], false, {
+        split = "right",
+        win = -1,
+        width = math.floor(vim.o.columns * 0.4),
+    })
+    local bottom = vim.api.nvim_open_win(bufs[2], false, {
+        split = "below",
+        win = top,
+    })
+
+    for _, win in ipairs({ top, bottom }) do
+        vim.wo[win].winfixwidth = true
+        vim.wo[win].wrap = false
     end
 
-    local count = cp_count_tests(dir)
+    view.wins = { top, bottom }
+end
 
-    -- The runners stop at the first missing test, so no gaps
-    if n > count + 1 then
-        vim.notify(
-            "Test " .. n .. " would leave a gap · opening Test " .. count + 1,
-            vim.log.levels.WARN
-        )
-        n = count + 1
-    end
+function cp_panel.decorate(view, count, input, output)
+    vim.wo[view.wins[1]].winbar = string.format(
+        "%%#Title# Test %d/%d %%*· Input  %%#Comment#%s",
+        view.test,
+        count,
+        vim.fn.fnamemodify(input, ":t")
+    )
+    vim.wo[view.wins[2]].winbar = string.format(
+        "%%#Title# Expected output %%#Comment#%s%%=]t [t · <C-n> new · <C-s> save ",
+        vim.fn.fnamemodify(output, ":t")
+    )
+end
 
-    cp_editor_close()
-    cp_editor.busy = true
+-- ============================================================
+-- Editor: two large floats side by side
+-- ============================================================
 
-    local input, output = cp_test_files(dir, n - 1)
-
-    for _, path in ipairs({ input, output }) do
-        if vim.fn.filereadable(path) == 0 then
-            vim.fn.writefile({}, path)
-        end
-    end
-
-    count = math.max(count, n)
-
-    cp_editor.dir = dir
-    cp_editor.test = n
-    cp_editor.pane = pane or 1
-
-    -- Geometry: two panes side by side, centered
+function cp_editor.create(view, bufs)
     local total = math.min(
         vim.o.columns - 4,
         math.max(60, math.floor(vim.o.columns * 0.94))
     )
     local height = math.max(8, math.floor(vim.o.lines * 0.82))
     local left_width = math.floor(total / 2) - 2
-    local right_width = total - left_width - 4
     local row = math.floor((vim.o.lines - height) / 2) - 1
     local col = math.floor((vim.o.columns - total) / 2)
 
-    local panes = {
-        {
-            path = input,
-            title = string.format(" Test %d/%d · Input ", n, count),
-            footer = " <Tab> switch · ]t [t · <C-n> new · R paste · <C-x> delete · q close ",
-            col = col,
-            width = left_width,
-        },
-        {
-            path = output,
-            title = " Expected output ",
-            footer = " " .. vim.fn.fnamemodify(output, ":t") .. " ",
-            col = col + left_width + 2,
-            width = right_width,
-        },
+    local geometry = {
+        { col = col, width = left_width },
+        { col = col + left_width + 2, width = total - left_width - 4 },
     }
 
-    for _, p in ipairs(panes) do
-        local existed = vim.fn.bufnr(p.path) ~= -1
-        local buf = vim.fn.bufadd(p.path)
+    view.wins = {}
 
-        vim.fn.bufload(buf)
-
-        if not existed then
-            vim.bo[buf].buflisted = false
-            cp_editor.created[buf] = true
-        end
-
-        local win = vim.api.nvim_open_win(buf, false, {
+    for i, g in ipairs(geometry) do
+        local win = vim.api.nvim_open_win(bufs[i], false, {
             relative = "editor",
             row = row,
-            col = p.col,
-            width = p.width,
+            col = g.col,
+            width = g.width,
             height = height,
             border = "single",
-            title = p.title,
-            title_pos = "center",
-            footer = p.footer,
-            footer_pos = "center",
+            title = " ",
             style = "minimal",
         })
 
         vim.wo[win].number = true
         vim.wo[win].wrap = false
 
-        table.insert(cp_editor.wins, win)
-        table.insert(cp_editor.bufs, buf)
-
-        cp_editor_keymaps(buf)
+        view.wins[i] = win
     end
-
-    vim.api.nvim_set_current_win(cp_editor.wins[cp_editor.pane])
-    cp_editor.busy = false
 end
 
--- Close the editor when focus leaves it or one pane is closed
-local cp_editor_group = vim.api.nvim_create_augroup("cp_editor", {
+function cp_editor.decorate(view, count, _, output)
+    vim.api.nvim_win_set_config(view.wins[1], {
+        title = string.format(" Test %d/%d · Input ", view.test, count),
+        title_pos = "center",
+        footer = " <Tab> switch · ]t [t · <C-n> new · <C-s> save · R paste · <C-x> delete · q close ",
+        footer_pos = "center",
+    })
+    vim.api.nvim_win_set_config(view.wins[2], {
+        title = " Expected output ",
+        title_pos = "center",
+        footer = " " .. vim.fn.fnamemodify(output, ":t") .. " ",
+        footer_pos = "center",
+    })
+end
+
+-- ============================================================
+-- Show Test N in a view (reusing its windows when open)
+-- ============================================================
+
+cp_view_show = function(view, n, pane, dir)
+    dir = dir or view.dir
+
+    local inside = cp_view_of(vim.api.nvim_get_current_win()) == view
+    local count, input, output
+    n, count, input, output = cp_prepare_test(dir, n)
+
+    view.busy = true
+
+    for _, buf in ipairs(view.bufs) do
+        cp_save_buf(buf)
+    end
+
+    local old = view.bufs
+    local bufs = { cp_load(input), cp_load(output) }
+
+    if not cp_view_is_open(view) then
+        for _, win in ipairs(view.wins) do
+            pcall(vim.api.nvim_win_close, win, true)
+        end
+
+        view.create(view, bufs)
+    end
+
+    view.dir = dir
+    view.test = n
+    view.bufs = bufs
+
+    for i, win in ipairs(view.wins) do
+        vim.api.nvim_win_set_buf(win, bufs[i])
+        cp_view_keymaps(bufs[i])
+    end
+
+    view.decorate(view, count, input, output)
+    cp_release(old)
+
+    -- Floats take focus; the panel only keeps it if you were in it
+    if inside or view.float then
+        vim.api.nvim_set_current_win(view.wins[pane or 1])
+    end
+
+    view.busy = false
+end
+
+-- Close a view when one of its windows is closed, and the
+-- floating editor when focus leaves it
+local cp_views_group = vim.api.nvim_create_augroup("cp_views", {
     clear = true,
 })
 
 vim.api.nvim_create_autocmd({ "WinEnter", "WinClosed" }, {
-    group = cp_editor_group,
+    group = cp_views_group,
     callback = function()
         vim.schedule(function()
-            if cp_editor.busy or #cp_editor.wins == 0 then
-                return
-            end
+            local current = cp_view_of(vim.api.nvim_get_current_win())
 
-            local current = vim.api.nvim_get_current_win()
-            local all_open = vim.iter(cp_editor.wins):all(function(win)
-                return vim.api.nvim_win_is_valid(win)
-            end)
+            for _, view in ipairs(cp_views) do
+                if not view.busy and #view.wins > 0 then
+                    local leave = view.float and current ~= view
 
-            if
-                not all_open or not vim.tbl_contains(cp_editor.wins, current)
-            then
-                cp_editor_close()
+                    if not cp_view_is_open(view) or leave then
+                        cp_view_close(view)
+                    end
+                end
             end
         end)
     end,
 })
 
+-- ============================================================
+-- Keymaps
+-- ============================================================
+
+map("n", "<leader>ic", function()
+    if cp_view_is_open(cp_panel) then
+        cp_view_close(cp_panel)
+        return
+    end
+
+    local dir = cp_view_dir()
+
+    if not dir then
+        return
+    end
+
+    -- Floats can't be split: leave the editor first
+    if cp_view_of(vim.api.nvim_get_current_win()) == cp_editor then
+        cp_view_close(cp_editor)
+    end
+
+    local n = dir == cp_panel.dir and cp_panel.test or 1
+
+    cp_view_show(
+        cp_panel,
+        math.min(n, math.max(1, cp_count_tests(dir))),
+        1,
+        dir
+    )
+end, {
+    desc = "Toggle CP test panel",
+})
+
 map("n", "<leader>il", function()
-    local dir = cp_editor_dir()
+    local dir = cp_view_dir()
 
     if not dir then
         return
@@ -2463,15 +2302,43 @@ map("n", "<leader>il", function()
     -- Reopen the last edited test for the same problem
     local n = dir == cp_editor.dir and cp_editor.test or 1
 
-    cp_editor_open(math.min(n, math.max(1, cp_count_tests(dir))), 1, dir)
+    cp_view_show(
+        cp_editor,
+        math.min(n, math.max(1, cp_count_tests(dir))),
+        1,
+        dir
+    )
 end, {
     desc = "CP test editor",
 })
 
 for n = 1, 9 do
     map("n", "<leader>i" .. n, function()
-        cp_editor_open(n, 1)
+        local view = cp_view_is_open(cp_panel) and cp_panel or cp_editor
+        local dir = cp_view_dir()
+
+        if dir then
+            cp_view_show(view, n, 1, dir)
+        end
     end, {
         desc = "CP test " .. n,
     })
 end
+
+map("n", "<leader>iw", function()
+    local dir = cp_view_dir()
+
+    if not dir then
+        return
+    end
+
+    local saved = cp_save_tests(dir)
+
+    vim.notify(
+        saved > 0 and ("Saved " .. saved .. " CP test files")
+            or "CP test files already saved",
+        vim.log.levels.INFO
+    )
+end, {
+    desc = "Save CP test files",
+})

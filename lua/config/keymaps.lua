@@ -1819,6 +1819,7 @@ end, { desc = "Create C++ folders" })
 -- <leader>i1..i9    show Test N (in the panel if it's open,
 --                   otherwise in the floating editor)
 -- <leader>iw        save all CP test files
+-- <leader>ib        receive a problem from Competitive Companion
 --
 -- Test 1 = input.txt / output.txt
 -- Test 2 = input1.txt / output1.txt ...
@@ -2341,4 +2342,265 @@ map("n", "<leader>iw", function()
     )
 end, {
     desc = "Save CP test files",
+})
+
+-- ============================================================
+-- <leader>ib
+-- Receive ONE problem from Competitive Companion.
+--
+-- Browser extension settings -> Custom ports -> 12345
+--
+-- Press <leader>ib in the solution, then click the green "+"
+-- on the problem page. The samples replace every existing test
+-- in the solution's folder:
+--     input.txt  / output.txt   <- sample 1
+--     input1.txt / output1.txt  <- sample 2 ...
+-- Press <leader>ib again while waiting to cancel.
+-- ============================================================
+
+local CP_COMPANION_PORT = 12345
+local CP_COMPANION_WAIT = 60 -- seconds
+
+-- { server, timer } while listening
+local cp_companion = nil
+
+local function cp_companion_stop()
+    if not cp_companion then
+        return
+    end
+
+    for _, handle in ipairs({ cp_companion.timer, cp_companion.server }) do
+        if not handle:is_closing() then
+            handle:close()
+        end
+    end
+
+    cp_companion = nil
+end
+
+local function cp_companion_lines(text)
+    local lines = vim.split((text or ""):gsub("\r", ""), "\n", { plain = true })
+
+    return cp_trim_lines(lines)
+end
+
+local function cp_companion_receive(dir, body)
+    local ok, problem = pcall(vim.json.decode, body)
+
+    if not ok or type(problem) ~= "table" or type(problem.tests) ~= "table" then
+        vim.notify(
+            "Competitive Companion sent something unexpected",
+            vim.log.levels.ERROR
+        )
+        return
+    end
+
+    local tests = problem.tests
+
+    if #tests == 0 then
+        vim.notify(
+            (problem.name or "Problem") .. " has no samples · tests unchanged",
+            vim.log.levels.WARN
+        )
+        return
+    end
+
+    -- The panel / editor may show files that are about to change
+    cp_close_views()
+
+    -- Write samples, reloading any buffer that already shows the file
+    for i, test in ipairs(tests) do
+        local input, output = cp_test_files(dir, i - 1)
+
+        for _, file in ipairs({
+            { input, test.input },
+            { output, test.output },
+        }) do
+            vim.fn.writefile(cp_companion_lines(file[2]), file[1])
+
+            local buf = vim.fn.bufnr(file[1])
+
+            if buf ~= -1 and vim.api.nvim_buf_is_loaded(buf) then
+                vim.api.nvim_buf_call(buf, function()
+                    vim.cmd("silent edit!")
+                end)
+            end
+        end
+    end
+
+    -- Remove old tests beyond the new ones
+    local index = #tests
+
+    while true do
+        local found = false
+
+        for _, path in ipairs({ cp_test_files(dir, index) }) do
+            local buf = vim.fn.bufnr(path)
+
+            if buf ~= -1 then
+                pcall(vim.api.nvim_buf_delete, buf, { force = true })
+                cp_created[buf] = nil
+            end
+
+            if vim.fn.filereadable(path) == 1 then
+                vim.fn.delete(path)
+                found = true
+            end
+        end
+
+        if not found then
+            break
+        end
+
+        index = index + 1
+    end
+
+    local details = { problem.name or "Problem", #tests .. " tests" }
+
+    if problem.timeLimit then
+        table.insert(
+            details,
+            string.format("TL %g s", problem.timeLimit / 1000)
+        )
+    end
+
+    if problem.memoryLimit then
+        table.insert(details, "ML " .. problem.memoryLimit .. " MB")
+    end
+
+    vim.notify(table.concat(details, " · "), vim.log.levels.INFO)
+
+    if problem.interactive then
+        vim.notify(
+            "Interactive problem: the samples can't be checked automatically",
+            vim.log.levels.WARN
+        )
+    end
+
+    cp_view_show(cp_panel, 1, 1, dir)
+end
+
+-- Minimal HTTP: read one POST request, reply 200, hand over the body
+local function cp_companion_accept(server, dir)
+    local client = vim.uv.new_tcp()
+
+    if not client or server:accept(client) ~= 0 then
+        return
+    end
+
+    local data = ""
+    local done = false
+
+    local function finish(body)
+        done = true
+        client:read_stop()
+        client:write(
+            "HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+            function()
+                client:close()
+            end
+        )
+
+        vim.schedule(function()
+            -- Already handled or cancelled
+            if not cp_companion then
+                return
+            end
+
+            cp_companion_stop()
+            cp_companion_receive(dir, body)
+        end)
+    end
+
+    client:read_start(function(err, chunk)
+        if done then
+            return
+        end
+
+        if err or not chunk then
+            -- Connection ended before a full request
+            client:close()
+            return
+        end
+
+        data = data .. chunk
+
+        local head_end = data:find("\r\n\r\n", 1, true)
+
+        if not head_end then
+            return
+        end
+
+        local headers = data:sub(1, head_end):lower()
+        local length = tonumber(headers:match("content%-length:%s*(%d+)")) or 0
+        local body = data:sub(head_end + 4)
+
+        if #body >= length then
+            finish(body)
+        end
+    end)
+end
+
+map("n", "<leader>ib", function()
+    if cp_companion then
+        cp_companion_stop()
+        vim.notify("Stopped waiting for Competitive Companion")
+        return
+    end
+
+    local dir = cp_view_dir()
+
+    if not dir then
+        return
+    end
+
+    local server = assert(vim.uv.new_tcp())
+    local ok, err = server:bind("127.0.0.1", CP_COMPANION_PORT)
+
+    if ok then
+        ok, err = server:listen(16, function(listen_err)
+            if not listen_err then
+                cp_companion_accept(server, dir)
+            end
+        end)
+    end
+
+    if not ok then
+        server:close()
+        vim.notify(
+            "Can't listen on port "
+                .. CP_COMPANION_PORT
+                .. " ("
+                .. tostring(err)
+                .. "). Is another Neovim waiting?",
+            vim.log.levels.ERROR
+        )
+        return
+    end
+
+    local timer = assert(vim.uv.new_timer())
+
+    timer:start(
+        CP_COMPANION_WAIT * 1000,
+        0,
+        vim.schedule_wrap(function()
+            if cp_companion and cp_companion.timer == timer then
+                cp_companion_stop()
+                vim.notify(
+                    "No problem received in " .. CP_COMPANION_WAIT .. " s",
+                    vim.log.levels.WARN
+                )
+            end
+        end)
+    )
+
+    cp_companion = { server = server, timer = timer }
+
+    vim.notify(
+        "Waiting for Competitive Companion on port "
+            .. CP_COMPANION_PORT
+            .. " · click + in the browser"
+    )
+end, {
+    desc = "Receive problem from Competitive Companion",
 })

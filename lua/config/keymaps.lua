@@ -447,7 +447,7 @@ map("n", "<leader>_", "<C-W>s", { desc = "Split Window Below", remap = true })
 map("n", "<leader>\\", "<C-W>v", { desc = "Split Window Right", remap = true })
 
 -- this option toggles the blink cmp can be useful when i want to not display any suggestions
-map("n", "<leader>tc", function()
+map("n", "<leader>tb", function()
     vim.g.blink_auto_show = not vim.g.blink_auto_show
 
     -- Hide any currently visible completion menu

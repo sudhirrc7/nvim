@@ -2,7 +2,7 @@ return {
     {
         "luukvbaal/statuscol.nvim",
         event = { "LazyFile" },
-        enabled = false,
+        enabled = true,
         opts = function()
             local builtin = require("statuscol.builtin")
             return {
@@ -33,5 +33,20 @@ return {
         config = function(_, opts)
             require("statuscol").setup(opts)
         end,
+    },
+    {
+        "lewis6991/gitsigns.nvim",
+        opts = {
+            signs = {
+                add = { text = "┃" },
+                change = { text = "┃" },
+                delete = { text = "󱈸" },
+                topdelete = { text = "󱈸" },
+                changedelete = { text = "┃" },
+                untracked = { text = "┇" },
+            },
+            signcolumn = true,
+            numhl = true,
+        },
     },
 }

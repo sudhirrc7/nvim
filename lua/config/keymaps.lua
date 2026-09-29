@@ -158,7 +158,6 @@ end, {
     desc = "Select child treesitter node or inner incremental lsp selections",
 })
 
-map("n", "<leader>ij", require("treesj").toggle)
 -- Search current word
 local searching_brave = function()
     vim.fn.system({
@@ -458,6 +457,119 @@ map("n", "<leader>tb", function()
             .. (vim.g.blink_auto_show and "Enabled" or "Disabled")
     )
 end, { desc = "Toggle Blink auto completion" })
+
+-- cycle blink cmp appearance: current (blink.lua) -> blink default -> ide
+local blink_styles = {
+    {
+        name = "Current",
+        -- filled from the live config on first use so it always matches blink.lua
+    },
+    {
+        name = "Default",
+        menu = {
+            border = "none",
+            winhighlight = "Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None",
+            scrollbar = true,
+            max_height = 10,
+            padding = 1,
+            gap = 1,
+            treesitter = {},
+            columns = {
+                { "kind_icon" },
+                { "label", "label_description", gap = 1 },
+            },
+        },
+        doc = {
+            border = "padded",
+            winhighlight = "Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,EndOfBuffer:BlinkCmpDoc",
+        },
+    },
+    {
+        -- my pick: square borders, treesitter-coloured labels, kind name on the right
+        name = "IDE",
+        menu = {
+            border = "single",
+            winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:Visual,Search:None",
+            scrollbar = false,
+            max_height = 14,
+            padding = { 0, 1 },
+            gap = 2,
+            treesitter = { "lsp" },
+            columns = {
+                { "kind_icon" },
+                { "label", "label_description", gap = 1 },
+                { "kind" },
+            },
+        },
+        doc = {
+            border = "single",
+            winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,EndOfBuffer:NormalFloat",
+        },
+    },
+}
+local blink_style_idx = 1
+
+local function apply_blink_style(style)
+    local cfg = require("blink.cmp.config").completion
+    local menu = require("blink.cmp.completion.windows.menu")
+    local docs = require("blink.cmp.completion.windows.documentation")
+    require("blink.cmp").hide()
+    docs.close()
+
+    -- the renderer reads draw.columns on every draw, padding/gap only on creation
+    local draw = cfg.menu.draw
+    draw.columns = style.menu.columns
+    draw.padding = style.menu.padding
+    draw.gap = style.menu.gap
+    draw.treesitter = style.menu.treesitter
+    menu.renderer = nil
+
+    -- windows copy their options once at creation, so patch the live copies
+    local mw = menu.win.config
+    mw.border = style.menu.border
+    mw.winhighlight = style.menu.winhighlight
+    mw.max_height = style.menu.max_height
+    if style.menu.scrollbar and not menu.win.scrollbar then
+        menu.win.scrollbar = require("blink.cmp.lib.window.scrollbar").new({
+            enable_gutter = style.menu.border == "none",
+        })
+    elseif not style.menu.scrollbar and menu.win.scrollbar then
+        menu.win.scrollbar:update()
+        menu.win.scrollbar = nil
+    end
+
+    docs.win.config.border = style.doc.border
+    docs.win.config.winhighlight = style.doc.winhighlight
+end
+
+map("n", "<leader>tz", function()
+    local cfg = require("blink.cmp.config").completion
+    local menu = require("blink.cmp.completion.windows.menu")
+    local docs = require("blink.cmp.completion.windows.documentation")
+    local current = blink_styles[1]
+    if not current.menu then
+        local draw = cfg.menu.draw
+        current.menu = {
+            border = menu.win.config.border,
+            winhighlight = menu.win.config.winhighlight,
+            scrollbar = menu.win.scrollbar ~= nil,
+            max_height = menu.win.config.max_height,
+            padding = draw.padding,
+            gap = draw.gap,
+            treesitter = draw.treesitter,
+            columns = draw.columns,
+        }
+        current.doc = {
+            border = docs.win.config.border,
+            winhighlight = docs.win.config.winhighlight,
+        }
+    end
+
+    blink_style_idx = blink_style_idx % #blink_styles + 1
+    local style = blink_styles[blink_style_idx]
+    apply_blink_style(style)
+    vim.notify("Blink appearance: " .. style.name)
+end, { desc = "Cycle Blink appearance" })
 
 map({ "n", "i" }, "<C-q>", function()
     vim.g.blink_auto_show = not vim.g.blink_auto_show

@@ -23,14 +23,19 @@ local explorer_styles = {
                 box = "vertical",
                 { win = "input", height = 1, border = "bottom" },
                 { win = "list", border = "none" },
-                { win = "preview", title = "{preview}", height = 0.4, border = "top" },
+                {
+                    win = "preview",
+                    title = "{preview}",
+                    height = 0.4,
+                    border = "top",
+                },
             },
         },
     },
     -- centered ranger-style popup with a live preview on the right
     {
         name = "Spotlight",
-        icon = "",
+        icon = "\u{f002}",
         auto_close = true,
         layout = {
             cycle = true,
@@ -53,7 +58,12 @@ local explorer_styles = {
                     { win = "input", height = 1, border = "bottom" },
                     { win = "list", border = "none" },
                 },
-                { win = "preview", title = " {preview} ", title_pos = "center", border = "rounded" },
+                {
+                    win = "preview",
+                    title = " {preview} ",
+                    title_pos = "center",
+                    border = "rounded",
+                },
             },
         },
     },
@@ -72,7 +82,7 @@ local explorer_styles = {
                 col = 1,
                 width = 40,
                 min_width = 40,
-                height = 0.92,
+                height = 0.95,
                 backdrop = 40,
                 border = "double",
                 title = " 󰉋 {title} {live} {flags} ",
@@ -80,14 +90,19 @@ local explorer_styles = {
                 box = "vertical",
                 { win = "input", height = 1, border = "bottom" },
                 { win = "list", border = "none" },
-                { win = "preview", title = " {preview} ", height = 0.45, border = "top" },
+                {
+                    win = "preview",
+                    title = " {preview} ",
+                    height = 0.45,
+                    border = "top",
+                },
             },
         },
     },
     -- borderless dock on the right, search always visible, P peeks in the main window
     {
         name = "Dock",
-        icon = "",
+        icon = "\u{f0db}",
         auto_close = false,
         layout = {
             cycle = false,
@@ -100,9 +115,20 @@ local explorer_styles = {
                 position = "right",
                 border = "left",
                 box = "vertical",
-                { win = "input", height = 1, border = "vpad", title = "{title} {live} {flags}", title_pos = "left" },
+                {
+                    win = "input",
+                    height = 1,
+                    border = "vpad",
+                    title = "{title} {live} {flags}",
+                    title_pos = "left",
+                },
                 { win = "list", border = "none" },
-                { win = "preview", title = "{preview}", height = 0.4, border = "top" },
+                {
+                    win = "preview",
+                    title = "{preview}",
+                    height = 0.4,
+                    border = "top",
+                },
             },
         },
     },
@@ -131,7 +157,12 @@ local explorer_styles = {
                     { win = "input", height = 1, border = "bottom" },
                     { win = "list", border = "none" },
                 },
-                { win = "preview", title = " {preview} ", title_pos = "right", border = "left" },
+                {
+                    win = "preview",
+                    title = " {preview} ",
+                    title_pos = "right",
+                    border = "left",
+                },
             },
         },
     },
@@ -154,9 +185,65 @@ local explorer_styles = {
                 title = " 󰚀 {title} ",
                 title_pos = "center",
                 box = "vertical",
-                { win = "input", height = 1, border = "vpad", title = "{live} {flags}", title_pos = "right" },
+                {
+                    win = "input",
+                    height = 1,
+                    border = "vpad",
+                    title = "{live} {flags}",
+                    title_pos = "right",
+                },
                 { win = "list", border = "hpad" },
-                { win = "preview", title = " {preview} ", height = 0.5, border = "top" },
+                {
+                    win = "preview",
+                    title = " {preview} ",
+                    height = 0.5,
+                    border = "top",
+                },
+            },
+        },
+    },
+    -- nvim-tree float look-alike: top-left popup, no title, / arrows before folders
+    {
+        name = "Tree",
+        icon = "\u{f0e8}",
+        auto_close = true,
+        format = function(item, picker)
+            local ret = Snacks.picker.format.file(item, picker)
+            if not item.parent then
+                return ret -- root line, like nvim-tree's "~/.."
+            end
+            for i, seg in ipairs(ret) do
+                if seg[2] == "SnacksPickerTree" then
+                    local arrow = not item.dir and "  " or item.open and "\u{f47c} " or "\u{f460} "
+                    table.insert(ret, i + 1, { arrow, "SnacksPickerTree" })
+                    break
+                end
+            end
+            return ret
+        end,
+        layout = {
+            cycle = false,
+            auto_hide = { "input" },
+            preview = false,
+            layout = {
+                position = "float",
+                row = 1,
+                col = 1,
+                width = 0.35,
+                min_width = 40,
+                max_width = 70,
+                height = 32,
+                backdrop = false,
+                border = "rounded",
+                box = "vertical",
+                { win = "input", height = 1, border = "bottom" },
+                { win = "list", border = "none" },
+                {
+                    win = "preview",
+                    title = " {preview} ",
+                    height = 0.45,
+                    border = "top",
+                },
             },
         },
     },
@@ -174,7 +261,8 @@ local explorer_current = 1
 do
     local f = io.open(explorer_state, "r")
     if f then
-        explorer_current = explorer_style_index(vim.trim(f:read("*a") or "")) or 1
+        explorer_current = explorer_style_index(vim.trim(f:read("*a") or ""))
+            or 1
         f:close()
     end
 end
@@ -193,6 +281,7 @@ local function explorer_source(idx)
         -- floating styles close themselves once a file is opened
         auto_close = style.auto_close,
         jump = { close = style.auto_close },
+        format = style.format or "file",
         layout = vim.deepcopy(style.layout),
     }
 end
@@ -221,7 +310,12 @@ local function explorer_cycle_style()
     end
 
     Snacks.notify(
-        ("%s  %s  (%d/%d)"):format(style.icon, style.name, explorer_current, #explorer_styles),
+        ("%s  %s  (%d/%d)"):format(
+            style.icon,
+            style.name,
+            explorer_current,
+            #explorer_styles
+        ),
         { title = "Explorer style" }
     )
 end

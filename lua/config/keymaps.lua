@@ -184,6 +184,19 @@ map("n", "<leader>iE", function()
     fyler.open({ kind = "split_right_most" })
 end, { desc = "Fyler.nvim - Open" })
 
+-- nvim-tree float look: rounded popup at the top-left, 30 lines tall
+map("n", "<leader>iT", function()
+    fyler.open({
+        kind = "floating",
+        border = "rounded",
+        row = 3, -- fyler shifts floats up by 2, so this lands on row 1
+        col = 1,
+        width = "35%",
+        height = 32, -- 30 lines + the border
+        win_opts = { cursorline = true },
+    })
+end, { desc = "Fyler.nvim - Open (tree float)" })
+
 map(
     "n",
     "<leader>s1",

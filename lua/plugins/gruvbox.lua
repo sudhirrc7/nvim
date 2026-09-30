@@ -4,7 +4,7 @@ return {
 
     opts = {
         transparent_mode = true,
-        invert_selection = true,
+        invert_selection = false,
         strikethough = true,
         dim_inactive = false,
 

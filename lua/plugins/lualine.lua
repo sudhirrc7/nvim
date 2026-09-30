@@ -19,7 +19,6 @@ end
 return {
     "nvim-lualine/lualine.nvim",
     enabled = true,
-    lazy = false,
     opts = function(_, opts)
         opts.options.component_separators = { left = "", right = "" }
         opts.options.section_separators = { left = "", right = "" }

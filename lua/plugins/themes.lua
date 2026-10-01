@@ -168,8 +168,8 @@ return {
                 "<leader>iz",
                 function()
                     local base_colors = {
-                        "#141415",
                         "#1A1A1A",
+                        "#141415",
                         "#181616",
                         "#000000",
                         "#232136",

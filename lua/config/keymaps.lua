@@ -29,6 +29,14 @@ vim.keymap.del("n", "<leader>uL")
 local line_number_mode = "relative"
 local previous_line_number_mode = "relative"
 
+-- Gutter values used when line numbers are off, and the original
+-- values (captured at startup) to restore when they come back on
+local gutter_off = { signcolumn = "no", foldcolumn = "0", statuscolumn = "" }
+local gutter_on = {}
+for opt in pairs(gutter_off) do
+    gutter_on[opt] = vim.go[opt]
+end
+
 -- ============================================================
 -- CHECK IF WINDOW IS A NORMAL EDITOR WINDOW
 -- ============================================================
@@ -63,6 +71,16 @@ local function apply_line_numbers(win)
     vim.api.nvim_set_option_value("relativenumber", relative, {
         win = win,
     })
+
+    -- When off, also hide the sign column (gitsigns, diagnostics),
+    -- fold column and statuscolumn so code starts at the left edge.
+    for opt, off_value in pairs(gutter_off) do
+        vim.api.nvim_set_option_value(
+            opt,
+            number and gutter_on[opt] or off_value,
+            { win = win }
+        )
+    end
 end
 
 -- ============================================================
@@ -297,6 +315,31 @@ Snacks.toggle({
     end,
     set = transparency.set,
 }):map("<leader>t1")
+
+-- Classic command line: reserve a line at the bottom for commands like
+-- stock nvim. Off by default (cmdheight = 0 in config/options.lua).
+-- Noice is paused while it's on, so the native cmdline and messages
+-- use that line instead of the noice popup drawing over lualine.
+Snacks.toggle({
+    name = "Command Line Space",
+    get = function()
+        return vim.o.cmdheight > 0
+    end,
+    set = function(state)
+        local ok, noice = pcall(require, "noice")
+        if state then
+            if ok then
+                noice.disable()
+            end
+            vim.o.cmdheight = 1
+        else
+            vim.o.cmdheight = 0
+            if ok then
+                noice.enable()
+            end
+        end
+    end,
+}):map("<leader>tx")
 
 -- Identation
 map("n", "<", "<<", { desc = "Deindent" })

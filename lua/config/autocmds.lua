@@ -9,6 +9,18 @@
 local ac = vim.api.nvim_create_autocmd
 local ag = vim.api.nvim_create_augroup
 
+-- Remember the last colorscheme, restored on startup in config/lazy.lua
+ac("ColorScheme", {
+    group = ag("remember_colorscheme", { clear = true }),
+    callback = function(args)
+        local f = io.open(vim.fn.stdpath("state") .. "/last_colorscheme", "w")
+        if f then
+            f:write(args.match)
+            f:close()
+        end
+    end,
+})
+
 -- Disable diagnostics in a .env file
 ac("BufRead", {
     pattern = ".env",

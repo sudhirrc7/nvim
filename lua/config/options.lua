@@ -97,6 +97,12 @@ o.smoothscroll = true
 
 o.conceallevel = 2
 
+-- One border style for every built-in float (LSP hover, signature, diagnostics)
+o.winborder = "rounded"
+
+-- Transparency for every colorscheme, toggled with <leader>t1
+require("config.transparency")
+
 -- Fix the clipboard when using WSL. Install https://github.com/equalsraf/win32yank (https://github.com/microsoft/WSL/issues/4440#issuecomment-1212350183)
 if os.getenv("WSL_DISTRO_NAME") ~= nil then
     o.clipboard = "unnamedplus"

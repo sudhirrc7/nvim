@@ -20,12 +20,14 @@ return {
     "nvim-lualine/lualine.nvim",
     enabled = true,
     opts = function(_, opts)
-        opts.options.component_separators = { left = "", right = "" }
-        opts.options.section_separators = { left = "", right = "" }
+        -- rounded "pill" sections
+        -- opts.options.component_separators = { left = "", right = "" }
+        -- opts.options.section_separators = { left = "", right = "" }
 
         opts.sections.lualine_a = {
             {
                 "mode",
+                -- separator = { left = "" },
                 -- icon = "",
                 -- fmt = function(text, context)
                 --     return string.sub(text, 1, 3)
@@ -48,13 +50,7 @@ return {
 
         opts.sections.lualine_y = { "progress" }
         opts.sections.lualine_z = {
-            { "location", separator = "" },
-            {
-                -- function()
-                --     return ""
-                -- end,
-                padding = { left = 0, right = 1 },
-            },
+            -- { "location", separator = { right = "" } },
         }
         opts.extensions = false
     end,

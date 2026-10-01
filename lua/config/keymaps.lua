@@ -176,16 +176,12 @@ map("n", "<leader>ie", function()
     fyler.open({ kind = "split_left_most" })
 end, { desc = "Fyler.nvim - Open" })
 
-map("n", "<leader>if", function()
-    fyler.open()
-end, { desc = "Fyler.nvim - Open" })
-
 map("n", "<leader>iE", function()
     fyler.open({ kind = "split_right_most" })
 end, { desc = "Fyler.nvim - Open" })
 
 -- nvim-tree float look: rounded popup at the top-left, 30 lines tall
-map("n", "<leader>iT", function()
+map("n", "<leader>if", function()
     fyler.open({
         kind = "floating",
         border = "rounded",
@@ -292,19 +288,15 @@ map("n", "<leader>fT", "<Nop>")
 --     vim.cmd.colorscheme("kanagawa-dragon")
 -- end, { desc = "Toggle transparency" })
 
--- -- this is used to toggle the transparency of the catppuccin theme on the fly
-local config1 = {
-    transparent_background = true,
-    float = {
-        transparent = true, -- enables transparency on floating windows
-        solid = true, -- use nvchad styling for floating windows
-    },
-}
-map("n", "<leader>t1", function()
-    config1.transparent_background = not config1.transparent_background
-    require("catppuccin").setup(config1)
-    vim.cmd.colorscheme("catppuccin-mocha")
-end, { desc = "Toggle transparency" })
+-- Transparency for whatever colorscheme is active (config/transparency.lua)
+local transparency = require("config.transparency")
+Snacks.toggle({
+    name = "Transparency",
+    get = function()
+        return transparency.enabled
+    end,
+    set = transparency.set,
+}):map("<leader>t1")
 
 -- Identation
 map("n", "<", "<<", { desc = "Deindent" })

@@ -29,6 +29,9 @@ return {
         color_overrides = {
             mocha = {
                 base = "#181825",
+                -- one step darker each, so floats and sidebars stand apart from base
+                mantle = "#11111b",
+                crust = "#0b0b12",
                 -- base = "#000000",
                 -- mantle = "#000000",
                 -- crust = "#000000",

@@ -1979,6 +1979,7 @@ end, { desc = "Create C++ folders" })
 -- <leader>i1..i9    show Test N (in the panel if it's open,
 --                   otherwise in the floating editor)
 -- <leader>iw        save all CP test files
+-- <leader>ip        pick a test with Snacks, open it in the panel
 -- <leader>ib        receive a problem from Competitive Companion
 --
 -- Test 1 = input.txt / output.txt
@@ -2763,4 +2764,139 @@ map("n", "<leader>ib", function()
     )
 end, {
     desc = "Receive problem from Competitive Companion",
+})
+
+-- ============================================================
+-- <leader>ip
+-- Pick a test with Snacks: preview shows input + expected
+-- output, <CR> opens it in the side panel (like <leader>ic)
+-- ============================================================
+
+-- Preview text with highlighted section headers
+local function cp_test_preview(input, output)
+    local lines, extmarks = {}, {}
+
+    local function section(title, path)
+        local header = string.format(
+            "── %s · %s ",
+            title,
+            vim.fn.fnamemodify(path, ":t")
+        )
+        header = header
+            .. string.rep(
+                "─",
+                math.max(4, 50 - vim.fn.strdisplaywidth(header))
+            )
+
+        table.insert(lines, header)
+        table.insert(extmarks, {
+            row = #lines,
+            col = 0,
+            end_col = #header,
+            hl_group = "Title",
+        })
+
+        local content = vim.fn.readfile(path)
+
+        if #content == 0 then
+            table.insert(lines, "(empty)")
+            table.insert(extmarks, {
+                row = #lines,
+                col = 0,
+                end_col = 7,
+                hl_group = "Comment",
+            })
+        else
+            vim.list_extend(lines, content)
+        end
+    end
+
+    section("Input", input)
+    table.insert(lines, "")
+    section("Expected output", output)
+
+    return { text = table.concat(lines, "\n"), extmarks = extmarks, loc = false }
+end
+
+map("n", "<leader>ip", function()
+    local dir = cp_view_dir()
+
+    if not dir then
+        return
+    end
+
+    -- Preview what's on screen, not stale files
+    cp_save_tests(dir)
+
+    local items = {}
+
+    for n = 1, cp_count_tests(dir) do
+        local input, output = cp_test_files(dir, n - 1)
+        local input_lines = vim.fn.readfile(input)
+        local output_lines = vim.fn.readfile(output)
+        local searchable = table.concat(input_lines, " ")
+            .. " "
+            .. table.concat(output_lines, " ")
+
+        table.insert(items, {
+            test = n,
+            text = "Test " .. n .. " " .. searchable:sub(1, 500),
+            input = input,
+            input_count = #input_lines,
+            output_count = #output_lines,
+            first_line = input_lines[1] or "",
+            preview = cp_test_preview(input, output),
+        })
+    end
+
+    if #items == 0 then
+        vim.notify(
+            "No test cases found. Press <leader>ic or <leader>ib first.",
+            vim.log.levels.WARN
+        )
+        return
+    end
+
+    Snacks.picker({
+        title = "CP Tests · " .. vim.fn.fnamemodify(dir, ":t"),
+        items = items,
+        preview = "preview",
+        format = function(item)
+            return {
+                { string.format("Test %-3d", item.test), "Title" },
+                {
+                    string.format(
+                        "%-12s",
+                        vim.fn.fnamemodify(item.input, ":t")
+                    ),
+                    "Comment",
+                },
+                {
+                    string.format(
+                        "%3d in · %3d out   ",
+                        item.input_count,
+                        item.output_count
+                    ),
+                    "Number",
+                },
+                { item.first_line:sub(1, 60), "Normal" },
+            }
+        end,
+        confirm = function(picker, item)
+            picker:close()
+
+            if not item then
+                return
+            end
+
+            -- Leave the floating editor first, like <leader>ic
+            if cp_view_of(vim.api.nvim_get_current_win()) == cp_editor then
+                cp_view_close(cp_editor)
+            end
+
+            cp_view_show(cp_panel, item.test, 1, dir)
+        end,
+    })
+end, {
+    desc = "Pick CP test",
 })

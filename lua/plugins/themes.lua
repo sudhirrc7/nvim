@@ -84,13 +84,28 @@ return {
             vim.g.gruvbox_material_ui_contrast = "high"
             vim.g.gruvbox_material_menu_selection_background = "aqua"
             vim.g.gruvbox_material_background = "hard"
-            vim.g.gruvbox_material_visual = "reverse"
+            -- vim.g.gruvbox_material_visual = "reverse"
             -- vim.g.gruvbox_material_sign_column_background = "grey"
             vim.g.gruvbox_material_spell_foreground = "colored"
             -- vim.g.gruvbox_material_diagnostic_text_highlight = 1
             vim.g.gruvbox_material_diagnostic_line_highlight = 1
             vim.g.gruvbox_material_diagnostic_virtual_text = "colored"
             vim.g.gruvbox_material_better_performance = 1
+        end,
+    },
+    {
+        "sainnhe/everforest",
+        lazy = false,
+        priority = 1000,
+        config = function()
+            -- Optionally configure and load the colorscheme
+            -- directly inside the plugin declaration.
+            vim.g.everforest_enable_italic = true
+            vim.g.everforest_disable_italic_comment = 0
+            vim.g.everforest_background = "hard"
+            vim.g.everforest_float_style = "blend"
+            vim.g.everforest_diagnostic_line_highlight = 1
+            vim.g.everforest_diagnostic_virtual_text = "colored"
         end,
     },
 

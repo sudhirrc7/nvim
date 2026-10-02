@@ -162,40 +162,88 @@ local function blend(top, bottom, alpha)
     return ("#%02x%02x%02x"):format(channel(2), channel(4), channel(6))
 end
 
--- tints every section with the mode color, fading from solid (a)
--- through a half-tone (b) to a faint glow (c)
-local function mode_gradient(theme)
-    local base = theme.normal and theme.normal.c and theme.normal.c.bg
-    base = is_hex(base) and base or ink()
-    local text = Snacks.util.color("Normal") or "#cdd6f4"
-    for mode, sections in pairs(theme) do
-        local accent = sections.a and sections.a.bg
-        if mode ~= "inactive" and is_hex(accent) then
-            theme[mode] = {
-                a = { fg = base, bg = accent, gui = "bold" },
-                b = {
-                    fg = blend(accent, text, 0.2),
-                    bg = blend(accent, base, 0.4),
-                },
-                c = { fg = accent, bg = blend(accent, base, 0.12) },
-            }
+-- Builds a theme transform that recolors every mode from its accent
+-- (the mode color): `sections(accent, base, text)` returns the new
+-- { a, b, c } where base/text are the theme background/foreground.
+local function mode_tint(sections)
+    return function(theme)
+        local base = theme.normal and theme.normal.c and theme.normal.c.bg
+        base = is_hex(base) and base or ink()
+        local text = Snacks.util.color("Normal") or "#cdd6f4"
+        for mode, old in pairs(theme) do
+            local accent = old.a and old.a.bg
+            if mode ~= "inactive" and is_hex(accent) then
+                theme[mode] = sections(accent, base, text)
+            end
         end
+        return theme
     end
-    return theme
 end
 
--- Wraps a component in its own rounded capsule filled with the fg of
--- `groups` (first one that exists), or the mode color for "mode".
+-- solid (a) through a half-tone (b) to a faint glow (c)
+local mode_gradient = mode_tint(function(accent, base, text)
+    return {
+        a = { fg = base, bg = accent, gui = "bold" },
+        b = { fg = blend(accent, text, 0.2), bg = blend(accent, base, 0.4) },
+        c = { fg = accent, bg = blend(accent, base, 0.12) },
+    }
+end)
+
+-- frosted glass: translucent mode tints with glowing text, no fill
+local mode_glass = mode_tint(function(accent, base, text)
+    return {
+        a = { fg = accent, bg = blend(accent, base, 0.22), gui = "bold" },
+        b = { fg = blend(accent, text, 0.45), bg = blend(accent, base, 0.1) },
+        c = { fg = text, bg = "None" },
+    }
+end)
+
+-- a deep band of the mode color: solid head (a), mid-tone fold (b),
+-- rich dark body (c), all with light text so nothing washes out
+local mode_ribbon = mode_tint(function(accent, base, text)
+    return {
+        a = { fg = base, bg = accent, gui = "bold" },
+        b = { fg = blend(accent, text, 0.15), bg = blend(accent, base, 0.55) },
+        c = { fg = blend(accent, text, 0.3), bg = blend(accent, base, 0.28) },
+    }
+end)
+
+-- shapes for capsule() edges
+local edges = {
+    round = { left = "\u{e0b6}", right = "\u{e0b4}" }, -- ( )
+    trapezoid = { left = "\u{e0ba}", right = "\u{e0b8}" }, -- ◢ ◣ wide at the bottom
+    tab = { left = "\u{e0be}", right = "\u{e0bc}" }, -- ◥ ◤ wide at the top
+    hexagon = { left = "\u{e0b2}", right = "\u{e0b0}" }, -- < >
+}
+
+-- Wraps a component in its own capsule filled with the fg of `groups`
+-- (first one that exists), or the mode color for "mode", or a color
+-- function. `shape` is one of `edges` (round by default).
 -- Put a gap() between capsules so they float apart.
-local function capsule(component, groups)
+local function capsule(component, groups, shape)
     component = type(component) == "table" and component or { component }
-    component.separator = { left = "\u{e0b6}", right = "\u{e0b4}" }
-    component.color = function()
-        local bg = groups == "mode" and mode_color()
-            or Snacks.util.color(groups)
-        return { fg = ink(), bg = bg, gui = "bold" }
-    end
+    component.separator = edges[shape or "round"]
+    component.color = type(groups) == "function" and groups
+        or function()
+            local bg = groups == "mode" and mode_color()
+                or Snacks.util.color(groups)
+            return { fg = ink(), bg = bg, gui = "bold" }
+        end
     return component
+end
+
+-- capsule color: the fg of `groups` (or the mode color for "mode")
+-- mixed into the background by `alpha`, with light tinted text
+local function tinted(groups, alpha)
+    return function()
+        local accent = groups == "mode" and mode_color()
+            or Snacks.util.color(groups)
+        return {
+            fg = blend(accent, Snacks.util.color("Normal") or "#cdd6f4", 0.5),
+            bg = blend(accent, ink(), alpha),
+            gui = "bold",
+        }
+    end
 end
 
 local function gap()
@@ -231,6 +279,86 @@ local function scroll_bar()
     return blocks[math.max(1, math.ceil(ratio * #blocks))]:rep(2)
 end
 
+-- Floating pills of one `shape` on a transparent bar:
+-- mode, branch, file ... lsp, progress, location.
+-- `colors` maps each pill to a capsule() color, plus the mode `icon`.
+local function pills(opts, shape, colors)
+    local diff, extras = split_x(opts)
+    opts.options.theme = auto_theme(transparent_middle)
+    opts.options.section_separators = ""
+    opts.options.component_separators = ""
+
+    opts.sections.lualine_a = {}
+    opts.sections.lualine_b = {}
+    opts.sections.lualine_c = {
+        gap(),
+        capsule({ "mode", icon = colors.icon }, colors.mode, shape),
+        gap(),
+        capsule({ "branch", icon = "\u{e725}" }, colors.branch, shape),
+        gap(),
+        capsule(file_with_icon(), colors.file, shape),
+        diagnostics(),
+    }
+    opts.sections.lualine_x = append(extras, info_extras())
+    vim.list_extend(opts.sections.lualine_x, {
+        diff,
+        capsule({
+            lsp_clients,
+            icon = "\u{f085}",
+            cond = function()
+                return lsp_clients() ~= ""
+            end,
+        }, colors.lsp, shape),
+        gap(),
+        capsule({ "progress" }, colors.progress, shape),
+        gap(),
+        capsule({ "location" }, colors.location, shape),
+        gap(),
+    })
+    opts.sections.lualine_y = {}
+    opts.sections.lualine_z = {}
+    return opts
+end
+
+-- Powerline where every edge is a slash: `left`/`right` are the section
+-- separators, `thin` the component one. With `gradient` it is tinted by
+-- the mode, otherwise it uses the plain theme and shows the root dir.
+local function slashed(gradient, left, right, thin)
+    return function(opts)
+        local diff, extras = split_x(opts)
+        opts.options.theme = auto_theme(gradient and mode_gradient or nil)
+        opts.options.section_separators = { left = left, right = right }
+        opts.options.component_separators = { left = thin, right = thin }
+
+        opts.sections.lualine_a = { { "mode", icon = "\u{e62b}" } }
+        opts.sections.lualine_b = { { "branch", icon = "\u{e725}" }, diff }
+        opts.sections.lualine_c = {
+            {
+                "filetype",
+                icon_only = true,
+                separator = "",
+                padding = { left = 1, right = 0 },
+            },
+            pretty_path(),
+            diagnostics(),
+        }
+        if not gradient then
+            table.insert(opts.sections.lualine_c, 1, LazyVim.lualine.root_dir())
+        end
+        opts.sections.lualine_x = append(extras, info_extras())
+        opts.sections.lualine_y = {
+            { "progress", separator = " ", padding = { left = 1, right = 0 } },
+            { "location", padding = { left = 0, right = 1 } },
+        }
+        opts.sections.lualine_z = {
+            function()
+                return "\u{f017} " .. os.date("%R")
+            end,
+        }
+        return opts
+    end
+end
+
 -- ============================================================
 -- STYLES
 -- Each `build` gets a fresh copy of LazyVim's lualine opts and must
@@ -242,6 +370,7 @@ local lualine_styles = {
     -- the original look: LazyVim's arrows with the custom path
     {
         name = "Classic",
+        desc = "LazyVim arrows with the custom path",
         icon = "\u{e0b0}",
         build = function(opts)
             opts.options.theme = auto_theme()
@@ -263,6 +392,7 @@ local lualine_styles = {
     -- rounded pills at both ends floating over a transparent middle
     {
         name = "Bubbles",
+        desc = "rounded pills over a transparent middle",
         icon = "\u{e0b6}",
         build = function(opts)
             local diff, extras = split_x(opts)
@@ -301,51 +431,24 @@ local lualine_styles = {
             return opts
         end,
     },
-    -- powerline with forward slashes and a clock
+    -- powerline with forward slashes (/) and a clock
     {
         name = "Slant",
+        desc = "slashed powerline with a clock",
         icon = "\u{e0bc}",
-        build = function(opts)
-            local diff, extras = split_x(opts)
-            opts.options.theme = auto_theme()
-            opts.options.section_separators =
-                { left = "\u{e0bc}", right = "\u{e0ba}" }
-            opts.options.component_separators =
-                { left = "\u{e0bb}", right = "\u{e0bb}" }
-
-            opts.sections.lualine_a = { { "mode", icon = "\u{e62b}" } }
-            opts.sections.lualine_b = { { "branch", icon = "\u{e725}" }, diff }
-            opts.sections.lualine_c = {
-                LazyVim.lualine.root_dir(),
-                {
-                    "filetype",
-                    icon_only = true,
-                    separator = "",
-                    padding = { left = 1, right = 0 },
-                },
-                pretty_path(),
-                diagnostics(),
-            }
-            opts.sections.lualine_x = append(extras, info_extras())
-            opts.sections.lualine_y = {
-                {
-                    "progress",
-                    separator = " ",
-                    padding = { left = 1, right = 0 },
-                },
-                { "location", padding = { left = 0, right = 1 } },
-            }
-            opts.sections.lualine_z = {
-                function()
-                    return "\u{f017} " .. os.date("%R")
-                end,
-            }
-            return opts
-        end,
+        build = slashed(false, "\u{e0bc}", "\u{e0ba}", "\u{e0bb}"),
+    },
+    -- Slant mirrored: every edge leans back (\)
+    {
+        name = "Backslant",
+        desc = "back-slashed powerline with a clock",
+        icon = "\u{e0b8}",
+        build = slashed(false, "\u{e0b8}", "\u{e0be}", "\u{e0b9}"),
     },
     -- eviline: transparent, mode-colored edge bars, LSP name in the center
     {
         name = "Evil",
+        desc = "eviline: mode bars, LSP in the center",
         icon = "\u{e62b}",
         build = function(opts)
             local diff, extras = split_x(opts)
@@ -409,6 +512,7 @@ local lualine_styles = {
     -- quiet text on a transparent bar, only the mode dot has color
     {
         name = "Minimal",
+        desc = "quiet text, only the mode dot has color",
         icon = "\u{25cf}",
         build = function(opts)
             local diff, extras = split_x(opts)
@@ -460,6 +564,7 @@ local lualine_styles = {
     -- so switching to insert/visual washes the bar in a new color
     {
         name = "Aurora",
+        desc = "whole bar tinted by the mode, fading to a glow",
         icon = "\u{f186}",
         build = function(opts)
             local diff, extras = split_x(opts)
@@ -491,6 +596,7 @@ local lualine_styles = {
     -- on a transparent bar
     {
         name = "Capsules",
+        desc = "rainbow capsules floating apart",
         icon = "\u{f135}",
         build = function(opts)
             local diff, extras = split_x(opts)
@@ -536,6 +642,7 @@ local lualine_styles = {
     -- flame-shaped separators burning into a transparent middle
     {
         name = "Flame",
+        desc = "flame edges burning into the background",
         icon = "\u{f06d}",
         build = function(opts)
             local diff, extras = split_x(opts)
@@ -567,6 +674,7 @@ local lualine_styles = {
     -- 8-bit: pixelated edges, a gamepad and a scroll meter
     {
         name = "Pixel",
+        desc = "8-bit edges, gamepad and a scroll meter",
         icon = "\u{f11b}",
         build = function(opts)
             local diff, extras = split_x(opts)
@@ -600,6 +708,7 @@ local lualine_styles = {
     -- transparent bar where everything glows in the mode color
     {
         name = "Neon",
+        desc = "everything glows in the mode color",
         icon = "\u{f0e7}",
         build = function(opts)
             local diff, extras = split_x(opts)
@@ -666,6 +775,298 @@ local lualine_styles = {
             return opts
         end,
     },
+    -- frosted glass: translucent mode-tinted pills with glowing text
+    {
+        name = "Glass",
+        desc = "frosted translucent pills with glowing text",
+        icon = "\u{f0eb}",
+        build = function(opts)
+            local diff, extras = split_x(opts)
+            opts.options.theme = auto_theme(mode_glass)
+            opts.options.section_separators =
+                { left = "\u{e0b4}", right = "\u{e0b6}" }
+            opts.options.component_separators = ""
+
+            opts.sections.lualine_a = {
+                {
+                    "mode",
+                    icon = "\u{f0eb}",
+                    separator = { left = "\u{e0b6}" },
+                    padding = { left = 0, right = 1 },
+                },
+            }
+            opts.sections.lualine_b = { { "branch", icon = "\u{e725}" }, diff }
+            opts.sections.lualine_c = {
+                {
+                    "filetype",
+                    icon_only = true,
+                    separator = "",
+                    padding = { left = 2, right = 0 },
+                },
+                pretty_path(),
+                diagnostics(),
+            }
+            opts.sections.lualine_x = append(extras, info_extras())
+            opts.sections.lualine_y = { "progress" }
+            opts.sections.lualine_z = {
+                {
+                    "location",
+                    separator = { right = "\u{e0b4}" },
+                    padding = { left = 1, right = 0 },
+                },
+            }
+            return opts
+        end,
+    },
+    -- the whole bar is one deep band of the mode color
+    {
+        name = "Ribbon",
+        desc = "a deep band of mode color, edge to edge",
+        icon = "\u{f02e}",
+        build = function(opts)
+            local _, extras = split_x(opts)
+            -- drop the extras' own colors (pink lazy updates etc.), they
+            -- clash with the band, and use the band's text color instead
+            extras = vim.tbl_map(function(component)
+                if type(component) == "table" then
+                    component = vim.tbl_extend("force", {}, component)
+                    component.color = nil
+                end
+                return component
+            end, extras)
+            opts.options.theme = auto_theme(mode_ribbon)
+            opts.options.section_separators =
+                { left = "\u{e0b0}", right = "\u{e0b2}" }
+            opts.options.component_separators =
+                { left = "\u{e0b1}", right = "\u{e0b3}" }
+
+            opts.sections.lualine_a = { { "mode", icon = "\u{f02e}" } }
+            opts.sections.lualine_b = {
+                { "branch", icon = "\u{e725}" },
+                { "diff", colored = false },
+            }
+            opts.sections.lualine_c = {
+                vim.tbl_extend(
+                    "force",
+                    file_with_icon(),
+                    { color = { gui = "bold" } }
+                ),
+                vim.tbl_extend("force", diagnostics(), { colored = false }),
+            }
+            opts.sections.lualine_x = append(extras, info_extras())
+            opts.sections.lualine_y = { "progress" }
+            opts.sections.lualine_z = { "location" }
+            return opts
+        end,
+    },
+    -- oh-my-zsh robbyrussell prompt: ➜ project git:(main) ✗
+    {
+        name = "Prompt",
+        desc = "a zsh prompt: ➜ project git:(main) ✗",
+        icon = "\u{f120}",
+        build = function(opts)
+            local diff, extras = split_x(opts)
+            local function head()
+                return vim.b.gitsigns_head or ""
+            end
+            local function in_git()
+                return head() ~= ""
+            end
+            local function dirty()
+                local s = vim.b.gitsigns_status_dict
+                return s ~= nil
+                    and (
+                            (s.added or 0)
+                            + (s.changed or 0)
+                            + (s.removed or 0)
+                        )
+                        > 0
+            end
+            opts.options.theme = auto_theme(transparent_middle)
+            opts.options.section_separators = ""
+            opts.options.component_separators = ""
+
+            opts.sections.lualine_a = {}
+            opts.sections.lualine_b = {}
+            opts.sections.lualine_c = {
+                {
+                    function()
+                        return "➜"
+                    end,
+                    color = fg_mode("bold"),
+                },
+                {
+                    function()
+                        return vim.fn.fnamemodify(LazyVim.root(), ":t")
+                    end,
+                    color = fg({ "DiagnosticInfo", "Special" }, "bold"),
+                    padding = { left = 0, right = 1 },
+                },
+                {
+                    function()
+                        return "git:("
+                    end,
+                    cond = in_git,
+                    color = fg("Function", "bold"),
+                    padding = 0,
+                },
+                {
+                    head,
+                    cond = in_git,
+                    color = fg("DiagnosticError", "bold"),
+                    padding = 0,
+                },
+                {
+                    function()
+                        return ")"
+                    end,
+                    cond = in_git,
+                    color = fg("Function", "bold"),
+                    padding = { left = 0, right = 1 },
+                },
+                {
+                    function()
+                        return "✗"
+                    end,
+                    cond = dirty,
+                    color = fg("DiagnosticWarn", "bold"),
+                    padding = { left = 0, right = 1 },
+                },
+                pretty_path(),
+                diagnostics(),
+            }
+            opts.sections.lualine_x = append(extras, info_extras())
+            vim.list_extend(opts.sections.lualine_x, {
+                diff,
+                {
+                    function()
+                        return "[%l:%v]"
+                    end,
+                    color = fg("Comment"),
+                },
+                {
+                    function()
+                        return os.date("%R")
+                    end,
+                    color = fg("Comment", "italic"),
+                    padding = { left = 0, right = 1 },
+                },
+            })
+            opts.sections.lualine_y = {}
+            opts.sections.lualine_z = {}
+            return opts
+        end,
+    },
+    -- the file sits in a glowing pill dead center, everything else
+    -- is pushed to the edges
+    {
+        name = "Spotlight",
+        desc = "your file in a glowing pill, dead center",
+        icon = "\u{f005}",
+        build = function(opts)
+            local diff, extras = split_x(opts)
+            opts.options.theme = auto_theme(transparent_middle)
+            opts.options.section_separators = ""
+            opts.options.component_separators = ""
+
+            opts.sections.lualine_a = {}
+            opts.sections.lualine_b = {}
+            opts.sections.lualine_c = {
+                {
+                    "mode",
+                    icon = "\u{f005}",
+                    color = fg_mode("bold"),
+                    padding = { left = 1, right = 1 },
+                },
+                { "branch", icon = "\u{e725}", color = fg("Comment") },
+                {
+                    function()
+                        return "%="
+                    end,
+                },
+                capsule(file_with_icon(), "mode"),
+                diagnostics(),
+            }
+            opts.sections.lualine_x = append(extras, info_extras())
+            vim.list_extend(opts.sections.lualine_x, {
+                diff,
+                { "location", color = fg("Comment") },
+                {
+                    scroll_bar,
+                    color = fg_mode(),
+                    padding = { left = 0, right = 1 },
+                },
+            })
+            opts.sections.lualine_y = {}
+            opts.sections.lualine_z = {}
+            return opts
+        end,
+    },
+    -- Slant mirrored: every edge leans back (\), over the mode gradient
+    {
+        name = "Backslash",
+        desc = "reverse-slanted powerline fading through the mode",
+        icon = "\u{e0b8}",
+        build = slashed(true, "\u{e0b8}", "\u{e0be}", "\u{e0b9}"),
+    },
+    -- Backslash mirrored: every edge leans forward (/)
+    {
+        name = "Forwardslash",
+        desc = "forward-slanted powerline fading through the mode",
+        icon = "\u{e0bc}",
+        build = slashed(true, "\u{e0bc}", "\u{e0ba}", "\u{e0bb}"),
+    },
+    -- floating trapezoids (wide at the bottom) in shades of the mode color
+    {
+        name = "Trapezoid",
+        desc = "floating trapezoids in shades of the mode color",
+        icon = "\u{e0ba}",
+        build = function(opts)
+            return pills(opts, "trapezoid", {
+                icon = "\u{f1b2}",
+                mode = "mode",
+                branch = tinted("mode", 0.45),
+                file = tinted("mode", 0.25),
+                lsp = tinted("mode", 0.25),
+                progress = tinted("mode", 0.45),
+                location = "mode",
+            })
+        end,
+    },
+    -- upside-down trapezoids hanging like tabs, each its own color
+    {
+        name = "Tabs",
+        desc = "rainbow tabs, wide at the top",
+        icon = "\u{e0be}",
+        build = function(opts)
+            return pills(opts, "tab", {
+                icon = "\u{f15b}",
+                mode = "mode",
+                branch = { "Statement", "Keyword" },
+                file = { "Function", "Identifier" },
+                lsp = { "Type", "Special" },
+                progress = { "String", "DiagnosticOk" },
+                location = { "Constant", "Number" },
+            })
+        end,
+    },
+    -- pointed hexagon pills, frosted versions of the rainbow colors
+    {
+        name = "Hexagon",
+        desc = "frosted rainbow hexagons with pointed ends",
+        icon = "\u{e0b2}",
+        build = function(opts)
+            return pills(opts, "hexagon", {
+                icon = "\u{f121}",
+                mode = "mode",
+                branch = tinted({ "Statement", "Keyword" }, 0.3),
+                file = tinted({ "Function", "Identifier" }, 0.3),
+                lsp = tinted({ "Type", "Special" }, 0.3),
+                progress = tinted({ "String", "DiagnosticOk" }, 0.3),
+                location = tinted({ "Constant", "Number" }, 0.3),
+            })
+        end,
+    },
 }
 
 local function lualine_style_index(name)
@@ -694,26 +1095,80 @@ local function lualine_build(idx)
     return opts
 end
 
-local function lualine_cycle_style()
-    lualine_current = lualine_current % #lualine_styles + 1
-    local style = lualine_styles[lualine_current]
-    require("lualine").setup(lualine_build(lualine_current))
+local function lualine_apply(idx)
+    require("lualine").setup(lualine_build(idx))
+end
 
-    local f = io.open(style_state, "w")
-    if f then
-        f:write(style.name)
-        f:close()
+-- Picks a style with a Snacks picker. Moving through the list previews
+-- each style live on the statusline; <CR> keeps it, <Esc> restores.
+local function lualine_pick_style()
+    local original = lualine_current
+    local confirmed = false
+    local items = {}
+    for i, style in ipairs(lualine_styles) do
+        items[#items + 1] = {
+            idx = i,
+            text = style.name .. " " .. style.desc,
+            style = style,
+        }
     end
 
-    Snacks.notify(
-        ("%s  %s  (%d/%d)"):format(
-            style.icon,
-            style.name,
-            lualine_current,
-            #lualine_styles
-        ),
-        { title = "Lualine style" }
-    )
+    Snacks.picker({
+        title = "Lualine Style",
+        items = items,
+        layout = { preset = "select", preview = false },
+        format = function(item)
+            local current = item.idx == original
+            local ret = {
+                { item.style.icon, "Special" },
+                { "  " },
+                {
+                    ("%-11s"):format(item.style.name),
+                    current and "DiagnosticOk" or "Normal",
+                },
+                { item.style.desc, "Comment" },
+            }
+            if current then
+                ret[#ret + 1] = { "  ● current", "DiagnosticOk" }
+            end
+            return ret
+        end,
+        on_show = function(picker)
+            vim.schedule(function()
+                picker.list:view(original)
+            end)
+        end,
+        on_change = function(_, item)
+            if item then
+                lualine_apply(item.idx)
+            end
+        end,
+        on_close = function()
+            if not confirmed then
+                lualine_apply(original)
+            end
+        end,
+        confirm = function(picker, item)
+            confirmed = item ~= nil
+            picker:close()
+            if not item then
+                return
+            end
+            lualine_current = item.idx
+            lualine_apply(item.idx)
+
+            local f = io.open(style_state, "w")
+            if f then
+                f:write(item.style.name)
+                f:close()
+            end
+
+            Snacks.notify(
+                ("%s  %s"):format(item.style.icon, item.style.name),
+                { title = "Lualine style" }
+            )
+        end,
+    })
 end
 
 return {
@@ -726,8 +1181,8 @@ return {
     keys = {
         {
             "<leader>tl",
-            lualine_cycle_style,
-            desc = "Toggle Lualine Style",
+            lualine_pick_style,
+            desc = "Select Lualine Style",
         },
     },
 }

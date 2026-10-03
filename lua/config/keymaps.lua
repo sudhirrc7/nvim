@@ -318,25 +318,43 @@ Snacks.toggle({
 
 -- Classic command line: reserve a line at the bottom for commands like
 -- stock nvim. Off by default (cmdheight = 0 in config/options.lua).
--- Noice is paused while it's on, so the native cmdline and messages
--- use that line instead of the noice popup drawing over lualine.
+-- While it's on, only Noice's cmdline is handed back to the native line
+-- (along with its message area, which Neovim ties to the cmdline), so it
+-- doesn't draw over lualine. Noice notifications, LSP docs and the
+-- popupmenu keep working.
+local noice_cmdline_defaults
+
+local function set_noice_cmdline(enabled)
+    local ok, config = pcall(require, "noice.config")
+    if not ok or not config.is_running() then
+        return
+    end
+    noice_cmdline_defaults = noice_cmdline_defaults
+        or {
+            cmdline = config.options.cmdline.enabled,
+            messages = config.options.messages.enabled,
+        }
+    config.options.cmdline.enabled = enabled and noice_cmdline_defaults.cmdline
+    config.options.messages.enabled = enabled
+        and noice_cmdline_defaults.messages
+    -- re-attach the UI so the new cmdline/messages settings apply
+    local noice = require("noice")
+    noice.disable()
+    noice.enable()
+end
+
 Snacks.toggle({
     name = "Command Line Space",
     get = function()
         return vim.o.cmdheight > 0
     end,
     set = function(state)
-        local ok, noice = pcall(require, "noice")
         if state then
-            if ok then
-                noice.disable()
-            end
+            set_noice_cmdline(false)
             vim.o.cmdheight = 1
         else
             vim.o.cmdheight = 0
-            if ok then
-                noice.enable()
-            end
+            set_noice_cmdline(true)
         end
     end,
 }):map("<leader>tx")

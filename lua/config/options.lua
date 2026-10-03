@@ -100,6 +100,9 @@ o.conceallevel = 2
 -- One border style for every built-in float (LSP hover, signature, diagnostics)
 o.winborder = "rounded"
 
+-- Terminal colors follow the colorscheme (before transparency clears Normal's bg)
+require("config.termsync")
+
 -- Transparency for every colorscheme, toggled with <leader>t1
 require("config.transparency")
 

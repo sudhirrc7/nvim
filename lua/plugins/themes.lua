@@ -4,6 +4,20 @@
 -- The last picked theme is restored on startup (config/lazy.lua).
 -- Leave each theme's own transparency off: <leader>t1 (config/transparency.lua)
 -- makes any of them transparent.
+
+-- shared by the folke-style themes (tokyonight, solarized-osaka): blue
+-- window separators, transparent sidebars and floats
+local function blue_separator(highlights, colors)
+    highlights.WinSeparator = { fg = colors.blue }
+end
+local function transparent_panels(styles)
+    return vim.tbl_extend(
+        "force",
+        { sidebars = "transparent", floats = "transparent" },
+        styles or {}
+    )
+end
+
 return {
     -- Local classic DOS / Far Manager blue theme: `farblue` / `farblue-midnight`
     {
@@ -18,14 +32,12 @@ return {
 
     {
         "Aejkatappaja/cendre",
-        config = function()
-            require("cendre").setup({
-                transparent = false,
-                background = "hard", -- "hard" | "medium" | "soft"
-                italic_virtual_text = false,
-                italic_comments = false,
-            })
-        end,
+        opts = {
+            transparent = false,
+            background = "hard", -- "hard" | "medium" | "soft"
+            italic_virtual_text = false,
+            italic_comments = false,
+        },
     },
 
     {
@@ -73,7 +85,6 @@ return {
             }
         end,
     },
-
     {
         "sainnhe/gruvbox-material",
         config = function()
@@ -95,11 +106,7 @@ return {
     },
     {
         "sainnhe/everforest",
-        lazy = false,
-        priority = 1000,
         config = function()
-            -- Optionally configure and load the colorscheme
-            -- directly inside the plugin declaration.
             vim.g.everforest_enable_italic = true
             vim.g.everforest_disable_italic_comment = 0
             vim.g.everforest_background = "hard"
@@ -211,14 +218,9 @@ return {
     {
         "craftzdog/solarized-osaka.nvim",
         opts = {
-            on_highlights = function(highlights, colors)
-                highlights.WinSeparator = { fg = colors.blue }
-            end,
+            on_highlights = blue_separator,
             transparent = false,
-            styles = {
-                sidebars = "transparent",
-                floats = "transparent",
-            },
+            styles = transparent_panels(),
         },
     },
 
@@ -228,18 +230,14 @@ return {
     {
         "folke/tokyonight.nvim",
         opts = {
-            on_highlights = function(highlights, colors)
-                highlights.WinSeparator = { fg = colors.blue }
-            end,
+            on_highlights = blue_separator,
             transparent = false,
-            styles = {
-                sidebars = "transparent",
-                floats = "transparent",
+            styles = transparent_panels({
                 comments = { italic = true },
                 keywords = { italic = true },
                 functions = { italic = true },
                 variables = { italic = false },
-            },
+            }),
         },
     },
 

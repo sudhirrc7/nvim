@@ -13,46 +13,18 @@ local ag = vim.api.nvim_create_augroup
 ac("ColorScheme", {
     group = ag("remember_colorscheme", { clear = true }),
     callback = function(args)
-        local f = io.open(vim.fn.stdpath("state") .. "/last_colorscheme", "w")
-        if f then
-            f:write(args.match)
-            f:close()
-        end
+        require("config.util").write_state("last_colorscheme", args.match)
     end,
 })
 
--- Disable diagnostics in a .env file
-ac("BufRead", {
-    pattern = ".env",
-    callback = function()
-        vim.diagnostic.enable(false)
+-- No diagnostics in .env files and in node_modules (only for those buffers)
+ac({ "BufNewFile", "BufRead" }, {
+    group = ag("disable_diagnostics", { clear = true }),
+    pattern = { ".env", "**/node_modules/**", "node_modules", "/node_modules/*" },
+    callback = function(args)
+        vim.diagnostic.enable(false, { bufnr = args.buf })
     end,
 })
-
--- local auto_close_filetype = {
---     "lazy",
---     "mason",
---     "lspinfo",
---     "toggleterm",
---     "null-ls-info",
---     "TelescopePrompt",
---     "notify",
--- }
-
--- -- Auto close window when leaving
--- ac("BufLeave", {
---     group = ag("lazyvim_auto_close_win", { clear = true }),
---     callback = function(event)
---         local ft = vim.api.nvim_buf_get_option(event.buf, "filetype")
---
---         if vim.fn.index(auto_close_filetype, ft) ~= -1 then
---             local winids = vim.fn.win_findbuf(event.buf)
---             for _, win in pairs(winids) do
---                 vim.api.nvim_win_close(win, true)
---             end
---         end
---     end,
--- })
 
 -- Disable leader and localleader for some filetypes
 ac("FileType", {
@@ -69,67 +41,19 @@ ac("FileType", {
         "floaterm",
     },
     callback = function(event)
-        vim.keymap.set(
-            "n",
-            "<leader>",
-            "<nop>",
-            { buffer = event.buf, desc = "" }
-        )
-        vim.keymap.set(
-            "n",
-            "<localleader>",
-            "<nop>",
-            { buffer = event.buf, desc = "" }
-        )
+        for _, lhs in ipairs({ "<leader>", "<localleader>" }) do
+            vim.keymap.set("n", lhs, "<nop>", { buffer = event.buf, desc = "" })
+        end
     end,
 })
 
--- Delete number column on terminals
--- ac("TermOpen", {
---     callback = function()
---         vim.cmd("setlocal listchars= number relativenumber")
---         vim.cmd("setlocal nospell")
---     end,
--- })
-
--- Disable next line comments
+-- Disable next line comments (ftplugins set these flags again, hence BufEnter)
 ac("BufEnter", {
+    group = ag("no_auto_comment", { clear = true }),
     callback = function()
-        vim.cmd("set formatoptions-=cro")
-        vim.cmd("setlocal formatoptions-=cro")
+        vim.opt_local.formatoptions:remove({ "c", "r", "o" })
     end,
 })
-
--- Disable eslint on node_modules
-ac({ "BufNewFile", "BufRead" }, {
-    group = ag("DisableEslintOnNodeModules", { clear = true }),
-    pattern = { "**/node_modules/**", "node_modules", "/node_modules/*" },
-    callback = function()
-        vim.diagnostic.enable(false)
-    end,
-})
-
--- -- Toggle between relative/absolute line numbers
--- local numbertoggle = ag("numbertoggle", { clear = true })
--- ac({ "BufEnter", "FocusGained", "InsertLeave", "CmdlineLeave", "WinEnter" }, {
---     pattern = "*",
---     group = numbertoggle,
---     callback = function()
---         if vim.o.nu and vim.api.nvim_get_mode().mode ~= "i" then
---             vim.opt.relativenumber = true
---         end
---     end,
--- })
---
--- ac({ "BufLeave", "FocusLost", "InsertEnter", "CmdlineEnter", "WinLeave" }, {
---     pattern = "*",
---     group = numbertoggle,
---     callback = function()
---         if vim.o.nu then
---             vim.opt.relativenumber = false
---         end
---     end,
--- })
 
 -- Create a dir when saving a file if it doesnt exist
 ac("BufWritePre", {
@@ -143,39 +67,12 @@ ac("BufWritePre", {
     end,
 })
 
--- vim.api.nvim_create_autocmd("CursorMovedI", {
---     pattern = "*",
---     callback = function()
---         -- Check if the completion menu is NOT already visible and if typing
---         if vim.fn.pumvisible() == 0 and vim.fn.omnifunc ~= "" then
---             -- Automatically trigger omnicomplete without manually pressing CTRL-X CTRL-O
---             vim.fn.feedkeys(
---                 vim.api.nvim_replace_termcodes("<C-x><C-o>", true, true, true),
---                 "n"
---             )
---         end
---     end,
--- })
-
-vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter" }, {
+-- Plain text: no spell, no wrap
+ac({ "BufEnter", "BufWinEnter" }, {
+    group = ag("txt_files", { clear = true }),
     pattern = "*.txt",
     callback = function()
-        -- vim.opt_local.number = true
-        -- vim.opt_local.relativenumber = false
         vim.opt_local.spell = false
         vim.opt_local.wrap = false
     end,
 })
-
--- vim.api.nvim_create_autocmd("CursorHold", {
---     callback = function()
---         vim.diagnostic.open_float(nil, {
---             focus = false,
---             scope = "cursor",
---             border = "none",
---             source = "if_many",
---             header = "",
---             prefix = "",
---         })
---     end,
--- })

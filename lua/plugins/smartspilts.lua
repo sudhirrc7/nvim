@@ -1,19 +1,25 @@
+-- <C-arrow> resize, <leader><arrow> move the cursor, <A-arrow> swap buffers
+local keys = {}
+for _, dir in ipairs({ "Left", "Down", "Up", "Right" }) do
+    local d = dir:lower()
+    for _, action in ipairs({
+        { "<C-" .. dir .. ">", "resize_", "Resize " },
+        { "<leader><" .. dir .. ">", "move_cursor_", "Move Cursor " },
+        { "<A-" .. dir .. ">", "swap_buf_", "Swap Buffer " },
+    }) do
+        local lhs, fn, desc = action[1], action[2], action[3]
+        keys[#keys + 1] = {
+            lhs,
+            function()
+                require("smart-splits")[fn .. d]()
+            end,
+            desc = desc .. dir,
+        }
+    end
+end
+
 return {
     "mrjones2014/smart-splits.nvim",
     event = "VeryLazy",
-  -- stylua: ignore
-  keys = {
-    { "<C-Left>",  function() require("smart-splits").resize_left() end,       desc = "Resize Left" },
-    { "<C-Down>",  function() require("smart-splits").resize_down() end,       desc = "Resize Down" },
-    { "<C-Up>",    function() require("smart-splits").resize_up() end,         desc = "Resize Up" },
-    { "<C-Right>", function() require("smart-splits").resize_right() end,      desc = "Resize Right" },
-    { "<leader><Left>",  function() require("smart-splits").move_cursor_left()  end, desc = "Move Cursor Left" },
-    { "<leader><Down>",  function() require("smart-splits").move_cursor_down()  end, desc = "Move Cursor Down" },
-    { "<leader><Up>",    function() require("smart-splits").move_cursor_up()    end, desc = "Move Cursor Up" },
-    { "<leader><Right>", function() require("smart-splits").move_cursor_right() end, desc = "Move Cursor Right" },
-    { "<A-Left>",  function() require("smart-splits").swap_buf_left() end,     desc = "Swap Buffer Left" },
-    { "<A-Down>",  function() require("smart-splits").swap_buf_down() end,     desc = "Swap Buffer Down" },
-    { "<A-Up>",    function() require("smart-splits").swap_buf_up() end,       desc = "Swap Buffer Up" },
-    { "<A-Right>", function() require("smart-splits").swap_buf_right() end,    desc = "Swap Buffer Right" },
-  },
+    keys = keys,
 }

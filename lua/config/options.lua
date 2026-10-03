@@ -1,58 +1,37 @@
 -- Options are automatically loaded before lazy.nvim startup
 -- Default options that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
 -- Add any additional options here
-local go = vim.g
-local o = vim.opt
--- vim.opt.fillchars:append("eob:~")
-vim.o.tabstop = 4
-vim.bo.tabstop = 4
-vim.o.softtabstop = 4
-vim.o.shiftround = true
-vim.o.shiftwidth = 4
-vim.bo.shiftwidth = 4
-vim.opt.autoread = true
+local g = vim.g
+local opt = vim.opt
+
 -- Optimizations on startup
 vim.loader.enable()
-vim.g.omni_sql_no_default_maps = 1
-o.background = "dark"
--- Personal Config and LazyVim global options
-go.lualine_info_extras = false
-go.snacks_animate = false
-go.codeium_cmp_hide = false
-go.lazygit_config = false
-go.lazyvim_cmp = "blink.cmp"
-go.lazyvim_picker = "snacks"
-go.trouble_lualine = false
-o.scrolloff = 8
--- vim.cmd("packadd nvim.undotree")
-vim.opt.cursorlineopt = "number"
--- vim.o.cursorlineopt = "screenline,number"
-vim.opt.tabstop = 4
-vim.o.guifont = "JetBrainsMono Nerd Font:h18" -- text below applies for VimScript
-go.neovide_input_macos_option_key_is_meta = "only_left"
---vim settings for me
--- Disable cursorline in all modes
--- vim.opt.cursorline = false
 
--- Set cursor to a block in all modes (normal, visual, insert, command)
--- The 'a' value applies the setting to all modes
-vim.opt.guicursor = ""
--- vim.opt.guicursor = "n-v-c:block,i-ci-ve:hor20,r-cr:hor20,o:hor50"
-
-vim.g.moonflyTransparent = true
-vim.g.moonflyNormalFloat = true
 -- Define leader key
-go.mapleader = " "
-go.maplocalleader = "\\"
+g.mapleader = " "
+g.maplocalleader = "\\"
+
+-- Personal Config and LazyVim global options
+g.lualine_info_extras = false
+g.snacks_animate = false
+g.codeium_cmp_hide = false
+g.lazygit_config = false
+g.lazyvim_cmp = "blink.cmp"
+g.lazyvim_picker = "snacks"
+g.trouble_lualine = false
+g.omni_sql_no_default_maps = 1
+g.neovide_input_macos_option_key_is_meta = "only_left"
+g.moonflyTransparent = true
+g.moonflyNormalFloat = true
 
 -- Autoformat on save (Global)
-go.autoformat = true
+g.autoformat = true
 
 -- Enable EditorConfig integration
-go.editorconfig = true
+g.editorconfig = true
 
 -- Root dir detection
-go.root_spec = {
+g.root_spec = {
     "lsp",
     {
         ".git",
@@ -68,37 +47,46 @@ go.root_spec = {
     "cwd",
 }
 
+-- Indentation
+opt.tabstop = 4
+opt.softtabstop = 4
+opt.shiftwidth = 4
+opt.shiftround = true
+
+opt.autoread = true
+opt.background = "dark"
+opt.scrolloff = 8
+opt.cursorlineopt = "number"
+opt.guifont = "JetBrainsMono Nerd Font:h18"
+
+-- Block cursor in every mode (normal, visual, insert, command)
+opt.guicursor = ""
+-- opt.guicursor = "n-v-c:block,i-ci-ve:hor20,r-cr:hor20,o:hor50"
+
 -- Disable annoying cmd line stuff
-o.showcmd = false
-o.laststatus = 3
-o.cmdheight = 0
--- o.cmdheight = 1
+opt.showcmd = false
+opt.laststatus = 3
+opt.cmdheight = 0 -- <leader>tx brings the command line back
 
--- Disable mouse
--- o.mouse = ""
-
-vim.opt.list = false
--- vim.opt.listchars:append("eol:↴")
-
-vim.opt.relativenumber = true
+opt.list = false
+opt.relativenumber = true
 
 -- Disable native bufferline
-o.showtabline = 0
+opt.showtabline = 0
 
--- Enable spell checking
-o.spell = false
-o.spelllang:append("es")
+-- Spell checking (off, toggled per buffer)
+opt.spell = false
+opt.spelllang:append("es")
 
 -- Backspacing and indentation when wrapping
-o.backspace = { "start", "eol", "indent" }
-o.breakindent = true
--- Smoothscroll
-o.smoothscroll = true
+opt.backspace = { "start", "eol", "indent" }
+opt.breakindent = true
+opt.smoothscroll = true
 
-o.conceallevel = 2
+opt.conceallevel = 2
 
 -- One border style for every built-in float (LSP hover, signature, diagnostics)
-o.winborder = "rounded"
+opt.winborder = "rounded"
 
 -- Terminal colors follow the colorscheme (before transparency clears Normal's bg)
 require("config.termsync")
@@ -108,15 +96,5 @@ require("config.transparency")
 
 -- Fix the clipboard when using WSL. Install https://github.com/equalsraf/win32yank (https://github.com/microsoft/WSL/issues/4440#issuecomment-1212350183)
 if os.getenv("WSL_DISTRO_NAME") ~= nil then
-    o.clipboard = "unnamedplus"
+    opt.clipboard = "unnamedplus"
 end
-
--- vim.opt.fillchars:append({
---     vert = "|",
---     horiz = "-", -- horizontal separator line
---     horizup = "+", -- junction: horiz line meets vert line going up
---     horizdown = "+", -- junction: horiz line meets vert line going down
---     vertleft = "+", -- junction: vert line with opening to the left
---     vertright = "+", -- junction: vert line with opening to the right
---     verthoriz = "+", -- junction: all four lines meet (a "+" crossing)
--- })

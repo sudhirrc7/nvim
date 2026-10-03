@@ -39,7 +39,7 @@ return {
     },
   -- stylua: ignore
   keys = {
-    { "-", "<cmd>Oil<cr>", { desc = "toggle oil lua" } },
+    { "-", "<cmd>Oil<cr>", desc = "toggle oil lua" },
     { "<leader>i-", function() require("oil").toggle_float() end, desc = "Toggle Oil" },
   },
 }

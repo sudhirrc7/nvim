@@ -15,12 +15,8 @@ require("lazy").setup({
             opts = {
                 -- restore the colorscheme saved by the ColorScheme autocmd in config/autocmds.lua
                 colorscheme = function()
-                    local f = io.open(vim.fn.stdpath("state") .. "/last_colorscheme", "r")
-                    local name = f and vim.trim(f:read("*a") or "") or ""
-                    if f then
-                        f:close()
-                    end
-                    if name == "" or not pcall(vim.cmd.colorscheme, name) then
+                    local name = require("config.util").read_state("last_colorscheme")
+                    if not name or not pcall(vim.cmd.colorscheme, name) then
                         vim.cmd.colorscheme("catppuccin-mocha")
                     end
                 end,

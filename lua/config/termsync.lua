@@ -5,7 +5,11 @@
 --   alacritty  ~/.config/alacritty/nvim-theme.toml  imported, live config reload
 --   kitty      ~/.config/kitty/nvim-theme.conf      included, reloaded with SIGUSR1
 --   ghostty    ~/.config/ghostty/themes/nvim-sync   theme, reloaded with AppleScript
+-- While transparency is on (<leader>t1) the terminal background is #000000.
 -- Must be required before config.transparency, which clears Normal's bg.
+local color = require("config.color")
+local util = require("config.util")
+
 local M = {}
 
 local home = vim.env.HOME
@@ -15,37 +19,12 @@ local paths = {
     ghostty = home .. "/.config/ghostty/themes/nvim-sync",
 }
 
-local function hex(v)
-    if type(v) == "number" then
-        return string.format("#%06x", v)
-    end
-    if type(v) == "string" then
-        if v:match("^#%x%x%x%x%x%x$") then
-            return v:lower()
-        end
-        local n = vim.api.nvim_get_color_by_name(v)
-        return n ~= -1 and hex(n) or nil
-    end
-end
-
 local function hl(name, attr)
     local h = vim.api.nvim_get_hl(0, { name = name, link = false })
     if h.reverse then
         attr = attr == "fg" and "bg" or "fg"
     end
-    return hex(h[attr])
-end
-
--- a blended t of the way from color a to color b
-local function mix(a, b, t)
-    local x, y = tonumber(a:sub(2), 16), tonumber(b:sub(2), 16)
-    local out = 0
-    for shift = 16, 0, -8 do
-        local ca = math.floor(x / 2 ^ shift) % 256
-        local cb = math.floor(y / 2 ^ shift) % 256
-        out = out + math.floor(ca + (cb - ca) * t + 0.5) * 2 ^ shift
-    end
-    return hex(out)
+    return color.hex(h[attr])
 end
 
 -- ANSI slot -> highlight groups to borrow its fg from, for themes that don't
@@ -60,14 +39,15 @@ local fallback = {
 }
 
 function M.palette()
+    local blend = color.blend
     local dark = vim.o.background == "dark"
     local bg = hl("Normal", "bg") or (dark and "#000000" or "#ffffff")
     local fg = hl("Normal", "fg") or (dark and "#ffffff" or "#000000")
     local derived = {
-        [0] = dark and mix(bg, fg, 0.2) or fg,
-        [7] = dark and mix(fg, bg, 0.15) or mix(bg, fg, 0.25),
-        [8] = hl("Comment", "fg") or mix(bg, fg, 0.45),
-        [15] = dark and fg or mix(bg, fg, 0.1),
+        [0] = dark and blend(fg, bg, 0.2) or fg,
+        [7] = dark and blend(bg, fg, 0.15) or blend(fg, bg, 0.25),
+        [8] = hl("Comment", "fg") or blend(fg, bg, 0.45),
+        [15] = dark and fg or blend(fg, bg, 0.1),
     }
     for i, groups in pairs(fallback) do
         for _, g in ipairs(groups) do
@@ -78,16 +58,19 @@ function M.palette()
 
     local colors = {}
     for i = 0, 15 do
-        colors[i] = hex(vim.g["terminal_color_" .. i])
+        colors[i] = color.hex(vim.g["terminal_color_" .. i])
             or derived[i]
             or derived[i - 8]
     end
+    -- while nvim is transparent (<leader>t1) the terminal shows through it,
+    -- so the terminal goes pure black instead of the theme's background
+    local transparent = require("config.transparency").enabled
     return {
         name = vim.g.colors_name or "unknown",
-        bg = bg,
+        bg = transparent and "#000000" or bg,
         fg = fg,
         cursor = hl("Cursor", "bg") or fg,
-        sel_bg = hl("Visual", "bg") or mix(bg, fg, 0.25),
+        sel_bg = hl("Visual", "bg") or blend(fg, bg, 0.25),
         sel_fg = hl("Visual", "fg") or fg,
         colors = colors,
     }
@@ -166,26 +149,6 @@ function render.ghostty(p)
     return table.concat(out, "\n") .. "\n"
 end
 
--- writes the file only when its content changed, returns whether it did
-local function write(path, content)
-    local f = io.open(path, "r")
-    if f then
-        local old = f:read("*a")
-        f:close()
-        if old == content then
-            return false
-        end
-    end
-    vim.fn.mkdir(vim.fn.fnamemodify(path, ":h"), "p")
-    f = io.open(path, "w")
-    if not f then
-        return false
-    end
-    f:write(content)
-    f:close()
-    return true
-end
-
 -- alacritty reloads by itself (it watches imported files), kitty and ghostty
 -- are told to, but only when running so the AppleScript never launches ghostty
 local function reload(changed)
@@ -216,7 +179,7 @@ function M.sync()
     local p = M.palette()
     local changed = {}
     for term, path in pairs(paths) do
-        changed[term] = write(path, render[term](p))
+        changed[term] = util.write_file(path, render[term](p))
     end
     reload(changed)
 end

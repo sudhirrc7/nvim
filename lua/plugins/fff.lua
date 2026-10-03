@@ -46,12 +46,6 @@ return {
             line_numbers = false,
             wrap_lines = false,
             show_file_info = true,
-            history = {
-                enabled = true,
-                db_path = vim.fn.stdpath("data") .. "/fff_queries",
-                min_combo_count = 3, -- file will get a boost if it was selected 3 in a row times per specific query
-                combo_boost_score_multiplier = 100, -- Score multiplier for combo matches
-            },
         },
         keymaps = {
             close = { "<C-c>", "<Esc>" },

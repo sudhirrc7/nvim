@@ -1,6 +1,5 @@
 -- Snacks explorer appearances, cycled with <leader>te.
 -- The chosen style is remembered across sessions.
-local explorer_state = vim.fn.stdpath("state") .. "/snacks_explorer_style"
 
 local explorer_styles = {
     -- the original left sidebar
@@ -249,23 +248,10 @@ local explorer_styles = {
     },
 }
 
-local function explorer_style_index(name)
-    for i, style in ipairs(explorer_styles) do
-        if style.name == name then
-            return i
-        end
-    end
-end
-
-local explorer_current = 1
-do
-    local f = io.open(explorer_state, "r")
-    if f then
-        explorer_current = explorer_style_index(vim.trim(f:read("*a") or ""))
-            or 1
-        f:close()
-    end
-end
+local explorer = require("config.util").styles(
+    "snacks_explorer_style",
+    explorer_styles
+)
 
 -- builds the `picker.sources.explorer` config for a style
 local function explorer_source(idx)
@@ -287,15 +273,8 @@ local function explorer_source(idx)
 end
 
 local function explorer_cycle_style()
-    explorer_current = explorer_current % #explorer_styles + 1
-    local style = explorer_styles[explorer_current]
-    Snacks.config.picker.sources.explorer = explorer_source(explorer_current)
-
-    local f = io.open(explorer_state, "w")
-    if f then
-        f:write(style.name)
-        f:close()
-    end
+    local style = explorer.next()
+    Snacks.config.picker.sources.explorer = explorer_source(explorer.index)
 
     -- reopen any visible explorer so the new style applies right away
     local open = Snacks.picker.get({ source = "explorer" })
@@ -313,7 +292,7 @@ local function explorer_cycle_style()
         ("%s  %s  (%d/%d)"):format(
             style.icon,
             style.name,
-            explorer_current,
+            explorer.index,
             #explorer_styles
         ),
         { title = "Explorer style" }
@@ -375,7 +354,7 @@ return {
                 frecency = true,
             },
             sources = {
-                explorer = explorer_source(explorer_current),
+                explorer = explorer_source(explorer.index),
             },
             -- layouts = {
             --   default = {

@@ -30,6 +30,16 @@ return {
         },
     },
 
+    -- Local neon-on-black theme with prism.el style depth colours: `neonprism`
+    -- (`:NeonPrism toggle` switches the depth colouring off and on)
+    {
+        dir = "~/personal/neonprism.nvim",
+        name = "neonprism.nvim",
+        opts = {
+            -- prism = { enabled = true, exclude = { "markdown", ... } },
+        },
+    },
+
     {
         "Aejkatappaja/cendre",
         opts = {

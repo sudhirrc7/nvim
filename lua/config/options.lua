@@ -60,7 +60,7 @@ opt.cursorlineopt = "number"
 opt.guifont = "JetBrainsMono Nerd Font:h18"
 
 -- Block cursor in every mode (normal, visual, insert, command)
-opt.guicursor = ""
+-- opt.guicursor = ""
 -- opt.guicursor = "n-v-c:block,i-ci-ve:hor20,r-cr:hor20,o:hor50"
 
 -- Disable annoying cmd line stuff

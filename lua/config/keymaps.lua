@@ -307,13 +307,33 @@ Snacks.toggle({
     end,
 }):map("<leader>tx")
 
+-- Hiding stops lualine's refresh timer/autocmds (otherwise it keeps
+-- redrawing). laststatus=0 still draws a statusline above horizontal
+-- splits, so those are drawn as a plain separator line instead.
+local statusline_sep = "%#WinSeparator#%{repeat('─', winwidth(0))}"
+
 Snacks.toggle({
     name = "Statusline",
     get = function()
         return vim.o.laststatus ~= 0
     end,
     set = function(state)
-        vim.o.laststatus = state and 3 or 0
+        local lualine = package.loaded["lualine"]
+        if lualine then
+            lualine.hide({ place = { "statusline" }, unhide = state })
+        end
+        if state then
+            vim.o.laststatus = 3
+            if not lualine then
+                vim.o.statusline = ""
+            end
+        else
+            vim.o.laststatus = 0
+            vim.go.statusline = statusline_sep
+            for _, win in ipairs(vim.api.nvim_list_wins()) do
+                vim.wo[win].statusline = statusline_sep
+            end
+        end
     end,
 }):map("<leader>uX")
 

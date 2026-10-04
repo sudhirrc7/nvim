@@ -84,11 +84,11 @@ snippets/                custom snippets per language
 LazyVim extras are enabled in `lazyvim.json` (open the list with
 `<leader>lx`). Language support comes from these extras: C/C++, Go, Java,
 Python, TypeScript, SQL, Docker, Markdown and more. `plugins/fish.lua` adds
-fish.
+fish and `plugins/flutter-tools.lua` adds Flutter/Dart.
 
 Choices that should survive a restart are saved in Neovim's state directory
-(`stdpath("state")`): the last colorscheme, transparency, the lualine style
-and the explorer style.
+(`stdpath("state")`): the last colorscheme, transparency, the lualine style,
+the explorer style and the Flutter decoration toggles.
 
 ## Keymaps
 
@@ -198,3 +198,53 @@ To import problems, install the
 browser extension and add `12345` under its custom ports. Press `<leader>ib`,
 then click the green `+` on the problem page. The samples replace the
 solution's existing tests.
+
+## Flutter
+
+[flutter-tools.nvim](https://github.com/nvim-flutter/flutter-tools.nvim) starts
+the Dart language server itself and runs `flutter run` with hot reload on every
+save. It uses the project's `.fvm/flutter_sdk` when the project pins a version
+with fvm, and the `flutter` on `$PATH` otherwise. Saving `pubspec.yaml` runs
+`pub get`. All keymaps are under `<leader>=`.
+
+| Keys                          | Action                                         |
+| ----------------------------- | ---------------------------------------------- |
+| `<leader>=r` / `=D`           | Run / run under the debugger (nvim-dap)        |
+| `<leader>=h` / `=H`           | Hot reload / hot restart                       |
+| `<leader>=q`                  | Quit the app                                   |
+| `<leader>=a` / `=A`           | Attach to / detach from a running app          |
+| `<leader>=d` / `=e`           | Pick a device / an emulator                    |
+| `<leader>=c`                  | Pick any flutter-tools command                 |
+| `<leader>=v`                  | Switch the project's SDK with fvm              |
+| `<leader>=o`                  | Widget outline                                 |
+| `<leader>=l` / `=L`           | Dev log / clear it                             |
+| `<leader>=w` / `=W`           | Widget previewer / stop it                     |
+| `<leader>=p` / `=P`           | `pub get` / `pub upgrade`                      |
+| `<leader>=s`                  | Go to the super class or method                |
+| `<leader>=n`                  | Rename, also renaming the file and imports     |
+| `<leader>=f`                  | Refactor actions (wrap / extract widget)       |
+| `<leader>=i` / `=F`           | Organize imports / fix all                     |
+| `<leader>=z` / `=x`           | Reanalyze the project / restart the Dart LSP   |
+| `<leader>=tt` / `to`          | Start DevTools / open it in the browser        |
+| `<leader>=ta` / `tc`          | Activate DevTools / copy the profiler URL      |
+
+Debug overlays in the running app (the same as the keys in `flutter run`):
+
+| Keys                          | Action                                         |
+| ----------------------------- | ---------------------------------------------- |
+| `<leader>=mi`                 | Widget inspector                               |
+| `<leader>=md` / `mb`          | Debug paint / paint baselines                  |
+| `<leader>=mr` / `mp`          | Repaint rainbow / performance overlay          |
+| `<leader>=ms`                 | Slow animations                                |
+| `<leader>=ml` / `mt`          | Light ↔ dark / cycle the target platform       |
+
+Editor decorations are toggles that are remembered across restarts. They are
+set up the first time a Dart file is opened.
+
+| Keys                          | Action                                                   |
+| ----------------------------- | -------------------------------------------------------- |
+| `<leader>=ug`                 | Widget guides, tree lines between widgets (off by default) |
+| `<leader>=ut`                 | Closing tags, the widget name after its closing `)`      |
+| `<leader>=uc`                 | Document colors, swatches for `Colors.red` etc.          |
+| `<leader>=us`                 | Color style: background → foreground → `■` swatch        |
+| `<leader>=un`                 | Pop up a notification for app errors                     |

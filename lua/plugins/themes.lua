@@ -40,6 +40,17 @@ return {
         },
     },
 
+    -- Local Poimandres with the colours of the original VS Code theme:
+    -- `poimandres` / `poimandres-storm` / `poimandres-dark`
+    {
+        dir = "~/personal/poimandres.nvim",
+        name = "poimandres.nvim",
+        opts = {
+            -- variant = "main", -- "main" | "storm" | "dark"
+            -- styles = { comments = { italic = false } },
+        },
+    },
+
     {
         "Aejkatappaja/cendre",
         opts = {

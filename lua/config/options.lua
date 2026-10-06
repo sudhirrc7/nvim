@@ -56,7 +56,7 @@ opt.shiftround = true
 opt.autoread = true
 opt.background = "dark"
 opt.scrolloff = 8
-opt.cursorlineopt = "number"
+-- opt.cursorlineopt = "number"
 opt.guifont = "JetBrainsMono Nerd Font:h18"
 
 -- Block cursor in every mode (normal, visual, insert, command)

@@ -51,6 +51,16 @@ return {
         },
     },
 
+    -- Local port of Casey Muratori's 4coder theme (Handmade Hero):
+    -- `casey` (#222425 background) / `casey-black` (#0c0c0c)
+    {
+        dir = "~/personal/casey.nvim",
+        name = "casey.nvim",
+        opts = {
+            -- variant = "main", -- "main" | "black"
+        },
+    },
+
     {
         "Aejkatappaja/cendre",
         opts = {
@@ -247,7 +257,13 @@ return {
 
     { "rezniqov/soviet.nvim", opts = {} },
     { "srcery-colors/srcery-vim" },
-
+    {
+        "maxmx03/solarized.nvim",
+        config = function(_, opts)
+            vim.o.background = "dark"
+            require("solarized").setup(opts)
+        end,
+    },
     {
         "folke/tokyonight.nvim",
         opts = {

@@ -119,7 +119,7 @@ search every keymap.
 | `fz` / `fc`                   | Fuzzy grep / grep the word under the cursor |
 | `<leader>fz`                  | Jump to a directory with zoxide            |
 | `-` / `<leader>i-`            | Oil (buffer / float)                       |
-| `\\`                          | mini.files                                 |
+| `\\`                          | mini.files (arrow keys work like hjkl)     |
 | `<leader>ie` / `iE` / `if`    | Fyler (left / right / floating)            |
 | `<leader>fV`                  | Open the working directory in VS Code      |
 

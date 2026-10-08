@@ -176,7 +176,9 @@ map({ "n", "x", "o" }, "<A-i>", select_node(-1), {
 
 -- Search current word
 map("n", "<leader>?", function()
-    vim.ui.open("https://search.brave.com/search?q=" .. vim.fn.expand("<cword>"))
+    vim.ui.open(
+        "https://search.brave.com/search?q=" .. vim.fn.expand("<cword>")
+    )
 end, { silent = true, desc = "Search Current Word on Brave Search" })
 
 local function fyler_open(opts)
@@ -221,8 +223,18 @@ for i, flags in ipairs({ "gI", "gi", "gIc" }) do
 end
 
 -- Add N blank lines above / below (Neovim's built-in [<Space> / ]<Space>)
-map("n", "[<CR>", "[<Space>", { remap = true, desc = "Add N blank lines above" })
-map("n", "]<CR>", "]<Space>", { remap = true, desc = "Add N blank lines below" })
+map(
+    "n",
+    "[<CR>",
+    "[<Space>",
+    { remap = true, desc = "Add N blank lines above" }
+)
+map(
+    "n",
+    "]<CR>",
+    "]<Space>",
+    { remap = true, desc = "Add N blank lines below" }
+)
 
 -- Lazy options
 map("n", "<leader>l", "<Nop>")
@@ -343,6 +355,50 @@ map("n", "<leader>uu", function()
     vim.wo.colorcolumn = next_column[vim.wo.colorcolumn] or ""
 end, { desc = "Toggle Color Column (80/100/off)" })
 
+-- Cursorline: full line, or only the line number in the gutter.
+-- Applied to normal editor windows so pickers/explorers keep theirs.
+local cursorline_full = vim.go.cursorlineopt
+
+local function apply_cursorline(win)
+    if is_normal_window(win) then
+        vim.wo[win].cursorlineopt = vim.go.cursorlineopt
+    end
+end
+
+vim.api.nvim_create_autocmd({ "BufWinEnter", "WinEnter" }, {
+    group = vim.api.nvim_create_augroup("CursorlineSync", { clear = true }),
+    callback = function()
+        apply_cursorline(vim.api.nvim_get_current_win())
+    end,
+})
+
+Snacks.toggle({
+    name = "Cursorline",
+    get = function()
+        return vim.go.cursorlineopt ~= "number"
+    end,
+    set = function(state)
+        vim.go.cursorlineopt = state and cursorline_full or "number"
+        for _, win in ipairs(vim.api.nvim_list_wins()) do
+            apply_cursorline(win)
+        end
+    end,
+}):map("<leader>tL")
+
+-- Cursor shape: Neovim's default (bar in insert, etc.) or a block in
+-- every mode (guicursor = "").
+local guicursor_default = vim.go.guicursor
+
+Snacks.toggle({
+    name = "Block Cursor",
+    get = function()
+        return vim.go.guicursor == ""
+    end,
+    set = function(state)
+        vim.go.guicursor = state and "" or guicursor_default
+    end,
+}):map("<leader>tB")
+
 -- Identation
 map("n", "<", "<<", { desc = "Deindent" })
 map("n", ">", ">>", { desc = "Indent" })
@@ -430,7 +486,12 @@ if not LazyVim.has("floaterm.nvim") and not LazyVim.has("toggleterm.nvim") then
     local root_term = float_term(LazyVim.root)
 
     map("n", "<leader>ft", root_term, { desc = "Terminal (Root Dir)" })
-    map("n", "<leader>fT", float_term(vim.fn.getcwd), { desc = "Terminal (cwd)" })
+    map(
+        "n",
+        "<leader>fT",
+        float_term(vim.fn.getcwd),
+        { desc = "Terminal (cwd)" }
+    )
     map("n", [[<c-\>]], root_term, { desc = "Terminal (Root Dir)" })
     map("t", [[<c-\>]], "<cmd>close<cr>", { desc = "Hide Terminal" })
 end

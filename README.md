@@ -107,6 +107,8 @@ search every keymap.
 | `<leader>tb` / `<C-q>`      | Completion menu auto-show on/off               |
 | `<leader>tx`                | Reserve a line for the command line            |
 | `<leader>uX`                | Statusline on/off                              |
+| `<leader>tL`                | Cursorline: full line ↔ line number only       |
+| `<leader>tB`                | Block cursor in every mode on/off              |
 | `<leader>uu`                | Color column: off → 80 → 100                   |
 | `<leader>ul` / `<leader>uL` | Line numbers on/off, absolute ↔ relative       |
 | `<leader>iz`                | Cycle the Rose Pine background shade           |

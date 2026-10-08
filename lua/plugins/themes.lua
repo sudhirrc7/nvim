@@ -61,6 +61,17 @@ return {
         },
     },
 
+    -- Local Solarized and Selenized with the original palettes:
+    -- `solarized` / `selenized`
+    {
+        dir = "~/personal/solenized.nvim",
+        name = "solenized.nvim",
+        opts = {
+            -- styles = { comments = { italic = false } },
+            -- bold = false,
+        },
+    },
+
     {
         "Aejkatappaja/cendre",
         opts = {
@@ -257,13 +268,6 @@ return {
 
     { "rezniqov/soviet.nvim", opts = {} },
     { "srcery-colors/srcery-vim" },
-    {
-        "maxmx03/solarized.nvim",
-        config = function(_, opts)
-            vim.o.background = "dark"
-            require("solarized").setup(opts)
-        end,
-    },
     {
         "folke/tokyonight.nvim",
         opts = {

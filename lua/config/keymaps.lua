@@ -357,7 +357,9 @@ end, { desc = "Toggle Color Column (80/100/off)" })
 
 -- Cursorline: full line, or only the line number in the gutter.
 -- Applied to normal editor windows so pickers/explorers keep theirs.
-local cursorline_full = vim.go.cursorlineopt
+-- The choice is remembered and restored in config/options.lua.
+local cursorline_full =
+    vim.api.nvim_get_option_info2("cursorlineopt", {}).default
 
 local function apply_cursorline(win)
     if is_normal_window(win) then
@@ -382,12 +384,13 @@ Snacks.toggle({
         for _, win in ipairs(vim.api.nvim_list_wins()) do
             apply_cursorline(win)
         end
+        require("config.util").write_state("cursorline_full", state and 1 or 0)
     end,
 }):map("<leader>tL")
 
 -- Cursor shape: Neovim's default (bar in insert, etc.) or a block in
--- every mode (guicursor = "").
-local guicursor_default = vim.go.guicursor
+-- every mode (guicursor = ""). Remembered like the cursorline above.
+local guicursor_default = vim.api.nvim_get_option_info2("guicursor", {}).default
 
 Snacks.toggle({
     name = "Block Cursor",
@@ -396,6 +399,7 @@ Snacks.toggle({
     end,
     set = function(state)
         vim.go.guicursor = state and "" or guicursor_default
+        require("config.util").write_state("block_cursor", state and 1 or 0)
     end,
 }):map("<leader>tB")
 

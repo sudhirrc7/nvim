@@ -88,7 +88,8 @@ fish and `plugins/flutter-tools.lua` adds Flutter/Dart.
 
 Choices that should survive a restart are saved in Neovim's state directory
 (`stdpath("state")`): the last colorscheme, transparency, the lualine style,
-the explorer style and the Flutter decoration toggles.
+the explorer style, the cursorline and block cursor toggles and the Flutter
+decoration toggles.
 
 ## Keymaps
 

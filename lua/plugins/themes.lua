@@ -72,6 +72,17 @@ return {
         },
     },
 
+    -- Local Rosé Pine as it looked on ThePrimeagen's streams (old token
+    -- colours, black background, grey bars): `oldrose`
+    {
+        dir = "~/personal/oldrose.nvim",
+        name = "oldrose.nvim",
+        opts = {
+            -- styles = { comments = { italic = false } },
+            -- bold = false,
+        },
+    },
+
     {
         "Aejkatappaja/cendre",
         opts = {

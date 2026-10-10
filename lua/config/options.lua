@@ -56,12 +56,17 @@ opt.shiftround = true
 opt.autoread = true
 opt.background = "dark"
 opt.scrolloff = 8
--- opt.cursorlineopt = "number"
-opt.guifont = "JetBrainsMono Nerd Font:h18"
+opt.guifont = "CaskaydiaCove Nerd Font:h18"
 
--- Block cursor in every mode (normal, visual, insert, command)
--- opt.guicursor = ""
--- opt.guicursor = "n-v-c:block,i-ci-ve:hor20,r-cr:hor20,o:hor50"
+-- Cursorline only in the gutter (<leader>tL) and a block cursor in every
+-- mode (<leader>tB), restored from the last session
+local util = require("config.util")
+if util.read_state("cursorline_full") == "0" then
+    opt.cursorlineopt = "number"
+end
+if util.read_state("block_cursor") == "1" then
+    opt.guicursor = ""
+end
 
 -- Disable annoying cmd line stuff
 opt.showcmd = false

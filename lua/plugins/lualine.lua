@@ -220,7 +220,10 @@ end)
 local mode_ribbon = mode_tint(function(accent, base, fg_text)
     return {
         a = { fg = base, bg = accent, gui = "bold" },
-        b = { fg = blend(accent, fg_text, 0.15), bg = blend(accent, base, 0.55) },
+        b = {
+            fg = blend(accent, fg_text, 0.15),
+            bg = blend(accent, base, 0.55),
+        },
         c = { fg = blend(accent, fg_text, 0.3), bg = blend(accent, base, 0.28) },
     }
 end)
@@ -302,6 +305,82 @@ local THIN_ARROWS = seps("\u{e0b1}", "\u{e0b3}")
 local ROUND = seps("\u{e0b4}", "\u{e0b6}")
 
 -- ============================================================
+-- PLAIN TEXT COMPONENTS (no icons or glyphs, for Plain / Native)
+-- ============================================================
+
+-- relative path with vim's flags: [+] [RO] [No Name]
+local function plain_file()
+    return {
+        "filename",
+        path = 1,
+        symbols = {
+            modified = "[+]",
+            readonly = "[RO]",
+            unnamed = "[No Name]",
+            newfile = "[New]",
+        },
+    }
+end
+
+local function plain_diagnostics()
+    return {
+        "diagnostics",
+        symbols = { error = "E:", warn = "W:", info = "I:", hint = "H:" },
+    }
+end
+
+-- LazyVim's diff component with +/~/- instead of icons
+local function plain_diff(diff)
+    return vim.tbl_extend("force", diff, {
+        symbols = { added = "+", modified = "~", removed = "-" },
+    })
+end
+
+-- "recording @q" while a macro is being recorded
+local function recording()
+    return {
+        function()
+            return "recording @" .. vim.fn.reg_recording()
+        end,
+        cond = function()
+            return vim.fn.reg_recording() ~= ""
+        end,
+    }
+end
+
+-- vim's showmode, "-- INSERT --", hidden in normal and command mode
+-- (cmdheight is 0, so the native one is never seen)
+local function showmode()
+    return {
+        function()
+            return "-- " .. require("lualine.utils.mode").get_mode() .. " --"
+        end,
+        cond = function()
+            local mode = vim.fn.mode():sub(1, 1)
+            return mode ~= "n" and mode ~= "c"
+        end,
+    }
+end
+
+-- every section in the theme's StatusLine colors, like the stock bar
+local function statusline_colors(theme)
+    local hl = vim.api.nvim_get_hl(0, { name = "StatusLine", link = false })
+    local fg_hex, bg_hex = color.hex(hl.fg), color.hex(hl.bg)
+    if hl.reverse then
+        fg_hex, bg_hex = bg_hex, fg_hex
+    end
+    fg_hex, bg_hex = fg_hex or text_color(), bg_hex or ink()
+    for mode in pairs(theme) do
+        theme[mode] = {
+            a = { fg = fg_hex, bg = bg_hex },
+            b = { fg = fg_hex, bg = bg_hex },
+            c = { fg = fg_hex, bg = bg_hex },
+        }
+    end
+    return theme
+end
+
+-- ============================================================
 -- STYLE BUILDERS
 -- Lualine merges a new setup() into the previous config, so every
 -- style sets the theme, both separators and every section.
@@ -320,6 +399,7 @@ local function style(spec)
         opts.options.theme = auto_theme(s.theme)
         opts.options.section_separators = s.sep or ""
         opts.options.component_separators = s.comp or ""
+        opts.options.icons_enabled = s.icons ~= false
 
         local x = vim.list_extend(s.extras or extras, info_extras())
         opts.sections = {
@@ -506,8 +586,16 @@ local lualine_styles = {
             return {
                 theme = transparent_middle,
                 c = {
-                    { bar, color = fg_mode(), padding = { left = 0, right = 1 } },
-                    { text("\u{e62b}"), color = fg_mode(), padding = { right = 1 } },
+                    {
+                        bar,
+                        color = fg_mode(),
+                        padding = { left = 0, right = 1 },
+                    },
+                    {
+                        text("\u{e62b}"),
+                        color = fg_mode(),
+                        padding = { right = 1 },
+                    },
                     branch({ color = fg("Statement", "bold") }),
                     ft_icon(1),
                     pretty_path(),
@@ -519,7 +607,11 @@ local lualine_styles = {
                     diff,
                     { "progress", color = fg("Special", "bold") },
                     { "location", color = fg("Function") },
-                    { bar, color = fg_mode(), padding = { left = 1, right = 0 } },
+                    {
+                        bar,
+                        color = fg_mode(),
+                        padding = { left = 1, right = 0 },
+                    },
                 },
             }
         end),
@@ -557,6 +649,66 @@ local lualine_styles = {
                         padding = { left = 1, right = 2 },
                     },
                 },
+            }
+        end),
+    },
+    -- flat square blocks of plain text: no separators, no icons
+    {
+        name = "Plain",
+        desc = "square blocks of plain text, no icons",
+        icon = "■",
+        build = style(function(diff)
+            return {
+                icons = false,
+                extras = { recording() },
+                a = { "mode" },
+                b = { { "branch" }, plain_diff(diff) },
+                c = { plain_file(), plain_diagnostics() },
+                x = { { "filetype" } },
+                y = { text("%l:%c") },
+                z = { text("%P") },
+            }
+        end),
+    },
+    -- Neovim's own statusline: path and flags, then diagnostics and the
+    -- ruler, all in the theme's StatusLine colors
+    {
+        name = "Native",
+        desc = "stock Neovim statusline: path, flags, ruler",
+        icon = "▭",
+        build = style(function()
+            return {
+                icons = false,
+                theme = statusline_colors,
+                extras = { recording() },
+                c = { showmode(), text("%<%f %h%w%m%r") },
+                x = { plain_diagnostics(), text("%-14.(%l,%c%V%) %P") },
+            }
+        end),
+    },
+    -- Plain's square blocks, with icons in place of the text markers
+    {
+        name = "Square",
+        desc = "square blocks like Plain, with icons",
+        icon = "\u{f0c8}",
+        build = style(function(diff)
+            return {
+                a = { { "mode", icon = "\u{e62b}" } },
+                b = { branch(), diff },
+                c = {
+                    vim.tbl_extend("force", plain_file(), {
+                        symbols = {
+                            modified = "●",
+                            readonly = "\u{f023}",
+                            unnamed = "[No Name]",
+                            newfile = "\u{f067}",
+                        },
+                    }),
+                    diagnostics(),
+                },
+                x = { { "filetype" } },
+                y = { { text("%l:%c"), icon = "\u{f05b}" } },
+                z = { text("%P") },
             }
         end),
     },
@@ -849,6 +1001,9 @@ local lualine_base
 
 local function lualine_build(idx)
     local opts = lualine_styles[idx].build(vim.deepcopy(lualine_base))
+    -- lualine merges options into the previous setup, so turn icons back
+    -- on for styles that don't set it (after the icon-less ones)
+    opts.options.icons_enabled = opts.options.icons_enabled ~= false
     opts.extensions = false
     return opts
 end

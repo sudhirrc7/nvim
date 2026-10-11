@@ -17,7 +17,7 @@ runner.
 - **Terminal follows the editor.** When the colorscheme changes, its palette is
   written to theme files for kitty, Alacritty and Ghostty, and any running
   terminal is reloaded.
-- **20 statusline styles.** `<leader>tl` opens a picker that previews each
+- **23 statusline styles.** `<leader>tl` opens a picker that previews each
   lualine style live as you move through the list.
 - **7 file explorer layouts.** `<leader>te` cycles the Snacks explorer between
   a sidebar, a drawer, a dock, a Quake-style drop-down and others.

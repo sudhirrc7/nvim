@@ -265,11 +265,10 @@ end, { desc = "[C]Open current file's PWD in VSCode" })
 -- Disable LazyVim bindings
 map("n", "<leader>L", "<Nop>")
 
--- Transparency for whatever colorscheme is active (config/transparency.lua),
--- the terminal background turns #000000 while it's on (config/termsync.lua)
+-- Transparency for whatever colorscheme is active (config/transparency.lua)
 local transparency = require("config.transparency")
 Snacks.toggle({
-    name = "Transparency (black bg)",
+    name = "Transparency",
     get = function()
         return transparency.enabled
     end,

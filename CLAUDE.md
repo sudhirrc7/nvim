@@ -44,9 +44,10 @@ Choices that survive restarts are plain files in `stdpath("state")`, via
 `util.read_state` / `util.write_state`. `util.styles(state_name, list)` wraps a
 list of `{ name = ... }` style tables with a remembered current index and
 `next()`/`set()`; it backs the lualine styles (`plugins/lualine.lua`), Snacks
-explorer layouts (`plugins/snacks.lua`) and Snacks picker layouts
-(`plugins/snacks-picker-styles.lua`). New switchable styles should follow this
-pattern. (`plugins/blink.lua` has its own non-persisted cycler.)
+explorer layouts (`plugins/snacks.lua`), Snacks picker layouts
+(`plugins/snacks-picker-styles.lua`) and blink.cmp menu styles
+(`plugins/blink.lua`, which bakes the saved style into opts and patches the
+live windows when cycling). New switchable styles should follow this pattern.
 
 ### Colorscheme pipeline
 

@@ -21,6 +21,9 @@ runner.
   lualine style live as you move through the list.
 - **7 file explorer layouts.** `<leader>te` cycles the Snacks explorer between
   a sidebar, a drawer, a dock, a Quake-style drop-down and others.
+- **8 completion menu styles.** `<leader>tz` cycles blink.cmp between my
+  setup, blink's default, an nvim-cmp lookalike and IDE, Badge, Zen, Retro and
+  Wide looks.
 - **Competitive programming runner.** Compile once, run every sample, see a
   side-by-side diff of wrong answers, edit tests in a side panel, and import
   problems straight from the browser with Competitive Companion.
@@ -60,8 +63,8 @@ Point your terminal at the file Neovim generates:
 | Alacritty | `import = ["~/.config/alacritty/nvim-theme.toml"]` under `[general]`        |
 | Ghostty   | `theme = nvim-sync`                                                        |
 
-While transparency is on, the terminal background is set to pure black so the
-editor looks the same through it.
+The terminal keeps the theme's own background, so while transparency is on the
+editor shows the theme's colors through it.
 
 ## Layout
 
@@ -88,7 +91,7 @@ fish and `plugins/flutter-tools.lua` adds Flutter/Dart.
 
 Choices that should survive a restart are saved in Neovim's state directory
 (`stdpath("state")`): the last colorscheme, transparency, the lualine style,
-the explorer style, the cursorline and block cursor toggles and the Flutter
+the explorer style, the completion menu style, the cursorline and block cursor toggles and the Flutter
 decoration toggles.
 
 ## Keymaps

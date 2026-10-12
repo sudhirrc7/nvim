@@ -670,18 +670,29 @@ local lualine_styles = {
             }
         end),
     },
-    -- Neovim's own statusline: path and flags, then diagnostics and the
-    -- ruler, all in the theme's StatusLine colors
+    -- Neovim's own statusline: path and flags, the git branch and diff,
+    -- then diagnostics and the ruler, all in the theme's StatusLine colors
     {
         name = "Native",
-        desc = "stock Neovim statusline: path, flags, ruler",
+        desc = "stock Neovim statusline: path, flags, git, ruler",
         icon = "▭",
-        build = style(function()
+        build = style(function(diff)
             return {
                 icons = false,
                 theme = statusline_colors,
                 extras = { recording() },
-                c = { showmode(), text("%<%f %h%w%m%r") },
+                c = {
+                    showmode(),
+                    text("%<%f %h%w%m%r"),
+                    {
+                        "branch",
+                        -- fmt also runs outside git, keep it empty there
+                        fmt = function(name)
+                            return name ~= "" and "[" .. name .. "]" or ""
+                        end,
+                    },
+                    plain_diff(diff),
+                },
                 x = { plain_diagnostics(), text("%-14.(%l,%c%V%) %P") },
             }
         end),

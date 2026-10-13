@@ -40,7 +40,7 @@ g.root_spec = {
         "package.json",
         "Makefile",
         "go.mod",
-        "cargo.toml",
+        "Cargo.toml",
         "pyproject.toml",
         "src",
     },
@@ -58,15 +58,13 @@ opt.background = "dark"
 opt.scrolloff = 8
 opt.guifont = "CaskaydiaCove Nerd Font:h18"
 
--- Cursorline only in the gutter (<leader>tL) and a block cursor in every
--- mode (<leader>tB), restored from the last session
+-- Cursorline only in the gutter (<leader>tL) and the cursor style
+-- (<leader>tB), restored from the last session
 local util = require("config.util")
 if util.read_state("cursorline_full") == "0" then
     opt.cursorlineopt = "number"
 end
-if util.read_state("block_cursor") == "1" then
-    opt.guicursor = ""
-end
+require("config.cursor").apply()
 
 -- Disable annoying cmd line stuff
 opt.showcmd = false

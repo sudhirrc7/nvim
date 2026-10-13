@@ -91,8 +91,8 @@ fish and `plugins/flutter-tools.lua` adds Flutter/Dart.
 
 Choices that should survive a restart are saved in Neovim's state directory
 (`stdpath("state")`): the last colorscheme, transparency, the lualine style,
-the explorer style, the completion menu style, the cursorline and block cursor toggles and the Flutter
-decoration toggles.
+the explorer style, the completion menu style, the cursorline toggle, the
+cursor style and the Flutter decoration toggles.
 
 ## Keymaps
 
@@ -112,7 +112,7 @@ search every keymap.
 | `<leader>tx`                | Reserve a line for the command line            |
 | `<leader>uX`                | Statusline on/off                              |
 | `<leader>tL`                | Cursorline: full line ↔ line number only       |
-| `<leader>tB`                | Block cursor in every mode on/off              |
+| `<leader>tB`                | Cursor: default → block → underline (insert)   |
 | `<leader>uu`                | Color column: off → 80 → 100                   |
 | `<leader>ul` / `<leader>uL` | Line numbers on/off, absolute ↔ relative       |
 | `<leader>iz`                | Cycle the Rose Pine background shade           |

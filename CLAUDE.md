@@ -47,7 +47,9 @@ list of `{ name = ... }` style tables with a remembered current index and
 explorer layouts (`plugins/snacks.lua`), Snacks picker layouts
 (`plugins/snacks-picker-styles.lua`) and blink.cmp menu styles
 (`plugins/blink.lua`, which bakes the saved style into opts and patches the
-live windows when cycling). New switchable styles should follow this pattern.
+live windows when cycling) and cursor shapes (`config/cursor.lua`, applied
+from `config/options.lua` at startup). New switchable styles should follow
+this pattern.
 
 ### Colorscheme pipeline
 

@@ -387,20 +387,13 @@ Snacks.toggle({
     end,
 }):map("<leader>tL")
 
--- Cursor shape: Neovim's default (bar in insert, etc.) or a block in
--- every mode (guicursor = ""). Remembered like the cursorline above.
-local guicursor_default = vim.api.nvim_get_option_info2("guicursor", {}).default
-
-Snacks.toggle({
-    name = "Block Cursor",
-    get = function()
-        return vim.go.guicursor == ""
-    end,
-    set = function(state)
-        vim.go.guicursor = state and "" or guicursor_default
-        require("config.util").write_state("block_cursor", state and 1 or 0)
-    end,
-}):map("<leader>tB")
+-- Cursor shape: Neovim's default -> block -> underline (config/cursor.lua)
+map(
+    "n",
+    "<leader>tB",
+    require("config.cursor").cycle,
+    { desc = "Cycle Cursor Style" }
+)
 
 -- Identation
 map("n", "<", "<<", { desc = "Deindent" })
@@ -424,7 +417,7 @@ map(
 )
 
 --toggle code diff
-map("n", "<leader>cd", "<cmd>CodeDiff<cr>", { desc = "Toggle codediff" })
+-- map("n", "<leader>cd", "<cmd>CodeDiff<cr>", { desc = "Toggle codediff" })
 
 -- Buffers
 map("n", "<leader>bf", "<cmd>bfirst<cr>", { desc = "First Buffer" })

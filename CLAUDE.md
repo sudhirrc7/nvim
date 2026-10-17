@@ -59,9 +59,9 @@ this pattern.
 - `plugins/themes.lua` holds every theme except catppuccin
   (`plugins/catppuccin.lua`), all lazy-loaded. Themes should keep their own
   `transparent` options off — transparency is handled globally.
-  Six themes are local dev plugins loaded via `dir = "~/personal/..."`
+  Seven themes are local dev plugins loaded via `dir = "~/personal/..."`
   (`farblue.nvim`, `neonprism.nvim`, `poimandres.nvim`, `casey.nvim`,
-  `solenized.nvim`, `oldrose.nvim`).
+  `solenized.nvim`, `oldrose.nvim`, `cursordark.nvim`).
 - `config/transparency.lua` clears `bg` on a fixed list of highlight groups on
   every `ColorScheme` event (skipping low-contrast "badge" groups); toggling
   just reloads the current colorscheme.

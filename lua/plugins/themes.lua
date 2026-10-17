@@ -83,6 +83,19 @@ return {
         },
     },
 
+    -- Local port of Cursor's own editor themes:
+    -- `cursordark` (Cursor Dark) / `cursordark-midnight` (Cursor Dark Midnight)
+    {
+        dir = "~/personal/cursordark.nvim",
+        name = "cursordark.nvim",
+        opts = {
+            -- variant = "dark", -- "dark" | "midnight"
+            -- panel_floats = true, -- Cursor's darker widget background
+            -- italic = false,
+            -- bold = false,
+        },
+    },
+
     {
         "Aejkatappaja/cendre",
         opts = {

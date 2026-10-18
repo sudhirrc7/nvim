@@ -197,6 +197,8 @@ end
 
 function M.sync()
     local p = M.palette()
+    -- the theme's own bg, for code that runs after transparency cleared it
+    M.bg = p.bg
     local changed = {}
     for term, path in pairs(paths) do
         changed[term] = util.write_file(path, render[term](p))

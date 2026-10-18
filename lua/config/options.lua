@@ -74,7 +74,7 @@ opt.cmdheight = 0 -- <leader>tx brings the command line back
 opt.list = false
 opt.relativenumber = true
 
--- Disable native bufferline
+-- Hidden until mini.tabline loads (plugins/minitabline.lua, <leader>bt)
 opt.showtabline = 0
 
 -- Spell checking (off, toggled per buffer)

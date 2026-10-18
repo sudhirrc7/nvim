@@ -92,7 +92,7 @@ fish and `plugins/flutter-tools.lua` adds Flutter/Dart.
 Choices that should survive a restart are saved in Neovim's state directory
 (`stdpath("state")`): the last colorscheme, transparency, the lualine style,
 the explorer style, the completion menu style, the cursorline toggle, the
-cursor style and the Flutter decoration toggles.
+cursor style, the tabline toggle and the Flutter decoration toggles.
 
 ## Keymaps
 
@@ -151,6 +151,10 @@ search every keymap.
 | `<Tab>` / `<S-Tab>`               | Next / previous buffer                   |
 | `<M-CR>`                          | Alternate buffer                         |
 | `<leader>bf` / `<leader>ba`       | First / last buffer                      |
+| `<leader>b1` … `<leader>b9`       | Go to the Nth buffer in the tabline (numbers show after `<leader>b`) |
+| `<leader>bl` / `<leader>br`       | Delete buffers to the left / right       |
+| `<leader>bt`                      | Toggle the tabline (mini.tabline)        |
+| Click a tab's `󰅖` (`●` if modified) | Close that buffer                      |
 | `<leader>th` / `<leader>tu`       | Close hidden / nameless buffers          |
 | `<leader>_` / `<leader>\`         | Split below / right                      |
 | `<C-arrows>`                      | Resize the window                        |
